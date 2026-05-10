@@ -14,6 +14,7 @@
             <nav class="flex flex-wrap items-center gap-4 text-sm">
                 @if (! auth()->user()->is_admin && auth()->user()->hasActiveKyc())
                     <a href="{{ route('payments.create') }}" class="font-medium text-slate-700 hover:text-indigo-600">Pay</a>
+                    <a href="{{ route('wallet.index') }}" class="font-medium text-slate-700 hover:text-indigo-600">Wallet</a>
                     <a href="{{ route('banks.index') }}" class="font-medium text-slate-700 hover:text-indigo-600">Banks</a>
                 @endif
                 <span class="hidden text-slate-600 sm:inline">{{ auth()->user()->name }}</span>

@@ -23,6 +23,17 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
+                <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+                    <input type="hidden" name="auto_settle_to_bank" value="0">
+                    <div class="flex items-start gap-3">
+                        <input id="auto_settle_to_bank" name="auto_settle_to_bank" type="checkbox" value="1" class="mt-1 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                            @checked(old('auto_settle_to_bank', $wallet->auto_settle_to_bank))>
+                        <label for="auto_settle_to_bank" class="text-sm text-slate-700">
+                            <span class="font-medium text-slate-900">Automatically send money to my bank when I receive settlement in my wallet</span>
+                            <span class="mt-1 block text-xs text-slate-600">Preference is saved when you pay. You can also change it under Wallet.</span>
+                        </label>
+                    </div>
+                </div>
                 <button type="submit" class="inline-flex rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
                     Continue
                 </button>

@@ -12,9 +12,16 @@ use App\Http\Controllers\BankController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KycController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\WalletController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', [PageController::class, 'home'])->name('home');
+Route::get('/about', [PageController::class, 'about'])->name('about');
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::post('/contact', [PageController::class, 'contactSubmit'])->name('contact.store');
+Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');
+Route::get('/terms', [PageController::class, 'terms'])->name('terms');
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
@@ -46,6 +53,9 @@ Route::middleware('auth')->group(function () {
 
         Route::get('payments', [PaymentController::class, 'create'])->name('payments.create');
         Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
+
+        Route::get('wallet', [WalletController::class, 'index'])->name('wallet.index');
+        Route::patch('wallet', [WalletController::class, 'update'])->name('wallet.update');
     });
 
     Route::middleware('admin')->group(function () {

@@ -12,6 +12,9 @@
                 <a href="{{ route('payments.create') }}" class="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-500">
                     Make a payment
                 </a>
+                <a href="{{ route('wallet.index') }}" class="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50">
+                    Wallet
+                </a>
                 <a href="{{ route('banks.index') }}" class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500">
                     Manage bank accounts
                 </a>

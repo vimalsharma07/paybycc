@@ -6,6 +6,76 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Plus Jakarta Sans', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Marketing site motion (respects reduced motion below) */
+@keyframes marketing-pulse {
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.85;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float-soft {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.marketing-gradient {
+    animation: marketing-pulse 14s ease-in-out infinite;
+}
+
+.animate-fade-up {
+    animation: fade-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+}
+
+.animate-delay-100 {
+    animation-delay: 0.1s;
+}
+.animate-delay-200 {
+    animation-delay: 0.2s;
+}
+.animate-delay-300 {
+    animation-delay: 0.3s;
+}
+.animate-delay-400 {
+    animation-delay: 0.4s;
+}
+
+.animate-float-soft {
+    animation: float-soft 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .marketing-gradient,
+    .animate-fade-up,
+    .animate-float-soft {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
 }

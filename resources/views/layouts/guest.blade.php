@@ -23,6 +23,14 @@
             </div>
 
             @yield('guest-footer')
+
+            <nav class="mt-10 flex flex-wrap justify-center gap-x-4 gap-y-2 text-center text-xs text-slate-500">
+                <a href="{{ route('home') }}" class="hover:text-indigo-600">Home</a>
+                <a href="{{ route('about') }}" class="hover:text-indigo-600">About</a>
+                <a href="{{ route('contact') }}" class="hover:text-indigo-600">Contact</a>
+                <a href="{{ route('privacy') }}" class="hover:text-indigo-600">Privacy</a>
+                <a href="{{ route('terms') }}" class="hover:text-indigo-600">Terms</a>
+            </nav>
         </div>
     </div>
 </body>

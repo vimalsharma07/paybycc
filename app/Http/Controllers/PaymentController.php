@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\Transaction;
+use App\Models\Wallet;
 use App\Services\Payments\GatewayManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,8 +17,18 @@ class PaymentController extends Controller
     {
         $primary = $gatewayManager->primaryGateway();
 
+        $wallet = Wallet::firstOrCreate(
+            ['user_id' => auth()->id()],
+            [
+                'balance' => 0,
+                'auto_settle_to_bank' => true,
+                'default_bank_id' => null,
+            ]
+        );
+
         return view('payments.create', [
             'gateway' => $primary,
+            'wallet' => $wallet,
         ]);
     }
 
@@ -32,6 +44,18 @@ class PaymentController extends Controller
 
         $validated = $request->validate([
             'amount' => ['required', 'numeric', 'min:0.01'],
+        ]);
+
+        $wallet = Wallet::firstOrCreate(
+            ['user_id' => $request->user()->id],
+            [
+                'balance' => 0,
+                'auto_settle_to_bank' => true,
+                'default_bank_id' => null,
+            ]
+        );
+        $wallet->update([
+            'auto_settle_to_bank' => $request->boolean('auto_settle_to_bank'),
         ]);
 
         $amountDecimal = number_format((float) $validated['amount'], 2, '.', '');
@@ -96,7 +120,27 @@ class PaymentController extends Controller
                 'status' => $success ? 'completed' : 'failed',
             ]);
 
-            return $payment->fresh();
+            $payment = $payment->fresh();
+
+            if ($success && $payment) {
+                $bufferDays = max(0, (int) config('paybycc.settlement_buffer_days', 2));
+
+                Transaction::create([
+                    'user_id' => $request->user()->id,
+                    'bank_id' => null,
+                    'payment_id' => $payment->id,
+                    'parent_transaction_id' => null,
+                    'type' => Transaction::TYPE_CARD_PAYMENT,
+                    'amount' => $amountDecimal,
+                    'currency' => 'INR',
+                    'status' => 'completed',
+                    'settlement_trigger_at' => now()->addDays($bufferDays),
+                    'settled_at' => null,
+                    'note' => 'Card / online payment via PayByCC',
+                ]);
+            }
+
+            return $payment;
         });
 
         $payload = $payment->driver_payload ?? [];
