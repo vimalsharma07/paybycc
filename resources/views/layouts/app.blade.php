@@ -5,15 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name'))</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @include('partials.head-styles')
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+<body class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
     <header class="border-b border-slate-200 bg-white">
-        <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
-            <a href="{{ route('dashboard') }}" class="text-lg font-semibold text-indigo-600">{{ config('app.name') }}</a>
-            <nav class="flex flex-wrap items-center gap-4 text-sm">
+        <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+            <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 via-violet-500 to-amber-400 text-[10px] font-black text-white shadow-md">PB</span>
+                <x-brand-wordmark variant="light" class="leading-none" />
+            </a>
+            <nav class="flex flex-wrap items-center gap-3 text-sm sm:gap-4">
                 @if (! auth()->user()->is_admin && auth()->user()->hasActiveKyc())
-                    <a href="{{ route('payments.create') }}" class="font-medium text-slate-700 hover:text-indigo-600">Pay</a>
+                    <a href="{{ route('payments.create') }}" class="pay-now-btn inline-flex items-center rounded-lg bg-gradient-to-r from-cyan-600 via-indigo-600 to-violet-600 px-4 py-2 text-sm font-bold text-white shadow-md transition hover:brightness-110">Pay now</a>
                     <a href="{{ route('wallet.index') }}" class="font-medium text-slate-700 hover:text-indigo-600">Wallet</a>
                     <a href="{{ route('banks.index') }}" class="font-medium text-slate-700 hover:text-indigo-600">Banks</a>
                 @endif

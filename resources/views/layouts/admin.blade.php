@@ -5,14 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin — '.config('app.name'))</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @include('partials.head-styles')
 </head>
-<body class="min-h-screen bg-slate-100 text-slate-900 antialiased">
+<body class="min-h-screen bg-slate-100 font-sans text-slate-900 antialiased">
     <div class="flex min-h-screen">
         <aside class="hidden w-56 shrink-0 flex-col border-r border-slate-200 bg-slate-900 text-slate-100 md:flex">
             <div class="border-b border-slate-700 px-4 py-5">
                 <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Admin</span>
-                <p class="mt-1 font-semibold text-white">{{ config('app.name') }}</p>
+                <p class="mt-2 flex items-center gap-2">
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-cyan-500 via-fuchsia-500 to-amber-400 text-[9px] font-black text-white">PB</span>
+                    <x-brand-wordmark variant="dark" size="sm" class="leading-none" />
+                </p>
             </div>
             <nav class="flex flex-1 flex-col gap-1 p-3">
                 <a href="{{ route('admin.dashboard') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.dashboard') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">

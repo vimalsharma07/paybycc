@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name'))</title>
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800|instrument-sans:400,500,600,700" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @include('partials.head-styles')
 </head>
 <body class="auth-body min-h-screen font-sans">
     <div class="pointer-events-none fixed inset-0 overflow-hidden">
@@ -19,9 +17,9 @@
     <div class="relative z-10 flex min-h-screen flex-col lg:flex-row">
         <aside class="relative flex flex-col justify-center px-6 pb-6 pt-10 sm:px-10 lg:w-[46%] lg:max-w-xl lg:px-12 lg:pb-16 lg:pt-16">
             <div class="animate-fade-up">
-                <a href="{{ route('home') }}" class="inline-flex items-center gap-2.5 text-lg font-bold tracking-tight text-white transition hover:opacity-90">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-extrabold shadow-lg shadow-indigo-500/30">P</span>
-                    {{ config('app.name') }}
+                <a href="{{ route('home') }}" class="group inline-flex items-center gap-2.5 transition hover:opacity-90">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 via-fuchsia-500 to-amber-400 text-xs font-black text-white shadow-lg shadow-cyan-500/20 ring-1 ring-white/15 group-hover:brightness-110 sm:text-sm">PB</span>
+                    <x-brand-wordmark variant="dark" size="lg" class="leading-none" />
                 </a>
             </div>
 

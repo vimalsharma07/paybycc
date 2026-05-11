@@ -6,9 +6,7 @@
     <meta name="description" content="@yield('meta_description', 'Pay tuition, utilities, rent & more with '.config('app.name').'. Secure card payments & wallet settlements.')">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name').' — Pay bills & tuition securely')</title>
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800|instrument-sans:400,500,600,700" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @include('partials.head-styles')
 </head>
 <body class="marketing-body min-h-screen bg-slate-950 font-sans text-slate-100 antialiased">
     <div class="pointer-events-none fixed inset-0 overflow-hidden">
@@ -19,9 +17,11 @@
 
     <header class="relative z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl">
         <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-            <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2 text-lg font-bold tracking-tight text-white">
-                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-extrabold shadow-lg shadow-indigo-500/30">P</span>
-                {{ config('app.name') }}
+            <a href="{{ route('home') }}" class="group flex shrink-0 items-center gap-2.5">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 via-fuchsia-500 to-amber-400 text-xs font-black leading-none text-white shadow-lg shadow-cyan-500/25 ring-1 ring-white/20 transition group-hover:brightness-110 sm:h-10 sm:w-10 sm:text-sm">
+                    <span class="translate-y-px">PB</span>
+                </span>
+                <x-brand-wordmark variant="dark" class="leading-none" />
             </a>
             <nav class="hidden flex-1 items-center justify-center gap-1 lg:flex">
                 <a href="{{ route('home') }}#bills" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">Bill types</a>
@@ -36,9 +36,18 @@
                         $dash = auth()->user()->is_admin
                             ? route('admin.dashboard')
                             : (auth()->user()->hasActiveKyc() ? route('dashboard') : route('kyc.index'));
+                        $payHref = auth()->user()->hasActiveKyc() ? route('payments.create') : route('kyc.index');
                     @endphp
+                    @if (! auth()->user()->is_admin)
+                        <a href="{{ $payHref }}" class="pay-now-btn hidden rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 px-4 py-2 text-sm font-bold text-white transition hover:brightness-110 sm:inline-flex sm:items-center sm:justify-center">
+                            Pay now
+                        </a>
+                    @endif
                     <a href="{{ $dash }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/10">Dashboard</a>
                 @else
+                    <a href="{{ route('register') }}" class="pay-now-btn hidden rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 px-4 py-2 text-sm font-bold text-white transition hover:brightness-110 sm:inline-flex sm:items-center sm:justify-center">
+                        Pay now
+                    </a>
                     <a href="{{ route('login') }}" class="hidden rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:text-white sm:inline">Log in</a>
                     <a href="{{ route('register') }}" class="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:brightness-110">Get started</a>
                 @endauth
@@ -51,8 +60,14 @@
             <a href="{{ route('privacy') }}" class="text-slate-400 transition hover:text-white">Privacy</a>
             <a href="{{ route('terms') }}" class="text-slate-400 transition hover:text-white">Terms</a>
             @guest
+                <a href="{{ route('register') }}" class="font-semibold text-cyan-400 transition hover:text-white">Pay now</a>
                 <a href="{{ route('login') }}" class="text-indigo-400 transition hover:text-white">Log in</a>
             @endguest
+            @auth
+                @if (! auth()->user()->is_admin)
+                    <a href="{{ auth()->user()->hasActiveKyc() ? route('payments.create') : route('kyc.index') }}" class="font-semibold text-cyan-400 transition hover:text-white">Pay now</a>
+                @endif
+            @endauth
         </nav>
     </header>
 
@@ -68,9 +83,9 @@
     <footer class="relative z-10 mt-20 border-t border-white/10 bg-slate-950/90 py-14">
         <div class="mx-auto grid max-w-6xl gap-10 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
             <div class="lg:col-span-2">
-                <p class="flex items-center gap-2 text-lg font-bold text-white">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-extrabold">P</span>
-                    {{ config('app.name') }}
+                <p class="flex items-center gap-2.5">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 via-fuchsia-500 to-amber-400 text-xs font-black text-white shadow-lg">PB</span>
+                    <x-brand-wordmark variant="dark" size="lg" class="leading-none" />
                 </p>
                 <p class="mt-3 max-w-md text-sm leading-relaxed text-slate-400">Pay tuition, household bills, rent & more — with secure card payments, clear settlement timing, and wallet tools built for real life.</p>
             </div>

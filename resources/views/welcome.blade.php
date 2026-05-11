@@ -18,23 +18,33 @@
                 <p class="animate-fade-up animate-delay-200 mt-6 text-lg leading-relaxed text-slate-400">
                     Tuition fees, utilities, rent, subscriptions, insurance & more. Use your card safely, track settlements, and optionally route payouts to your bank when funds land in your wallet.
                 </p>
-                <div class="animate-fade-up animate-delay-300 mt-10 flex flex-wrap gap-4">
+                <div class="animate-fade-up animate-delay-300 mt-10 flex flex-wrap gap-3">
                     @auth
-                        <a href="{{ auth()->user()->hasActiveKyc() ? route('payments.create') : route('kyc.index') }}" class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 px-8 py-3.5 text-base font-semibold text-white shadow-xl shadow-indigo-500/30 transition hover:brightness-110">
-                            {{ auth()->user()->hasActiveKyc() ? 'Pay a bill' : 'Complete KYC to pay' }}
+                        @php $payUrl = auth()->user()->hasActiveKyc() ? route('payments.create') : route('kyc.index'); @endphp
+                        <a href="{{ $payUrl }}" class="pay-now-btn inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 px-8 py-3.5 text-base font-bold text-white shadow-xl transition hover:brightness-110">
+                            {{ auth()->user()->hasActiveKyc() ? 'Pay now' : 'Pay now — finish KYC' }}
+                        </a>
+                        <a href="{{ auth()->user()->hasActiveKyc() ? route('dashboard') : route('kyc.index') }}" class="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/5 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-white/10">
+                            {{ auth()->user()->hasActiveKyc() ? 'Dashboard' : 'KYC steps' }}
                         </a>
                     @else
-                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 px-8 py-3.5 text-base font-semibold text-white shadow-xl shadow-indigo-500/30 transition hover:brightness-110">
-                            Create free account
+                        <a href="{{ route('register') }}" class="pay-now-btn inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 px-8 py-3.5 text-base font-bold text-white shadow-xl transition hover:brightness-110">
+                            Pay now — free account
                         </a>
-                        <a href="{{ route('login') }}" class="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-8 py-3.5 text-base font-semibold text-white transition hover:bg-white/10">
-                            Log in
+                        <a href="{{ route('login') }}" class="inline-flex items-center justify-center rounded-2xl border border-fuchsia-400/40 bg-fuchsia-500/10 px-6 py-3.5 text-base font-semibold text-fuchsia-200 transition hover:bg-fuchsia-500/20">
+                            Log in &amp; pay
+                        </a>
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-2xl border border-amber-400/35 bg-amber-500/10 px-6 py-3.5 text-base font-semibold text-amber-200 transition hover:bg-amber-500/20">
+                            Start in 2 minutes
                         </a>
                     @endauth
                     <a href="{{ route('about') }}" class="inline-flex items-center justify-center rounded-2xl px-4 py-3.5 text-base font-medium text-slate-400 transition hover:text-white">
                         How we help →
                     </a>
                 </div>
+                @guest
+                    <p class="animate-fade-up animate-delay-300 mt-4 text-xs text-slate-500">Secure card checkout · India-first · <x-brand-wordmark variant="dark" size="sm" class="inline-flex align-baseline" /></p>
+                @endguest
                 <dl class="animate-fade-up animate-delay-400 mt-14 grid grid-cols-3 gap-6 border-t border-white/10 pt-10">
                     <div>
                         <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Designed for</dt>
@@ -164,13 +174,15 @@
         <div class="mx-auto max-w-4xl rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-600/40 via-violet-600/30 to-slate-900 p-10 text-center shadow-2xl shadow-indigo-500/20 sm:p-14">
             <h2 class="text-3xl font-bold text-white sm:text-4xl">Ready to tidy up bill pay?</h2>
             <p class="mx-auto mt-4 max-w-xl text-lg text-indigo-100/90">Join {{ config('app.name') }} — built for families, students, renters, and anyone who wants fewer surprises at month-end.</p>
-            <div class="mt-10 flex flex-wrap justify-center gap-4">
+            <div class="mt-10 flex flex-wrap justify-center gap-3 sm:gap-4">
                 @guest
-                    <a href="{{ route('register') }}" class="inline-flex rounded-2xl bg-white px-8 py-3.5 text-base font-semibold text-indigo-900 shadow-lg transition hover:bg-indigo-50">Sign up free</a>
+                    <a href="{{ route('register') }}" class="pay-now-btn inline-flex rounded-2xl bg-gradient-to-r from-cyan-400 via-white to-amber-200 px-8 py-3.5 text-base font-bold text-slate-900 shadow-lg transition hover:brightness-105">Pay now — join free</a>
+                    <a href="{{ route('login') }}" class="inline-flex rounded-2xl border-2 border-fuchsia-300/50 bg-fuchsia-500/20 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-fuchsia-500/30">Log in</a>
                 @else
-                    <a href="{{ auth()->user()->hasActiveKyc() ? route('dashboard') : route('kyc.index') }}" class="inline-flex rounded-2xl bg-white px-8 py-3.5 text-base font-semibold text-indigo-900 shadow-lg transition hover:bg-indigo-50">Go to app</a>
+                    <a href="{{ auth()->user()->hasActiveKyc() ? route('payments.create') : route('kyc.index') }}" class="pay-now-btn inline-flex rounded-2xl bg-gradient-to-r from-cyan-400 via-white to-amber-200 px-8 py-3.5 text-base font-bold text-slate-900 shadow-lg transition hover:brightness-105">Pay now</a>
+                    <a href="{{ route('dashboard') }}" class="inline-flex rounded-2xl border-2 border-white/40 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-white/10">Dashboard</a>
                 @endguest
-                <a href="{{ route('terms') }}" class="inline-flex rounded-2xl border border-white/30 px-8 py-3.5 text-base font-semibold text-white transition hover:bg-white/10">Review terms</a>
+                <a href="{{ route('terms') }}" class="inline-flex rounded-2xl border border-white/30 px-6 py-3.5 text-base font-semibold text-white/90 transition hover:bg-white/10">Review terms</a>
             </div>
         </div>
     </section>

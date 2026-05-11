@@ -1,0 +1,225 @@
+/* PayByCC — plain CSS (no Tailwind build). Used with Tailwind Play CDN. */
+
+@keyframes marketing-pulse {
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.85;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float-soft {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.marketing-gradient {
+    animation: marketing-pulse 14s ease-in-out infinite;
+}
+
+.animate-fade-up {
+    animation: fade-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+}
+
+.animate-delay-100 {
+    animation-delay: 0.1s;
+}
+.animate-delay-200 {
+    animation-delay: 0.2s;
+}
+.animate-delay-300 {
+    animation-delay: 0.3s;
+}
+.animate-delay-400 {
+    animation-delay: 0.4s;
+}
+
+.animate-float-soft {
+    animation: float-soft 6s ease-in-out infinite;
+}
+
+@keyframes pay-now-glow {
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 0 rgba(34, 211, 238, 0.35),
+            0 10px 40px -10px rgba(99, 102, 241, 0.5);
+    }
+    50% {
+        box-shadow:
+            0 0 0 4px rgba(34, 211, 238, 0.15),
+            0 14px 48px -8px rgba(167, 139, 250, 0.45);
+    }
+}
+
+.pay-now-btn {
+    animation: pay-now-glow 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .marketing-gradient,
+    .animate-fade-up,
+    .animate-float-soft,
+    .pay-now-btn {
+        animation: none !important;
+    }
+
+    .animate-fade-up {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    .auth-btn-primary:hover,
+    .auth-btn-primary:active {
+        transform: none !important;
+    }
+}
+
+/* Auth pages */
+.auth-body {
+    background-color: #020617;
+    color: #f1f5f9;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.auth-card {
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(15, 23, 42, 0.7);
+    padding: 2rem;
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(24px);
+}
+
+.auth-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #cbd5e1;
+}
+
+.auth-input {
+    display: block;
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #fff;
+    outline: none;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition:
+        border-color 0.2s,
+        background-color 0.2s,
+        box-shadow 0.2s;
+}
+
+.auth-input::placeholder {
+    color: #64748b;
+}
+
+.auth-input:focus {
+    border-color: rgba(129, 140, 248, 0.7);
+    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.2),
+        0 0 0 2px rgba(99, 102, 241, 0.35);
+}
+
+.auth-input-error,
+.auth-input.auth-input-error {
+    border-color: rgba(248, 113, 113, 0.55);
+}
+
+.auth-input-error:focus,
+.auth-input.auth-input-error:focus {
+    border-color: rgba(248, 113, 113, 0.8);
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.2),
+        0 0 0 2px rgba(239, 68, 68, 0.3);
+}
+
+.auth-error-text {
+    margin-top: 0.375rem;
+    font-size: 0.875rem;
+    color: #f87171;
+}
+
+.auth-link {
+    font-weight: 600;
+    color: #818cf8;
+    text-underline-offset: 2px;
+    transition: color 0.15s;
+}
+
+.auth-link:hover {
+    color: #a5b4fc;
+}
+
+.auth-btn-primary {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    border: none;
+    cursor: pointer;
+    background-image: linear-gradient(to right, #6366f1, #7c3aed);
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    box-shadow:
+        0 10px 15px -3px rgba(99, 102, 241, 0.3),
+        0 4px 6px -2px rgba(99, 102, 241, 0.15);
+    outline: none;
+    transition:
+        transform 0.2s,
+        filter 0.2s,
+        box-shadow 0.2s;
+}
+
+.auth-btn-primary:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+    box-shadow:
+        0 12px 20px -4px rgba(99, 102, 241, 0.4),
+        0 4px 6px -2px rgba(99, 102, 241, 0.2);
+}
+
+.auth-btn-primary:active {
+    transform: translateY(0);
+}
+
+.auth-btn-primary:focus-visible {
+    box-shadow:
+        0 0 0 2px #818cf8,
+        0 0 0 4px #020617;
+}
