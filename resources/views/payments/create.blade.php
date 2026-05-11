@@ -13,6 +13,13 @@
                 <p class="mt-1 text-xs text-emerald-800">Amount limits {{ $gateway->min_txn }} – {{ $gateway->max_txn }} INR @if ((float) $gateway->daily_limit > 0)· Daily cap {{ $gateway->daily_limit }} INR @endif</p>
             </div>
 
+            @if (strtolower(\App\Models\Gateway::normalizeFilename($gateway->filename)) === 'cashfree')
+                <div class="mt-4 rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+                    <p class="font-medium">Cashfree · cards only</p>
+                    <p class="mt-1 text-xs text-indigo-800">Checkout is hosted by Cashfree. Only <strong>credit and debit cards</strong> are offered for this order (no UPI, netbanking, or wallets). After payment, you return here and we confirm the order with Cashfree before crediting your wallet flow.</p>
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('payments.store') }}" class="mt-8 max-w-md space-y-5">
                 @csrf
                 <div>

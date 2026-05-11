@@ -88,7 +88,7 @@
 
             <div>
                 <label for="credentials_json" class="mb-1 block text-sm font-medium text-slate-700">Credentials (JSON)</label>
-                <textarea id="credentials_json" name="credentials_json" rows="8" placeholder='{\n  "client_id": "",\n  "client_secret": ""\n}'
+                <textarea id="credentials_json" name="credentials_json" rows="8" placeholder='{\n  "client_id": "Cashfree App ID",\n  "client_secret": "Secret key",\n  "env": "sandbox"\n}'
                     class="block w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 @error('credentials_json') border-red-500 @enderror">{{ old('credentials_json') }}</textarea>
                 @error('credentials_json')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

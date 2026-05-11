@@ -69,6 +69,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('payments', [PaymentController::class, 'create'])->name('payments.create');
         Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
+        Route::get('payments/cashfree/return', [PaymentController::class, 'cashfreeReturn'])->name('payments.cashfree.return');
+        Route::get('payments/{payment}/checkout', [PaymentController::class, 'checkout'])->name('payments.checkout');
 
         Route::get('wallet', [WalletController::class, 'index'])->name('wallet.index');
         Route::patch('wallet', [WalletController::class, 'update'])->name('wallet.update');
