@@ -64,7 +64,7 @@
         </div>
     </header>
 
-    <main class="relative z-10 {{ $marketingDockPad ? 'pb-24 lg:pb-0' : '' }}">
+    <main class="relative z-10 {{ $marketingDockPad ? 'pb-28 lg:pb-0' : '' }}">
         @if (session('status'))
             <div class="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
                 <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{{ session('status') }}</div>

@@ -224,9 +224,14 @@
         0 0 0 4px #020617;
 }
 
-/* Mobile app dock */
+/* Mobile app dock — keep FAB visible above home indicator / rounded corners */
+.mobile-dock {
+    overflow: visible;
+}
+
 .mobile-dock-safe {
-    padding-bottom: env(safe-area-inset-bottom, 0);
+    padding-bottom: max(0.75rem, calc(env(safe-area-inset-bottom, 0px) + 0.35rem));
+    padding-top: 0.35rem;
 }
 
 details > summary::-webkit-details-marker {

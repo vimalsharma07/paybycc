@@ -31,7 +31,7 @@
         </div>
     </header>
 
-    <main class="app-main-shell mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:py-10 {{ $appDock ? 'pb-24 lg:pb-10' : '' }}">
+    <main class="app-main-shell mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:py-10 {{ $appDock ? 'pb-28 lg:pb-10' : '' }}">
         @if (session('status'))
             <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
                 {{ session('status') }}
