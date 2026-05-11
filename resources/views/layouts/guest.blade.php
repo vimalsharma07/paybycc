@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name'))</title>
     @include('partials.head-styles')
@@ -17,8 +17,7 @@
     <div class="relative z-10 flex min-h-screen flex-col lg:flex-row">
         <aside class="relative flex flex-col justify-center px-6 pb-6 pt-10 sm:px-10 lg:w-[46%] lg:max-w-xl lg:px-12 lg:pb-16 lg:pt-16">
             <div class="animate-fade-up">
-                <a href="{{ route('home') }}" class="group inline-flex items-center gap-2.5 transition hover:opacity-90">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 via-fuchsia-500 to-amber-400 text-xs font-black text-white shadow-lg shadow-cyan-500/20 ring-1 ring-white/15 group-hover:brightness-110 sm:text-sm">PB</span>
+                <a href="{{ route('home') }}" class="inline-block transition hover:opacity-90">
                     <x-brand-wordmark variant="dark" size="lg" class="leading-none" />
                 </a>
             </div>

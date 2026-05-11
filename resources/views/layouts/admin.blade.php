@@ -12,8 +12,7 @@
         <aside class="hidden w-56 shrink-0 flex-col border-r border-slate-200 bg-slate-900 text-slate-100 md:flex">
             <div class="border-b border-slate-700 px-4 py-5">
                 <span class="text-xs font-medium uppercase tracking-wider text-slate-400">Admin</span>
-                <p class="mt-2 flex items-center gap-2">
-                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-cyan-500 via-fuchsia-500 to-amber-400 text-[9px] font-black text-white">PB</span>
+                <p class="mt-2">
                     <x-brand-wordmark variant="dark" size="sm" class="leading-none" />
                 </p>
             </div>

@@ -223,3 +223,20 @@
         0 0 0 2px #818cf8,
         0 0 0 4px #020617;
 }
+
+/* Mobile app dock */
+.mobile-dock-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.mobile-dock-item {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-dock-fab {
+    -webkit-tap-highlight-color: transparent;
+}

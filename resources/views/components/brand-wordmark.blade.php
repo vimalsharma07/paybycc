@@ -5,9 +5,9 @@
 
 @php
     $sizeClasses = match ($size) {
-        'sm' => 'text-base gap-0 sm:gap-0.5',
-        'lg' => 'text-2xl gap-0.5 sm:text-3xl sm:gap-1',
-        default => 'text-lg gap-0 sm:text-xl sm:gap-0.5',
+        'sm' => 'text-base gap-0',
+        'lg' => 'text-2xl gap-0 sm:text-3xl',
+        default => 'text-lg gap-0 sm:text-xl',
     };
 
     if ($variant === 'light') {
