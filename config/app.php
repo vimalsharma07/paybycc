@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Remote cache clear (GET /cache-clear?token=...)
+    |--------------------------------------------------------------------------
+    |
+    | Set a long random string in CACHE_CLEAR_SECRET. If empty, the route
+    | returns 403. Use only over HTTPS in production (token may appear in logs).
+    |
+    */
+
+    'cache_clear_secret' => env('CACHE_CLEAR_SECRET'),
+
 ];

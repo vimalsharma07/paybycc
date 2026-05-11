@@ -14,6 +14,7 @@ use App\Http\Controllers\KycController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\WalletController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PageController::class, 'home'])->name('home');
@@ -22,6 +23,21 @@ Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::post('/contact', [PageController::class, 'contactSubmit'])->name('contact.store');
 Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [PageController::class, 'terms'])->name('terms');
+
+Route::get('/cache-clear', function () {
+    $secret = config('app.cache_clear_secret');
+    if (! is_string($secret) || $secret === '') {
+        abort(403);
+    }
+    $token = (string) request()->query('token', '');
+    if (! hash_equals($secret, $token)) {
+        abort(403);
+    }
+    Artisan::call('optimize:clear');
+
+    return response('optimize:clear completed.', 200)
+        ->header('Content-Type', 'text/plain; charset=UTF-8');
+})->middleware('throttle:10,1')->name('cache.clear');
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
