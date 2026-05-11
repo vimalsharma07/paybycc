@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\BankController as AdminBankController;
 use App\Http\Controllers\Admin\GatewayController as AdminGatewayController;
+use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -86,6 +87,8 @@ Route::middleware('auth')->group(function () {
         Route::get('admin/banks', [AdminBankController::class, 'index'])->name('admin.banks.index');
         Route::get('admin/banks/{bank}/edit', [AdminBankController::class, 'edit'])->name('admin.banks.edit');
         Route::patch('admin/banks/{bank}', [AdminBankController::class, 'update'])->name('admin.banks.update');
+
+        Route::get('admin/transactions', [AdminTransactionController::class, 'index'])->name('admin.transactions.index');
 
         Route::get('admin/gateways', [AdminGatewayController::class, 'index'])->name('admin.gateways.index');
         Route::get('admin/gateways/create', [AdminGatewayController::class, 'create'])->name('admin.gateways.create');
