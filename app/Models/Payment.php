@@ -13,6 +13,7 @@ class Payment extends Model
         'gateway_id',
         'amount',
         'currency',
+        'remark',
         'status',
         'gateway_reference',
         'driver_payload',

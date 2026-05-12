@@ -14,6 +14,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KycController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WalletController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -59,6 +60,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('kyc', [KycController::class, 'index'])->name('kyc.index');
     Route::post('kyc/pan', [KycController::class, 'storePan'])->name('kyc.pan');
+
+    Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
 
     Route::middleware('kyc.verified')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

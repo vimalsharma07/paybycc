@@ -8,6 +8,15 @@
         <p class="mt-2 text-sm text-slate-600">
             You are paying <span class="font-mono font-semibold text-slate-900">₹{{ number_format((float) $payment->amount, 2) }}</span> with <strong>card only</strong> (credit or debit) via Cashfree.
         </p>
+        @if (filled($payment->remark))
+            <div class="mt-4 flex items-start gap-3 rounded-xl border border-indigo-100 bg-indigo-50/80 px-4 py-3">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-[10px] font-bold uppercase leading-none tracking-wide text-white" aria-hidden="true">Note</span>
+                <div class="min-w-0">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-indigo-800">Your note</p>
+                    <p class="mt-1 text-sm font-medium text-slate-900">{{ $payment->remark }}</p>
+                </div>
+            </div>
+        @endif
         <p class="mt-4 text-xs text-slate-500">If nothing happens, use the button below. Do not refresh while paying.</p>
         <button type="button" id="cf-pay-btn" class="mt-6 inline-flex w-full justify-center rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
             Open Cashfree checkout

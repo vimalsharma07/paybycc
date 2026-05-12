@@ -3,23 +3,46 @@
 @section('title', 'Wallet — '.config('app.name'))
 
 @section('content')
-    <div class="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-2xl font-semibold text-slate-900">Wallet</h1>
-            <p class="mt-1 text-sm text-slate-600">Balance, settlement preference, and payment history.</p>
+    <div class="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div class="flex items-center gap-3">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-sm" aria-hidden="true">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H12a2.25 2.25 0 00-2.25 2.25v6.75A2.25 2.25 0 009.75 21.75h-1.5A2.25 2.25 0 016 19.5V12a2.25 2.25 0 00-2.25-2.25H3"/><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.375H9.75A2.25 2.25 0 0112 5.625v.75m0 0h3.75m-3.75 0H9m0 0H5.625A2.25 2.25 0 003 8.25v.375c0 .621.504 1.125 1.125 1.125h16.5c.621 0 1.125-.504 1.125-1.125V8.25A2.25 2.25 0 0019.875 6H16.5"/></svg>
+            </span>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900">Wallet</h1>
+                <p class="mt-1 text-sm text-slate-600">Balance, settlement preference, and history.</p>
+            </div>
         </div>
-        <a href="{{ route('payments.create') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Make a payment →</a>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('profile.show') }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50">Profile</a>
+            <a href="{{ route('payments.create') }}" class="inline-flex items-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500">Pay</a>
+        </div>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 class="text-lg font-semibold text-slate-900">Balance</h2>
-            <p class="mt-3 text-3xl font-semibold tabular-nums text-slate-900">{{ number_format((float) $wallet->balance, 2) }} <span class="text-base font-normal text-slate-500">INR</span></p>
-            <p class="mt-4 text-xs text-slate-500">Simple wallet ledger. Card payments create a transaction with an expected settlement date; bank settlements can be recorded separately when funds arrive.</p>
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900">Balance</h2>
+                    <p class="mt-3 text-3xl font-semibold tabular-nums text-slate-900">{{ number_format((float) $wallet->balance, 2) }} <span class="text-base font-normal text-slate-500">INR</span></p>
+                </div>
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700" aria-hidden="true">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </span>
+            </div>
+            <p class="mt-4 text-xs text-slate-500">Card payments create a transaction with an expected settlement date; settlements can be recorded when funds arrive.</p>
         </div>
 
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 class="text-lg font-semibold text-slate-900">Settings</h2>
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900">Settings</h2>
+                    <p class="mt-1 text-xs text-slate-500">Auto-settlement and default payout bank.</p>
+                </div>
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700" aria-hidden="true">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 12h9.75M10.5 18h9.75M3.75 6h.008v.008H3.75V6zm0 6h.008v.008H3.75V12zm0 6h.008v.008H3.75V18z"/></svg>
+                </span>
+            </div>
             <form method="POST" action="{{ route('wallet.update') }}" class="mt-4 space-y-5">
                 @csrf
                 @method('PATCH')
@@ -59,7 +82,10 @@
 
     <div class="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="border-b border-slate-100 px-6 py-4">
-            <h2 class="text-lg font-semibold text-slate-900">Transactions</h2>
+            <div class="flex items-center gap-2">
+                <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18"/><path stroke-linecap="round" stroke-linejoin="round" d="M7 14l4-4 3 3 6-6"/></svg>
+                <h2 class="text-lg font-semibold text-slate-900">Transactions</h2>
+            </div>
             <p class="mt-1 text-xs text-slate-500">Card payments show expected settlement date. Settlement rows include the bank that received funds.</p>
         </div>
         @if ($transactions->isEmpty())

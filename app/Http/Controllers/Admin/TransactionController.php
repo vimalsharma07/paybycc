@@ -16,7 +16,7 @@ class TransactionController extends Controller
         $transactions = Transaction::query()
             ->with([
                 'user:id,name,email',
-                'payment:id,amount,status,gateway_reference',
+                'payment:id,amount,status,gateway_reference,remark',
                 'bank:id,account_holder_name',
             ])
             ->when($q !== '', function ($query) use ($q) {

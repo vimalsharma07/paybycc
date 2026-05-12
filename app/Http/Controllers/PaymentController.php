@@ -51,7 +51,11 @@ class PaymentController extends Controller
 
         $validated = $request->validate([
             'amount' => ['required', 'numeric', 'min:0.01'],
+            'remark' => ['nullable', 'string', 'max:160'],
         ]);
+
+        $remarkRaw = isset($validated['remark']) ? trim((string) $validated['remark']) : '';
+        $remark = $remarkRaw === '' ? null : $remarkRaw;
 
         $wallet = Wallet::firstOrCreate(
             ['user_id' => $request->user()->id],
@@ -99,12 +103,13 @@ class PaymentController extends Controller
             return back()->withInput()->withErrors(['amount' => 'Payment gateway configuration error. Please try again later.']);
         }
 
-        $payment = DB::transaction(function () use ($request, $gateway, $amountDecimal, $driver) {
+        $payment = DB::transaction(function () use ($request, $gateway, $amountDecimal, $driver, $remark) {
             $payment = Payment::create([
                 'user_id' => $request->user()->id,
                 'gateway_id' => $gateway->id,
                 'amount' => $amountDecimal,
                 'currency' => 'INR',
+                'remark' => $remark,
                 'status' => 'pending',
             ]);
 
@@ -242,6 +247,11 @@ class PaymentController extends Controller
 
         $bufferDays = max(0, (int) config('paybycc.settlement_buffer_days', 2));
 
+        $userNote = trim((string) ($payment->remark ?? ''));
+        $note = $userNote !== ''
+            ? $userNote.' · Cashfree card'
+            : 'Card payment via Cashfree';
+
         Transaction::create([
             'user_id' => $userId,
             'bank_id' => null,
@@ -253,7 +263,7 @@ class PaymentController extends Controller
             'status' => 'completed',
             'settlement_trigger_at' => now()->addDays($bufferDays),
             'settled_at' => null,
-            'note' => 'Card payment via Cashfree',
+            'note' => $note,
         ]);
     }
 

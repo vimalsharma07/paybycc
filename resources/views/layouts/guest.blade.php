@@ -39,7 +39,7 @@
             </div>
         </aside>
 
-        <main class="flex flex-1 flex-col justify-center px-4 pb-12 pt-2 sm:px-6 lg:px-10 lg:py-16">
+        <main class="flex flex-1 flex-col justify-center px-4 pb-28 pt-2 sm:px-6 lg:px-10 lg:pb-16 lg:py-16">
             <div class="mx-auto w-full max-w-md animate-fade-up animate-delay-200">
                 @if (session('status'))
                     <div class="mb-6 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
@@ -63,5 +63,32 @@
             </div>
         </main>
     </div>
+
+    @php
+        $guestExploreId = 'mobile-explore-guest';
+        $guestExploreTiles = [
+            ['href' => route('privacy'), 'label' => 'Privacy', 'icon' => 'shield'],
+            ['href' => route('terms'), 'label' => 'Terms', 'icon' => 'document'],
+            ['href' => route('contact'), 'label' => 'Contact', 'icon' => 'mail'],
+            ['href' => route('about'), 'label' => 'About', 'icon' => 'info'],
+            ['href' => route('home').'#bills', 'label' => 'Bill types', 'icon' => 'grid'],
+            ['href' => route('home'), 'label' => 'Home page', 'icon' => 'home'],
+            ['href' => route('register'), 'label' => 'Sign up', 'icon' => 'user-plus'],
+            ['href' => route('login'), 'label' => 'Log in', 'icon' => 'login'],
+        ];
+    @endphp
+    <nav class="mobile-dock fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-slate-950/95 backdrop-blur-md lg:hidden mobile-dock-safe" aria-label="Quick links">
+        <div class="mx-auto grid min-h-[4.25rem] max-w-md grid-cols-2 gap-2 px-6 py-2">
+            <a href="{{ route('home') }}" class="mobile-dock-item flex flex-col items-center justify-center gap-1 rounded-2xl border border-white/10 bg-white/5 py-3 text-slate-300 transition hover:border-cyan-400/30 hover:bg-white/10 hover:text-white">
+                <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10"/></svg>
+                <span class="text-[11px] font-semibold">Marketing home</span>
+            </a>
+            <button type="button" data-open-dialog="{{ $guestExploreId }}" class="mobile-dock-item flex flex-col items-center justify-center gap-1 rounded-2xl border border-white/10 bg-white/5 py-3 text-slate-300 transition hover:border-cyan-400/30 hover:bg-white/10 hover:text-white">
+                <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                <span class="text-[11px] font-semibold">Menu & legal</span>
+            </button>
+        </div>
+    </nav>
+    @include('partials.mobile-explore-dialog', ['dialogId' => $guestExploreId, 'skin' => 'dark', 'tiles' => $guestExploreTiles])
 </body>
 </html>

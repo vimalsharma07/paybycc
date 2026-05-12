@@ -3,16 +3,32 @@
 @section('title', 'Bank accounts — '.config('app.name'))
 
 @section('content')
-    <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-2xl font-semibold text-slate-900">Bank accounts</h1>
-            <p class="mt-1 text-sm text-slate-600">Add accounts you use for payouts. Shown only after KYC is verified.</p>
+    <div class="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div class="flex items-center gap-3">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-600 text-white shadow-sm" aria-hidden="true">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-4h6v4"/></svg>
+            </span>
+            <div>
+                <h1 class="text-2xl font-semibold text-slate-900">Bank accounts</h1>
+                <p class="mt-1 text-sm text-slate-600">Add payout accounts. Mark one as primary.</p>
+            </div>
         </div>
-        <a href="{{ route('dashboard') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">← Back to dashboard</a>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('profile.show') }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50">Profile</a>
+            <a href="{{ route('dashboard') }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50">Dashboard</a>
+        </div>
     </div>
 
     <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 class="text-lg font-semibold text-slate-900">Add bank account</h2>
+        <div class="flex items-center justify-between gap-3">
+            <div>
+                <h2 class="text-lg font-semibold text-slate-900">Add bank account</h2>
+                <p class="mt-1 text-xs text-slate-500">We only store what is needed for payouts.</p>
+            </div>
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-100 text-violet-700" aria-hidden="true">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            </span>
+        </div>
         <form method="POST" action="{{ route('banks.store') }}" class="mt-6 space-y-5">
             @csrf
             <div class="grid gap-5 sm:grid-cols-2">
@@ -62,7 +78,13 @@
 
     <div class="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="border-b border-slate-100 px-6 py-4">
-            <h2 class="text-lg font-semibold text-slate-900">Your accounts</h2>
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-4h6v4"/></svg>
+                    <h2 class="text-lg font-semibold text-slate-900">Your accounts</h2>
+                </div>
+                <p class="text-xs font-medium text-slate-500">{{ $banks->count() }} saved</p>
+            </div>
         </div>
         @if ($banks->isEmpty())
             <p class="px-6 py-10 text-center text-sm text-slate-600">No bank accounts yet. Add one above.</p>
@@ -99,7 +121,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 capitalize">
-                                    <span class="{{ $bank->status === 'active' ? 'text-emerald-700' : 'text-slate-500' }}">{{ $bank->status }}</span>
+                                    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $bank->status === 'active' ? 'bg-emerald-100 text-emerald-900 ring-1 ring-emerald-400/40' : 'bg-slate-100 text-slate-700 ring-1 ring-slate-300/60' }}">{{ $bank->status }}</span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <button type="button" onclick="document.getElementById('edit-{{ $bank->id }}').classList.toggle('hidden')"
