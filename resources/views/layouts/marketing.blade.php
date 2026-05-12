@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="description" content="@yield('meta_description', 'Pay tuition, utilities, rent & more with '.config('app.name').'. Secure card payments & wallet settlements.')">
+    <meta name="description" content="@yield('meta_description', ($siteSettings->tagline ? $siteSettings->tagline.' ' : '').'Pay tuition, utilities, rent & more with '.$siteSettings->displayName().'. Secure card payments & wallet settlements.')">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name').' — Pay bills & tuition securely')</title>
+    <title>@yield('title', $siteSettings->displayName().' — Pay bills & tuition securely')</title>
     @include('partials.head-styles')
 </head>
 @php
@@ -21,9 +21,7 @@
 
     <header class="relative z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl">
         <div class="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6 lg:py-4 {{ $isAdminMobile ? 'justify-between' : 'justify-center lg:justify-between' }}">
-            <a href="{{ route('home') }}" class="shrink-0 transition hover:opacity-90 {{ $isAdminMobile ? '' : 'lg:justify-self-start' }}">
-                <x-brand-wordmark variant="dark" class="leading-none" />
-            </a>
+            @include('partials.site-brand-header', ['href' => route('home'), 'variant' => 'dark', 'wrapperClass' => $isAdminMobile ? '' : 'lg:justify-self-start'])
 
             @if ($isAdminMobile)
                 <a href="{{ route('admin.dashboard') }}" class="shrink-0 rounded-xl bg-white/10 px-4 py-2 text-xs font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15 lg:hidden">
@@ -77,9 +75,42 @@
         <div class="mx-auto grid max-w-6xl gap-10 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
             <div class="lg:col-span-2">
                 <p>
-                    <x-brand-wordmark variant="dark" size="lg" class="leading-none" />
+                    @if ($siteSettings->logoUrl())
+                        <img src="{{ $siteSettings->logoUrl() }}" alt="{{ $siteSettings->displayName() }}" class="h-10 w-auto max-w-[220px] object-contain object-left" loading="lazy" />
+                    @else
+                        <x-brand-wordmark variant="dark" size="lg" class="leading-none" />
+                    @endif
                 </p>
-                <p class="mt-3 max-w-md text-sm leading-relaxed text-slate-400">Pay tuition, household bills, rent & more — with secure card payments, clear settlement timing, and wallet tools built for real life.</p>
+                <p class="mt-3 max-w-md text-sm leading-relaxed text-slate-400">{{ $siteSettings->tagline ?: 'Pay tuition, household bills, rent & more — with secure card payments, clear settlement timing, and wallet tools built for real life.' }}</p>
+                @if ($siteSettings->instagram_url || $siteSettings->linkedin_url || $siteSettings->facebook_url || $siteSettings->twitter_url)
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        @if ($siteSettings->instagram_url)
+                            <a href="{{ $siteSettings->instagram_url }}" target="_blank" rel="noopener noreferrer" class="rounded-lg bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 ring-1 ring-white/10 transition hover:bg-white/10 hover:text-white">Instagram</a>
+                        @endif
+                        @if ($siteSettings->linkedin_url)
+                            <a href="{{ $siteSettings->linkedin_url }}" target="_blank" rel="noopener noreferrer" class="rounded-lg bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 ring-1 ring-white/10 transition hover:bg-white/10 hover:text-white">LinkedIn</a>
+                        @endif
+                        @if ($siteSettings->facebook_url)
+                            <a href="{{ $siteSettings->facebook_url }}" target="_blank" rel="noopener noreferrer" class="rounded-lg bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 ring-1 ring-white/10 transition hover:bg-white/10 hover:text-white">Facebook</a>
+                        @endif
+                        @if ($siteSettings->twitter_url)
+                            <a href="{{ $siteSettings->twitter_url }}" target="_blank" rel="noopener noreferrer" class="rounded-lg bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300 ring-1 ring-white/10 transition hover:bg-white/10 hover:text-white">X</a>
+                        @endif
+                    </div>
+                @endif
+                @if ($siteSettings->support_email || $siteSettings->email)
+                    <p class="mt-4 text-xs text-slate-500">
+                        @if ($siteSettings->support_email)
+                            <a href="mailto:{{ $siteSettings->support_email }}" class="font-medium text-indigo-300 hover:text-white">{{ $siteSettings->support_email }}</a>
+                        @endif
+                        @if ($siteSettings->support_email && $siteSettings->email)
+                            <span class="mx-1 text-slate-600">·</span>
+                        @endif
+                        @if ($siteSettings->email)
+                            <a href="mailto:{{ $siteSettings->email }}" class="font-medium text-indigo-300 hover:text-white">{{ $siteSettings->email }}</a>
+                        @endif
+                    </p>
+                @endif
             </div>
             <div>
                 <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Product</p>
@@ -103,12 +134,12 @@
             </div>
         </div>
         <p class="mx-auto mt-12 max-w-6xl border-t border-white/5 px-4 pt-8 text-center text-xs text-slate-600 sm:px-6">
-            © {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
+            © {{ date('Y') }} {{ $siteSettings->displayName() }}. All rights reserved.
         </p>
     </footer>
 
     <footer class="relative z-10 mt-12 border-t border-white/10 px-4 py-5 text-center text-xs text-slate-600 lg:hidden">
-        © {{ date('Y') }} {{ config('app.name') }}
+        © {{ date('Y') }} {{ $siteSettings->displayName() }}
     </footer>
 
     @include('partials.mobile-dock-marketing')

@@ -1,7 +1,7 @@
 @extends('layouts.marketing')
 
-@section('title', 'Privacy policy — '.config('app.name'))
-@section('meta_description', 'How '.config('app.name').' collects, uses, stores, and protects your personal information.')
+@section('title', 'Privacy policy — '.$siteSettings->displayName())
+@section('meta_description', 'How '.$siteSettings->displayName().' collects, uses, stores, and protects your personal information.')
 
 @section('content')
     <article class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:py-24">
@@ -10,11 +10,17 @@
         <p class="mt-4 text-sm text-slate-500">Last updated: {{ date('F j, Y') }}</p>
 
         <div class="mt-12 scroll-mt-24 space-y-10 text-slate-400 leading-relaxed">
-            <p>{{ config('app.name') }} (“we”, “us”, “our”) respects your privacy. This policy explains what we collect, why we collect it, how long we keep it, and the choices you have. It applies to our website and related services where this policy is linked.</p>
+            <p>{{ $siteSettings->displayName() }} (“we”, “us”, “our”) respects your privacy. This policy explains what we collect, why we collect it, how long we keep it, and the choices you have. It applies to our website and related services where this policy is linked.</p>
 
             <section>
             <h2 class="text-xl font-semibold text-white">1. Who we are</h2>
-            <p class="mt-4">The operator of {{ config('app.name') }} is the entity identified in your deployment (please insert your registered business name and address in production). For privacy requests, use the <a href="{{ route('contact') }}" class="font-medium text-indigo-400 underline-offset-2 hover:underline">Contact</a> page.</p>
+            @if (filled($siteSettings->address))
+                <p class="mt-4">The operator of {{ $siteSettings->displayName() }} is registered at the following address:</p>
+                <p class="mt-2 whitespace-pre-line rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">{{ $siteSettings->address }}</p>
+            @else
+                <p class="mt-4">The operator of {{ $siteSettings->displayName() }} is the entity managing this deployment. Add your registered business name and address in <strong class="text-slate-300">Admin → Website</strong> so they appear here automatically.</p>
+            @endif
+            <p class="mt-4">For privacy requests, use the <a href="{{ route('contact') }}" class="font-medium text-indigo-400 underline-offset-2 hover:underline">Contact</a> page@if ($siteSettings->support_email) or email <a href="mailto:{{ $siteSettings->support_email }}" class="font-medium text-indigo-400 underline-offset-2 hover:underline">{{ $siteSettings->support_email }}</a>@endif.</p>
             </section>
 
             <section>

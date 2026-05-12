@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin — '.config('app.name'))</title>
+    <title>@yield('title', 'Admin — '.$siteSettings->displayName())</title>
     @include('partials.head-styles')
 </head>
 <body class="min-h-screen bg-slate-100 font-sans text-slate-900 antialiased">
@@ -19,6 +19,9 @@
             <nav class="flex flex-1 flex-col gap-1 p-3">
                 <a href="{{ route('admin.dashboard') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.dashboard') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     Dashboard
+                </a>
+                <a href="{{ route('admin.website-settings.edit') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.website-settings.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    Website
                 </a>
                 <a href="{{ route('admin.users.index') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.users.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     Users
@@ -52,6 +55,7 @@
                 </div>
                 <nav class="mt-3 flex flex-wrap gap-2 text-sm">
                     <a href="{{ route('admin.dashboard') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.dashboard') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Dashboard</a>
+                    <a href="{{ route('admin.website-settings.edit') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.website-settings.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Website</a>
                     <a href="{{ route('admin.users.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.users.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Users</a>
                     <a href="{{ route('admin.banks.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.banks.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Banks</a>
                     <a href="{{ route('admin.gateways.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.gateways.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Gateways</a>

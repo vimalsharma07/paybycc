@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name'))</title>
+    <title>@yield('title', $siteSettings->displayName())</title>
     @include('partials.head-styles')
 </head>
 @php
@@ -13,9 +13,7 @@
 <body class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
     <header class="border-b border-slate-200 bg-white">
         <div class="mx-auto flex max-w-5xl items-center justify-center px-4 py-3 sm:px-6 lg:justify-between lg:py-4">
-            <a href="{{ route('dashboard') }}" class="flex items-center">
-                <x-brand-wordmark variant="light" class="leading-none" />
-            </a>
+            @include('partials.site-brand-header', ['href' => route('dashboard'), 'variant' => 'light', 'wrapperClass' => ''])
             <nav class="hidden flex-wrap items-center gap-3 text-sm lg:flex lg:gap-4">
                 @if (! auth()->user()->is_admin && auth()->user()->hasActiveKyc())
                     <a href="{{ route('payments.create') }}" class="pay-now-btn inline-flex items-center rounded-lg bg-gradient-to-r from-cyan-600 via-indigo-600 to-violet-600 px-4 py-2 text-sm font-bold text-white shadow-md transition hover:brightness-110">Pay now</a>

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name'))</title>
+    <title>@yield('title', $siteSettings->displayName())</title>
     @include('partials.head-styles')
 </head>
 <body class="auth-body min-h-screen font-sans">
@@ -17,9 +17,7 @@
     <div class="relative z-10 flex min-h-screen flex-col lg:flex-row">
         <aside class="relative flex flex-col justify-center px-6 pb-6 pt-10 sm:px-10 lg:w-[46%] lg:max-w-xl lg:px-12 lg:pb-16 lg:pt-16">
             <div class="animate-fade-up">
-                <a href="{{ route('home') }}" class="inline-block transition hover:opacity-90">
-                    <x-brand-wordmark variant="dark" size="lg" class="leading-none" />
-                </a>
+                @include('partials.site-brand-header', ['href' => route('home'), 'variant' => 'dark', 'wrapperClass' => 'inline-block', 'logoSize' => 'lg', 'imgClass' => 'h-10 w-auto max-w-[260px] object-left sm:h-11'])
             </div>
 
             <div class="mt-8 animate-fade-up animate-delay-100 space-y-4 lg:mt-14">

@@ -1,7 +1,7 @@
 @extends('layouts.marketing')
 
-@section('title', 'Contact us — '.config('app.name'))
-@section('meta_description', 'Reach '.config('app.name').' for support, partnerships, or privacy questions.')
+@section('title', 'Contact us — '.$siteSettings->displayName())
+@section('meta_description', 'Reach '.$siteSettings->displayName().' for support, partnerships, or privacy questions.')
 
 @section('content')
     <div class="mx-auto grid max-w-6xl gap-12 px-4 py-16 lg:grid-cols-2 lg:py-24">
@@ -11,13 +11,45 @@
             <p class="mt-6 text-lg leading-relaxed text-slate-400">Billing questions, privacy concerns, or feedback about tuition &amp; household payments — send a note. We aim to reply within a few business days.</p>
 
             <div class="mt-10 space-y-6 rounded-2xl border border-white/10 bg-white/5 p-8">
-                <div class="flex gap-4">
-                    <span class="text-2xl">📧</span>
-                    <div>
-                        <p class="font-semibold text-white">Email</p>
-                        <p class="mt-1 text-sm text-slate-400">Use this form for the fastest response. For operational mail, configure a support address on your domain when you go live.</p>
+                @if ($siteSettings->support_email || $siteSettings->email)
+                    <div class="flex gap-4">
+                        <span class="text-2xl">📧</span>
+                        <div>
+                            <p class="font-semibold text-white">Email</p>
+                            <p class="mt-1 text-sm text-slate-400">Reach us directly, or use the form for structured requests.</p>
+                            <ul class="mt-3 space-y-1 text-sm">
+                                @if ($siteSettings->support_email)
+                                    <li><a href="mailto:{{ $siteSettings->support_email }}" class="font-medium text-indigo-400 underline-offset-2 hover:underline">{{ $siteSettings->support_email }}</a> <span class="text-slate-500">· support</span></li>
+                                @endif
+                                @if ($siteSettings->email && $siteSettings->email !== $siteSettings->support_email)
+                                    <li><a href="mailto:{{ $siteSettings->email }}" class="font-medium text-indigo-400 underline-offset-2 hover:underline">{{ $siteSettings->email }}</a> <span class="text-slate-500">· general</span></li>
+                                @endif
+                            </ul>
+                        </div>
                     </div>
-                </div>
+                @else
+                    <div class="flex gap-4">
+                        <span class="text-2xl">📧</span>
+                        <div>
+                            <p class="font-semibold text-white">Email</p>
+                            <p class="mt-1 text-sm text-slate-400">Use this form for the fastest response. Add support and general addresses in <strong class="text-slate-300">Admin → Website</strong> so they appear here.</p>
+                        </div>
+                    </div>
+                @endif
+                @if (filled($siteSettings->phone) || filled($siteSettings->address))
+                    <div class="flex gap-4">
+                        <span class="text-2xl">📍</span>
+                        <div>
+                            <p class="font-semibold text-white">Location &amp; phone</p>
+                            @if (filled($siteSettings->phone))
+                                <p class="mt-1 text-sm text-slate-400"><a href="tel:{{ preg_replace('/\s+/', '', $siteSettings->phone) }}" class="font-medium text-indigo-400 underline-offset-2 hover:underline">{{ $siteSettings->phone }}</a></p>
+                            @endif
+                            @if (filled($siteSettings->address))
+                                <p class="mt-2 whitespace-pre-line text-sm text-slate-300">{{ $siteSettings->address }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @endif
                 <div class="flex gap-4">
                     <span class="text-2xl">🔒</span>
                     <div>
