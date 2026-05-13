@@ -4,14 +4,12 @@ namespace App\Mail\Ops;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NewUserRegisteredMail extends Mailable implements ShouldQueue, ShouldQueueAfterCommit
+class NewUserRegisteredMail extends Mailable
 {
     use Queueable, SerializesModels;
 
