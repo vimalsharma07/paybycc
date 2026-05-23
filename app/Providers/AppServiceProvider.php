@@ -8,9 +8,15 @@ use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WebsiteSetting;
 use App\Observers\TransactionObserver;
+use App\Contracts\SmsSender;
 use App\Services\Payments\GatewayManager;
+use App\Services\Sms\ApitxtSmsSender;
+use App\Services\Sms\LogSmsSender;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -25,6 +31,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(GatewayManager::class, function ($app) {
             return new GatewayManager($app);
         });
+
+        $this->app->singleton(SmsSender::class, function () {
+            return config('sms.driver') === 'log'
+                ? new LogSmsSender
+                : new ApitxtSmsSender;
+        });
     }
 
     /**
@@ -35,6 +47,20 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
+        RateLimiter::for('otp-send', function (Request $request) {
+            return [
+                Limit::perMinute(5)->by($request->ip()),
+                Limit::perHour(30)->by($request->ip()),
+            ];
+        });
+
+        RateLimiter::for('otp-verify', function (Request $request) {
+            return [
+                Limit::perMinute(15)->by($request->ip()),
+                Limit::perHour(60)->by($request->ip()),
+            ];
+        });
 
         View::composer('*', function ($view) {
             $view->with('siteSettings', WebsiteSetting::cached());

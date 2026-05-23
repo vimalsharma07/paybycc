@@ -88,5 +88,6 @@
         </div>
     </nav>
     @include('partials.mobile-explore-dialog', ['dialogId' => $guestExploreId, 'skin' => 'dark', 'tiles' => $guestExploreTiles])
+    @stack('scripts')
 </body>
 </html>

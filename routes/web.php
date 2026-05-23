@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\WebsiteSettingController as AdminWebsiteSettingCo
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\RegisterOtpController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\DashboardController;
@@ -47,7 +48,13 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [LoginController::class, 'store']);
 
     Route::get('register', [RegisterController::class, 'create'])->name('register');
-    Route::post('register', [RegisterController::class, 'store']);
+    Route::post('register', [RegisterController::class, 'store'])->middleware('throttle:10,1');
+    Route::post('register/otp/send', [RegisterOtpController::class, 'send'])
+        ->middleware('throttle:otp-send')
+        ->name('register.otp.send');
+    Route::post('register/otp/verify', [RegisterOtpController::class, 'verify'])
+        ->middleware('throttle:otp-verify')
+        ->name('register.otp.verify');
 
     Route::get('forgot-password', [ForgotPasswordController::class, 'create'])->name('password.request');
     Route::post('forgot-password', [ForgotPasswordController::class, 'store'])->name('password.email');
