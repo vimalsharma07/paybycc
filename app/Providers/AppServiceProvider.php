@@ -37,10 +37,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(AppLogger::class);
 
-        $this->app->singleton(SmsSender::class, function () {
+        $this->app->singleton(SmsSender::class, function ($app) {
             return config('sms.driver') === 'log'
-                ? new LogSmsSender
-                : new ApitxtSmsSender;
+                ? $app->make(LogSmsSender::class)
+                : $app->make(ApitxtSmsSender::class);
         });
     }
 

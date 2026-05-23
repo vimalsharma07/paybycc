@@ -66,7 +66,6 @@ class OtpService
         }
 
         $otp = $this->generateCode();
-        $message = $this->buildMessage($purposeKey, $otp);
 
         $this->expirePending($phone, $purposeKey);
 
@@ -97,7 +96,8 @@ class OtpService
             $smsContext['otp'] = $otp;
         }
 
-        if (! $this->deliverSms($phone, $message, $purposeKey, $smsContext, $record)) {
+        $smsResult = $this->deliverSms($phone, $otp, $purposeKey, $smsContext, $record);
+        if (! ($smsResult['ok'] ?? false)) {
             $record->update(['status' => OtpVerify::STATUS_FAILED]);
 
             $this->appLog->error('otp', 'otp.sms.failed', 'SMS delivery failed', [
@@ -105,9 +105,10 @@ class OtpService
                 'purpose' => $purposeKey,
                 'otp_verify_id' => $record->id,
                 'sms_driver' => config('sms.driver'),
+                'sms_error' => $smsResult['error'] ?? null,
             ], $record);
 
-            return OtpResult::fail('We could not send the OTP. Please try again in a moment.');
+            return OtpResult::fail($this->userFacingSmsError($smsResult['error'] ?? null));
         }
 
         $record->update(['sms_sent_at' => now()]);
@@ -310,32 +311,37 @@ class OtpService
         return str_pad((string) random_int(0, $max), $length, '0', STR_PAD_LEFT);
     }
 
-    protected function buildMessage(string $purpose, string $otp): string
-    {
-        $template = (string) config('otp.purposes.'.$purpose.'.message');
-
-        return str_replace(
-            ['{otp}', '{app}'],
-            [$otp, (string) config('app.name')],
-            $template
-        );
-    }
-
     /**
      * @param  array<string, mixed>  $context
+     * @return array{ok: bool, error?: string}
      */
-    protected function deliverSms(string $phone, string $message, string $purpose, array $context, OtpVerify $record): bool
+    protected function deliverSms(string $phone, string $otp, string $purpose, array $context, OtpVerify $record): array
     {
         if (config('sms.driver') === 'log') {
             $this->appLog->info('sms', 'sms.log_driver', 'SMS skipped (log driver)', array_merge($context, [
-                'message_preview' => mb_substr($message, 0, 120),
+                'otp' => $otp,
             ]), $record);
 
-            return true;
+            return ['ok' => true];
         }
 
-        $result = $this->sms->send($phone, $message);
+        return $this->sms->sendOtp($phone, $otp);
+    }
 
-        return ($result['ok'] ?? false) === true;
+    protected function userFacingSmsError(?string $providerError): string
+    {
+        if ($providerError === 'SMS is not configured.') {
+            return 'SMS is not set up on the server. Set SMS_AUTHKEY in .env (apitxt dashboard).';
+        }
+
+        if (! is_string($providerError) || $providerError === '') {
+            return 'We could not send the OTP. Please try again in a moment.';
+        }
+
+        if (config('app.debug') || preg_match('/template|sender|DLT|not found|invalid|rejected/i', $providerError)) {
+            return 'SMS provider: '.$providerError;
+        }
+
+        return 'We could not send the OTP. Please try again in a moment.';
     }
 }

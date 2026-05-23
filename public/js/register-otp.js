@@ -109,7 +109,22 @@
             body: JSON.stringify(body),
         });
         const data = await response.json().catch(() => ({}));
-        return { ok: response.ok, status: response.status, data };
+        return { ok: response.ok, status: response.status, data, message: extractMessage(data) };
+    }
+
+    function extractMessage(data) {
+        if (data && typeof data.message === 'string' && data.message !== '') {
+            return data.message;
+        }
+        if (data && data.errors && typeof data.errors === 'object') {
+            const firstKey = Object.keys(data.errors)[0];
+            const first = firstKey && Array.isArray(data.errors[firstKey]) ? data.errors[firstKey][0] : null;
+            if (typeof first === 'string') {
+                return first;
+            }
+        }
+
+        return 'Something went wrong. Please try again.';
     }
 
     async function sendOtp() {
@@ -119,13 +134,13 @@
         setLoading(sendBtn, true);
         setStatus('Sending code…', '');
 
-        const { ok, data } = await postJson(sendUrl, { phone });
+        const { ok, data, message } = await postJson(sendUrl, { phone });
 
         setLoading(sendBtn, false);
         updateSendButton();
 
         if (!ok) {
-            setStatus(data.message || 'Could not send OTP.', 'error');
+            setStatus(message, 'error');
             if (data.retry_after) startResendCountdown(data.retry_after);
             return;
         }
@@ -133,7 +148,7 @@
         otpPanel.classList.remove('hidden');
         otpPanel.dataset.sent = '1';
         otpInput.focus();
-        setStatus(data.message || 'Code sent.', 'success');
+        setStatus(message || 'Code sent.', 'success');
         startResendCountdown(data.retry_after || resendSeconds);
         updateVerifyButton();
     }
@@ -146,18 +161,18 @@
         setLoading(verifyBtn, true);
         setStatus('Verifying…', '');
 
-        const { ok, data } = await postJson(verifyUrl, { phone, otp });
+        const { ok, message } = await postJson(verifyUrl, { phone, otp });
 
         setLoading(verifyBtn, false);
         updateVerifyButton();
 
         if (!ok) {
-            setStatus(data.message || 'Verification failed.', 'error');
+            setStatus(message, 'error');
             return;
         }
 
         setVerifiedState(true);
-        setStatus(data.message || 'Verified.', 'success');
+        setStatus(message || 'Verified.', 'success');
     }
 
     phoneInput.addEventListener('input', () => {

@@ -26,12 +26,7 @@ return [
     */
 
     'purposes' => [
-        'registration' => [
-            'message' => env(
-                'OTP_REGISTRATION_MESSAGE',
-                'Your verification code for {app} is {otp}. Valid for 10 minutes. Do not share with anyone.'
-            ),
-        ],
+        'registration' => [],
     ],
 
 ];

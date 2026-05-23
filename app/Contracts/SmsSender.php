@@ -5,7 +5,9 @@ namespace App\Contracts;
 interface SmsSender
 {
     /**
-     * @return array{ok: bool, error?: string}
+     * Send an OTP to a mobile number.
+     *
+     * @return array{ok: bool, error?: string, request_id?: string}
      */
-    public function send(string $mobile, string $message): array;
+    public function sendOtp(string $mobile, string $otp): array;
 }

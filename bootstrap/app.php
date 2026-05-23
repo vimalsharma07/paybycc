@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\Logging\AppLogger;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -26,5 +27,19 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->reportable(function (Throwable $e): void {
+            if (! app()->bound(AppLogger::class)) {
+                return;
+            }
+
+            try {
+                app(AppLogger::class)->error('system', 'system.exception', $e->getMessage(), [
+                    'exception' => $e::class,
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ]);
+            } catch (Throwable) {
+                // Avoid recursive failures if the logs table is unavailable.
+            }
+        });
     })->create();

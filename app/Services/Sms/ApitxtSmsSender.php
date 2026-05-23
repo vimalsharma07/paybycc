@@ -15,57 +15,50 @@ class ApitxtSmsSender implements SmsSender
     /**
      * @return array{ok: bool, error?: string, request_id?: string}
      */
-    public function send(string $mobile, string $message): array
+    public function sendOtp(string $mobile, string $otp): array
     {
         $authkey = config('sms.apitxt.authkey');
-        $sender = config('sms.apitxt.sender');
-        $templateId = config('sms.apitxt.template_id');
-        $peId = config('sms.apitxt.pe_id');
 
-        $missing = array_values(array_filter([
-            ! is_string($authkey) || $authkey === '' ? 'SMS_AUTHKEY' : null,
-            ! is_string($sender) || $sender === '' ? 'SMS_SENDER' : null,
-            ! is_string($templateId) || $templateId === '' ? 'SMS_TEMPLATE_ID' : null,
-            ! is_string($peId) || $peId === '' ? 'SMS_PE_ID' : null,
-        ]));
-
-        if ($missing !== []) {
+        if (! is_string($authkey) || $authkey === '') {
             $this->appLog->error('sms', 'sms.config.missing', 'SMS API not configured', [
                 'mobile' => $mobile,
-                'missing_env' => $missing,
+                'missing_env' => ['SMS_AUTHKEY'],
             ]);
 
             return ['ok' => false, 'error' => 'SMS is not configured.'];
         }
 
         $url = (string) config('sms.apitxt.url');
+        $formattedMobile = $this->formatMobile($mobile);
 
-        $this->appLog->info('sms', 'sms.api.request', 'Calling SMS API', [
-            'mobile' => $mobile,
+        $payload = [
+            'authkey' => $authkey,
+            'mobile' => $formattedMobile,
+            'otp' => $otp,
+            'channel' => (string) config('sms.apitxt.channel', 'sms'),
+            'country' => (string) config('sms.apitxt.country', '91'),
+        ];
+
+        $templateId = config('sms.apitxt.template_id');
+        if ($templateId !== null && $templateId !== '') {
+            $payload['template_id'] = (int) $templateId;
+        }
+
+        $this->appLog->info('sms', 'sms.api.request', 'Calling apitxt sendOTP', [
             'url' => $url,
-            'sender' => strtoupper($sender),
-            'route' => (string) config('sms.apitxt.route', '4'),
-            'template_id' => $templateId,
-            'message_length' => strlen($message),
+            'mobile' => $formattedMobile,
+            'channel' => $payload['channel'],
+            'has_template_id' => array_key_exists('template_id', $payload),
         ]);
 
         try {
             $response = Http::timeout(15)
                 ->acceptJson()
-                ->get($url, [
-                    'authkey' => $authkey,
-                    'mobiles' => $mobile,
-                    'message' => $message,
-                    'sender' => strtoupper($sender),
-                    'route' => (string) config('sms.apitxt.route', '4'),
-                    'template_id' => $templateId,
-                    'pe_id' => $peId,
-                    'flash' => 0,
-                    'unicode' => 0,
-                ]);
+                ->asForm()
+                ->post($url, $payload);
         } catch (\Throwable $e) {
             $this->appLog->error('sms', 'sms.api.exception', 'SMS HTTP exception', [
-                'mobile' => $mobile,
+                'mobile' => $formattedMobile,
                 'error' => $e->getMessage(),
             ]);
 
@@ -74,7 +67,7 @@ class ApitxtSmsSender implements SmsSender
 
         if (! $response->successful()) {
             $this->appLog->error('sms', 'sms.api.http_error', 'SMS API HTTP error', [
-                'mobile' => $mobile,
+                'mobile' => $formattedMobile,
                 'http_status' => $response->status(),
                 'body' => $response->body(),
             ]);
@@ -85,32 +78,52 @@ class ApitxtSmsSender implements SmsSender
         $body = $response->json();
         if (! is_array($body)) {
             $this->appLog->error('sms', 'sms.api.invalid_json', 'SMS API invalid JSON', [
-                'mobile' => $mobile,
+                'mobile' => $formattedMobile,
                 'body' => $response->body(),
             ]);
 
             return ['ok' => false, 'error' => 'Unexpected SMS provider response.'];
         }
 
-        $status = $body['status'] ?? null;
-        if ($status !== 200 && $status !== '200') {
+        $status = strtolower((string) ($body['status'] ?? ''));
+        if ($status !== 'success') {
+            $apiMessage = is_string($body['message'] ?? null) && $body['message'] !== ''
+                ? $body['message']
+                : 'Could not send SMS. Please try again.';
+
             $this->appLog->error('sms', 'sms.api.rejected', 'SMS API rejected request', [
-                'mobile' => $mobile,
+                'mobile' => $formattedMobile,
                 'response' => $body,
             ]);
 
-            return ['ok' => false, 'error' => 'Could not send SMS. Please try again.'];
+            return ['ok' => false, 'error' => $apiMessage];
         }
 
-        $this->appLog->info('sms', 'sms.api.success', 'SMS API accepted request', [
-            'mobile' => $mobile,
-            'request_id' => $body['request_id'] ?? null,
+        $requestId = null;
+        if (isset($body['data']) && is_array($body['data'])) {
+            $requestId = $body['data']['request_id'] ?? null;
+        }
+
+        $this->appLog->info('sms', 'sms.api.success', 'SMS OTP sent successfully', [
+            'mobile' => $formattedMobile,
+            'request_id' => $requestId,
             'response' => $body,
         ]);
 
         return [
             'ok' => true,
-            'request_id' => is_string($body['request_id'] ?? null) ? $body['request_id'] : null,
+            'request_id' => is_string($requestId) ? $requestId : null,
         ];
+    }
+
+    protected function formatMobile(string $mobile): string
+    {
+        $digits = preg_replace('/\D/', '', $mobile) ?? '';
+
+        if (strlen($digits) === 10) {
+            return '91'.$digits;
+        }
+
+        return $digits;
     }
 }

@@ -14,11 +14,11 @@ class LogSmsSender implements SmsSender
     /**
      * @return array{ok: bool, error?: string}
      */
-    public function send(string $mobile, string $message): array
+    public function sendOtp(string $mobile, string $otp): array
     {
         $this->appLog->info('sms', 'sms.log_driver.sent', 'SMS log driver (no real send)', [
             'mobile' => $mobile,
-            'message' => $message,
+            'otp' => $otp,
         ]);
 
         return ['ok' => true];
