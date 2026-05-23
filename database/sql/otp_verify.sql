@@ -1,0 +1,22 @@
+CREATE TABLE `otp_verify` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT UNSIGNED NULL,
+  `phone` CHAR(10) NOT NULL,
+  `purpose` VARCHAR(32) NOT NULL,
+  `otp_hash` VARCHAR(255) NOT NULL,
+  `status` VARCHAR(20) NOT NULL DEFAULT 'pending',
+  `attempts` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `ip_address` VARCHAR(45) NULL,
+  `expires_at` TIMESTAMP NOT NULL,
+  `verified_at` TIMESTAMP NULL,
+  `sms_sent_at` TIMESTAMP NULL,
+  `consumed_at` TIMESTAMP NULL,
+  `created_at` TIMESTAMP NULL,
+  `updated_at` TIMESTAMP NULL,
+  PRIMARY KEY (`id`),
+  KEY `otp_verify_phone_purpose_status_index` (`phone`, `purpose`, `status`),
+  KEY `otp_verify_phone_created_at_index` (`phone`, `created_at`),
+  KEY `otp_verify_user_id_purpose_index` (`user_id`, `purpose`),
+  KEY `otp_verify_expires_at_index` (`expires_at`),
+  CONSTRAINT `otp_verify_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

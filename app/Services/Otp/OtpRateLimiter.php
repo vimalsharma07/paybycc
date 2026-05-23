@@ -2,12 +2,10 @@
 
 namespace App\Services\Otp;
 
+use App\Models\OtpVerify;
 use App\Support\PhoneNumber;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Carbon;
 
-/**
- * OTP send rate limits (applied inside OtpService for every purpose).
- */
 class OtpRateLimiter
 {
     public function dailyLimit(): int
@@ -43,31 +41,22 @@ class OtpRateLimiter
         ];
     }
 
-    public function recordDailySmsSend(string $phone): void
-    {
-        if ($this->dailyLimit() === 0) {
-            return;
-        }
-
-        $phone = PhoneNumber::normalize($phone);
-        $key = $this->dailyCountCacheKey($phone);
-        $count = $this->dailySendCount($phone);
-
-        Cache::put($key, $count + 1, now()->endOfDay());
-    }
-
     public function resendCooldownSeconds(string $purpose, string $phone): ?int
     {
         $phone = PhoneNumber::normalize($phone);
-        $cacheKey = 'otp:'.$purpose.':sms:'.$phone;
-        $existing = Cache::get($cacheKey);
+        $latest = OtpVerify::query()
+            ->where('phone', $phone)
+            ->where('purpose', $purpose)
+            ->whereNotNull('sms_sent_at')
+            ->latest('id')
+            ->first();
 
-        if (! is_array($existing) || ! isset($existing['sent_at'])) {
+        if ($latest === null || $latest->sms_sent_at === null) {
             return null;
         }
 
         $resendAfter = (int) config('otp.resend_seconds', 60);
-        $elapsed = time() - (int) $existing['sent_at'];
+        $elapsed = $latest->sms_sent_at->diffInSeconds(now());
 
         if ($elapsed >= $resendAfter) {
             return null;
@@ -78,12 +67,13 @@ class OtpRateLimiter
 
     public function dailySendCount(string $phone): int
     {
-        return (int) Cache::get($this->dailyCountCacheKey(PhoneNumber::normalize($phone)), 0);
-    }
+        $phone = PhoneNumber::normalize($phone);
 
-    protected function dailyCountCacheKey(string $phone): string
-    {
-        return 'otp:sms_daily:'.$phone.':'.now()->format('Y-m-d');
+        return OtpVerify::query()
+            ->where('phone', $phone)
+            ->whereNotNull('sms_sent_at')
+            ->whereDate('sms_sent_at', Carbon::today())
+            ->count();
     }
 
     protected function secondsUntilEndOfDay(): int

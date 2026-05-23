@@ -24,7 +24,11 @@ class RegisterOtpController extends Controller
             ], 422);
         }
 
-        $result = $otp->sendSms($validated['phone'], OtpPurpose::Registration);
+        $result = $otp->sendSms(
+            $validated['phone'],
+            OtpPurpose::Registration,
+            $request->ip()
+        );
 
         return response()->json([
             'ok' => $result->success,

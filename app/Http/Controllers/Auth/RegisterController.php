@@ -50,7 +50,7 @@ class RegisterController extends Controller
             'status' => 'active',
         ]);
 
-        $otp->clearVerification(OtpPurpose::Registration);
+        $otp->consumeVerification($validated['phone'], OtpPurpose::Registration, $user->id);
 
         event(new Registered($user));
 
