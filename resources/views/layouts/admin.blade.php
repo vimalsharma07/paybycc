@@ -35,6 +35,9 @@
                 <a href="{{ route('admin.transactions.index') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.transactions.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     Transactions
                 </a>
+                <a href="{{ route('admin.logs.index') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.logs.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    Logs
+                </a>
             </nav>
             <div class="border-t border-slate-700 p-3">
                 <form method="POST" action="{{ route('logout') }}">
@@ -60,6 +63,7 @@
                     <a href="{{ route('admin.banks.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.banks.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Banks</a>
                     <a href="{{ route('admin.gateways.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.gateways.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Gateways</a>
                     <a href="{{ route('admin.transactions.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.transactions.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Transactions</a>
+                    <a href="{{ route('admin.logs.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.logs.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Logs</a>
                 </nav>
             </header>
 

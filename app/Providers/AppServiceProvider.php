@@ -3,12 +3,14 @@
 namespace App\Providers;
 
 use App\Listeners\SendOpsNotificationOnUserRegistered;
+use App\Models\ApplicationLog;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WebsiteSetting;
 use App\Observers\TransactionObserver;
 use App\Contracts\SmsSender;
+use App\Services\Logging\AppLogger;
 use App\Services\Payments\GatewayManager;
 use App\Services\Sms\ApitxtSmsSender;
 use App\Services\Sms\LogSmsSender;
@@ -17,6 +19,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -31,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(GatewayManager::class, function ($app) {
             return new GatewayManager($app);
         });
+
+        $this->app->singleton(AppLogger::class);
 
         $this->app->singleton(SmsSender::class, function () {
             return config('sms.driver') === 'log'
@@ -61,6 +66,8 @@ class AppServiceProvider extends ServiceProvider
                 Limit::perHour(60)->by($request->ip()),
             ];
         });
+
+        Route::bind('log', fn (string $value) => ApplicationLog::query()->findOrFail($value));
 
         View::composer('*', function ($view) {
             $view->with('siteSettings', WebsiteSetting::cached());
