@@ -11,6 +11,7 @@ use App\Models\WebsiteSetting;
 use App\Observers\TransactionObserver;
 use App\Contracts\SmsSender;
 use App\Services\Logging\AppLogger;
+use App\Services\Logging\FlowLog;
 use App\Services\Payments\GatewayManager;
 use App\Services\Sms\ApitxtSmsSender;
 use App\Services\Sms\LogSmsSender;
@@ -36,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(AppLogger::class);
+        $this->app->singleton(FlowLog::class);
 
         $this->app->singleton(SmsSender::class, function ($app) {
             return config('sms.driver') === 'log'

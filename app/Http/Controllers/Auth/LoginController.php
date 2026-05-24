@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\LogLevel;
 use App\Http\Controllers\Controller;
+use App\Services\Logging\FlowLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class LoginController extends Controller
@@ -15,29 +18,58 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, FlowLog $flow): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-            'remember' => ['nullable', 'boolean'],
-        ]);
+        try {
+            $credentials = $request->validate([
+                'email' => ['required', 'string', 'email'],
+                'password' => ['required', 'string'],
+                'remember' => ['nullable', 'boolean'],
+            ]);
+        } catch (ValidationException $e) {
+            $flow->auth('login.validation_failed', 'Login validation failed', $flow->validationErrors($e), level: LogLevel::Notice);
+
+            throw $e;
+        }
 
         $remember = $request->boolean('remember');
 
+        $flow->auth('login.attempt', 'Login attempt', [
+            'email' => $credentials['email'],
+            'remember' => $remember,
+        ]);
+
         if (! Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $remember)) {
+            $flow->auth('login.failed', 'Login failed — invalid credentials', [
+                'email' => $credentials['email'],
+            ], level: LogLevel::Warning);
+
             return back()
                 ->withInput($request->only('email'))
                 ->withErrors(['email' => 'These credentials do not match our records.']);
         }
 
+        $user = Auth::user();
         $request->session()->regenerate();
 
-        return redirect()->intended($this->redirectPath(Auth::user()));
+        $redirect = $this->redirectPath($user);
+
+        $flow->auth('login.success', 'Login successful', $flow->userContext($user, [
+            'remember' => $remember,
+            'redirect' => $redirect,
+        ]), $user);
+
+        return redirect()->intended($redirect);
     }
 
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, FlowLog $flow): RedirectResponse
     {
+        $user = Auth::user();
+
+        if ($user !== null) {
+            $flow->auth('logout.success', 'User logged out', $flow->userContext($user), $user);
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();

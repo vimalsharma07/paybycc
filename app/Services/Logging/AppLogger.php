@@ -87,7 +87,7 @@ class AppLogger
      */
     protected function sanitizeContext(array $context): array
     {
-        $sensitive = ['otp', 'password', 'token', 'authkey', 'secret', 'api_key'];
+        $sensitive = ['otp', 'password', 'token', 'authkey', 'secret', 'api_key', 'pan', 'aadhar'];
 
         foreach ($context as $key => $value) {
             if (is_string($key) && in_array(strtolower($key), $sensitive, true)) {
