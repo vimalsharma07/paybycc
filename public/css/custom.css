@@ -256,6 +256,28 @@
     opacity: 0.45;
 }
 
+/* App shell — sidebar + main (logged-in marketplace) */
+.app-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    max-height: 100vh;
+}
+
+.app-main-shell {
+    max-width: 72rem;
+}
+
+.app-stat-card {
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 1023px) {
+    .app-main-shell {
+        max-width: 100%;
+    }
+}
+
 /* Mobile app dock — keep FAB visible above home indicator / rounded corners */
 .mobile-dock {
     overflow: visible;

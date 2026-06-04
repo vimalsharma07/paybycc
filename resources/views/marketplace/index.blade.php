@@ -1,11 +1,12 @@
 @extends('layouts.app')
 
 @section('title', 'Find freelancers — '.config('app.name'))
+@section('page_heading', 'Marketplace')
+@section('page_subheading', 'Search freelancers and pay with card')
 
 @section('content')
-    <div class="mb-8">
-        <h1 class="text-2xl font-bold text-slate-900 sm:text-3xl">Find freelancers &amp; sellers</h1>
-        <p class="mt-2 text-sm text-slate-600">Search by name, user code, company, city, or skill. Pay with card from their profile or the Pay page.</p>
+    <div class="mb-8 lg:hidden">
+        <p class="text-sm text-slate-600">Search by name, user code, company, city, or skill.</p>
     </div>
 
     <form method="GET" action="{{ route('marketplace.index') }}" class="mb-8 flex flex-col gap-3 sm:flex-row">

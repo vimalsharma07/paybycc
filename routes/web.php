@@ -13,6 +13,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\RegisterOtpController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeployController;
@@ -78,6 +79,10 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('platform.access')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('account/payments', [AccountController::class, 'payments'])->name('account.payments');
+        Route::get('account/settlements', [AccountController::class, 'settlements'])->name('account.settlements');
+        Route::get('account/transactions', [AccountController::class, 'transactions'])->name('account.transactions');
 
         Route::get('marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
         Route::get('marketplace/freelancers/{freelancer}', [MarketplaceController::class, 'show'])->name('marketplace.show');

@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Pay — '.config('app.name'))
+@section('page_heading', 'Pay now')
+@section('page_subheading', 'Send a secure card payment to a freelancer')
 
 @php
     $remarkPresets = ['Project milestone', 'Freelance work', 'Consulting', 'Design', 'Development', 'Monthly retainer'];
