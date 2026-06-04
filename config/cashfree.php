@@ -21,4 +21,16 @@ return [
 
     'auto_sync_gateway' => env('CASHFREE_AUTO_SYNC_GATEWAY', true),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Order payment methods (optional)
+    |--------------------------------------------------------------------------
+    |
+    | Comma-separated Cashfree codes, e.g. cc,dc,upi,nb,paylater,app
+    | Leave empty to show every method enabled on your Cashfree merchant dashboard.
+    |
+    */
+
+    'payment_methods' => env('CASHFREE_PAYMENT_METHODS'),
+
 ];

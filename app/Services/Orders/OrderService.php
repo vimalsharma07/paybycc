@@ -10,6 +10,10 @@ use InvalidArgumentException;
 
 class OrderService
 {
+    public function __construct(
+        protected OrderFeeCalculator $fees,
+    ) {}
+
     public function assertCanPay(User $customer, User $freelancer): void
     {
         if ($customer->id === $freelancer->id) {
@@ -25,6 +29,11 @@ class OrderService
         }
     }
 
+    public function previewFees(User $freelancer, string $amountDecimal): OrderFeeBreakdown
+    {
+        return $this->fees->calculate($freelancer, (float) $amountDecimal);
+    }
+
     public function createOrder(User $customer, User $freelancer, string $amountDecimal, ?string $notes): Order
     {
         $this->assertCanPay($customer, $freelancer);
@@ -37,29 +46,21 @@ class OrderService
             throw new InvalidArgumentException('Order amount is outside allowed limits.');
         }
 
-        $feePercent = (float) config('platform.marketplace.platform_fee_percent', 0);
-        $platformFee = round($amount * ($feePercent / 100), 2);
-        $net = round($amount - $platformFee, 2);
+        $breakdown = $this->fees->calculate($freelancer, $amount);
 
-        return Order::create([
+        return Order::create(array_merge([
             'order_code' => $this->uniqueOrderCode(),
             'customer_id' => $customer->id,
             'freelancer_id' => $freelancer->id,
             'service_id' => null,
             'subservice_id' => null,
-            'order_amount' => number_format($amount, 2, '.', ''),
-            'platform_fee' => number_format($platformFee, 2, '.', ''),
-            'gst_amount' => '0.00',
-            'tds_amount' => '0.00',
-            'tcs_amount' => '0.00',
-            'net_settlement_amount' => number_format($net, 2, '.', ''),
             'currency' => 'INR',
             'order_status' => 'created',
             'payment_status' => 'pending',
             'settlement_status' => 'pending',
             'safe_status' => 'pending_review',
             'notes' => $notes,
-        ]);
+        ], $breakdown->toOrderAttributes()));
     }
 
     public function recordPaymentSuccess(Payment $payment): void

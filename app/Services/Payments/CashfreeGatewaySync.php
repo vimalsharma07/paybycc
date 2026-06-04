@@ -36,11 +36,12 @@ class CashfreeGatewaySync
             [
                 'name' => 'Cashfree',
                 'filename' => 'Cashfree',
-                'credentials' => [
+                'credentials' => array_filter([
                     'client_id' => (string) config('cashfree.client_id'),
                     'client_secret' => (string) config('cashfree.client_secret'),
                     'env' => $env,
-                ],
+                    'payment_methods' => config('cashfree.payment_methods'),
+                ], fn ($v) => $v !== null && $v !== ''),
                 'status' => 'active',
                 'is_primary' => true,
                 'min_txn' => 1,

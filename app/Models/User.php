@@ -49,6 +49,14 @@ class User extends Authenticatable
         return $this->role === 'seller';
     }
 
+    /** Seller has GSTIN on profile (15-char Indian GSTIN). */
+    public function hasGstRegistered(): bool
+    {
+        $gstin = strtoupper(preg_replace('/\s+/', '', (string) $this->gstin) ?? '');
+
+        return strlen($gstin) === 15;
+    }
+
     public function getKycStatusLabelAttribute(): string
     {
         if ($this->hasSkippedKyc()) {

@@ -46,6 +46,25 @@ Route::get('/cache-clear', function () {
         ->header('Content-Type', 'text/plain; charset=UTF-8');
 })->middleware('throttle:10,1')->name('cache.clear');
 
+Route::get('/run-migrate', function () {
+    $secret = config('app.migrate_secret');
+    if (! is_string($secret) || $secret === '') {
+        abort(403, 'Migrate route disabled. Set MIGRATE_SECRET in .env.');
+    }
+    $token = (string) request()->query('token', '');
+    if (! hash_equals($secret, $token)) {
+        abort(403);
+    }
+
+    Artisan::call('migrate', ['--force' => true]);
+    $output = trim(Artisan::output());
+
+    return response(
+        $output !== '' ? $output : 'migrate --force completed.',
+        200
+    )->header('Content-Type', 'text/plain; charset=UTF-8');
+})->middleware('throttle:5,1')->name('migrate.run');
+
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
     Route::post('login', [LoginController::class, 'store']);
@@ -82,9 +101,14 @@ Route::middleware('auth')->group(function () {
         Route::get('marketplace/freelancers/{freelancer}', [MarketplaceController::class, 'show'])->name('marketplace.show');
 
         Route::get('payments', [PaymentController::class, 'create'])->name('payments.create');
+        Route::get('payments/fee-estimate', [PaymentController::class, 'feeEstimate'])->name('payments.fee-estimate');
         Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
+        Route::get('payments/return', [PaymentController::class, 'returnFromGateway'])->name('payments.return');
         Route::get('payments/cashfree/return', [PaymentController::class, 'cashfreeReturn'])->name('payments.cashfree.return');
         Route::get('payments/{payment}/checkout', [PaymentController::class, 'checkout'])->name('payments.checkout');
+        Route::get('payments/{payment}/success', [PaymentController::class, 'success'])->name('payments.success');
+        Route::get('payments/{payment}/failed', [PaymentController::class, 'failed'])->name('payments.failed');
+        Route::get('payments/{payment}/pending', [PaymentController::class, 'pending'])->name('payments.pending');
     });
 
     Route::middleware('kyc.active')->group(function () {

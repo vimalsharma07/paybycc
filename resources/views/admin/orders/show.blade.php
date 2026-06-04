@@ -25,12 +25,20 @@
                     <dd class="font-mono font-semibold text-slate-900">{{ number_format((float) $order->order_amount, 2) }}</dd>
                 </div>
                 <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <dt class="text-slate-600">Platform fee</dt>
+                    <dt class="text-slate-600">Platform fees <span class="block text-xs font-normal text-slate-400">processing + {{ config('commerce.flat_order_fee_percent') }}% service</span></dt>
                     <dd class="font-mono text-slate-900">{{ number_format((float) $order->platform_fee, 2) }}</dd>
                 </div>
                 <div class="flex justify-between border-b border-slate-100 pb-2">
-                    <dt class="text-slate-600">GST / TDS / TCS</dt>
-                    <dd class="font-mono text-slate-700">{{ number_format((float) $order->gst_amount, 2) }} / {{ number_format((float) $order->tds_amount, 2) }} / {{ number_format((float) $order->tcs_amount, 2) }}</dd>
+                    <dt class="text-slate-600">GST on processing</dt>
+                    <dd class="font-mono text-slate-900">{{ number_format((float) $order->gst_amount, 2) }}</dd>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <dt class="text-slate-600">TCS @if($order->freelancer?->hasGstRegistered())<span class="text-xs text-emerald-700">(GSTIN)</span>@else<span class="text-xs text-slate-400">(n/a)</span>@endif</dt>
+                    <dd class="font-mono text-slate-900">{{ number_format((float) $order->tcs_amount, 2) }}</dd>
+                </div>
+                <div class="flex justify-between border-b border-slate-100 pb-2">
+                    <dt class="text-slate-600">TDS <span class="text-xs text-slate-400">(FY net ≥ ₹{{ number_format(config('commerce.tds.cumulative_net_threshold_inr'), 0) }})</span></dt>
+                    <dd class="font-mono text-slate-900">{{ number_format((float) $order->tds_amount, 2) }}</dd>
                 </div>
                 <div class="flex justify-between">
                     <dt class="font-medium text-slate-800">Net settlement</dt>

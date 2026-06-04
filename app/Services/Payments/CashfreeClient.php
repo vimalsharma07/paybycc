@@ -30,8 +30,16 @@ class CashfreeClient
         string $customerName,
         string $returnUrl,
         string $orderNote,
-        string $paymentMethods = 'cc,dc',
+        ?string $paymentMethods = null,
     ): array {
+        $orderMeta = [
+            'return_url' => $returnUrl,
+        ];
+
+        if ($paymentMethods !== null && trim($paymentMethods) !== '') {
+            $orderMeta['payment_methods'] = trim($paymentMethods);
+        }
+
         $payload = [
             'order_amount' => $orderAmount,
             'order_currency' => $currency,
@@ -41,10 +49,7 @@ class CashfreeClient
                 'customer_email' => $customerEmail,
                 'customer_name' => $customerName,
             ]),
-            'order_meta' => [
-                'return_url' => $returnUrl,
-                'payment_methods' => $paymentMethods,
-            ],
+            'order_meta' => $orderMeta,
             'order_note' => $orderNote,
         ];
 

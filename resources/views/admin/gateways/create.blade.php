@@ -88,11 +88,12 @@
 
             <div>
                 <label for="credentials_json" class="mb-1 block text-sm font-medium text-slate-700">Credentials (JSON)</label>
-                <textarea id="credentials_json" name="credentials_json" rows="8" placeholder='{\n  "client_id": "Cashfree App ID",\n  "client_secret": "Secret key",\n  "env": "sandbox"\n}'
+                    <textarea id="credentials_json" name="credentials_json" rows="8" placeholder='{\n  "client_id": "Cashfree App ID",\n  "client_secret": "Secret key",\n  "env": "sandbox",\n  "payment_methods": ""\n}'
                     class="block w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 @error('credentials_json') border-red-500 @enderror">{{ old('credentials_json') }}</textarea>
                 @error('credentials_json')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
+                <p class="mt-1 text-xs text-slate-500">Leave <span class="font-mono">payment_methods</span> out (or empty) for all methods on your Cashfree dashboard. To restrict: <span class="font-mono">"payment_methods":"cc,dc,upi,nb"</span></p>
             </div>
 
             <div class="flex flex-wrap items-center gap-4 border-t border-slate-100 pt-6">

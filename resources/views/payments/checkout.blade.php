@@ -6,7 +6,7 @@
     <div class="mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
         <h1 class="text-xl font-semibold text-slate-900">Redirecting to secure payment</h1>
         <p class="mt-2 text-sm text-slate-600">
-            You are paying <span class="font-mono font-semibold text-slate-900">₹{{ number_format((float) $payment->amount, 2) }}</span> with <strong>card only</strong> (credit or debit) via Cashfree.
+            You are paying <span class="font-mono font-semibold text-slate-900">₹{{ number_format((float) $payment->amount, 2) }}</span> via Cashfree — choose card, UPI, netbanking, wallets, and other methods enabled on your account.
         </p>
         @if (filled($payment->remark))
             <div class="mt-4 flex items-start gap-3 rounded-xl border border-indigo-100 bg-indigo-50/80 px-4 py-3">

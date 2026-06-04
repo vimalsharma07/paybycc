@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Gateways\Cashfree;
 use App\Models\Gateway;
 use App\Models\Payment;
 use App\Models\Transaction;
@@ -10,9 +9,10 @@ use App\Models\User;
 use App\Models\Wallet;
 use App\Services\Orders\OrderService;
 use App\Services\Orders\SellerSearch;
-use App\Services\Payments\CashfreeClient;
 use App\Services\Payments\CashfreeGatewaySync;
 use App\Services\Payments\GatewayManager;
+use App\Services\Payments\PaymentReturnService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,9 +22,9 @@ use InvalidArgumentException;
 class PaymentController extends Controller
 {
     public function __construct(
-        protected CashfreeClient $cashfreeClient,
         protected OrderService $orders,
         protected SellerSearch $sellerSearch,
+        protected PaymentReturnService $paymentReturns,
     ) {}
 
     public function create(Request $request, GatewayManager $gatewayManager): View
@@ -58,7 +58,50 @@ class PaymentController extends Controller
             'selectedFreelancer' => $selectedFreelancer,
             'searchQ' => $searchQ,
             'searchResults' => $searchResults,
+            'commerceRates' => $this->commerceRatesForView(),
         ]);
+    }
+
+    public function feeEstimate(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'freelancer_id' => ['required', 'integer', 'exists:users,id'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+        ]);
+
+        $freelancer = $this->sellerSearch->findSeller((int) $validated['freelancer_id']);
+        if (! $freelancer) {
+            return response()->json(['message' => 'Invalid freelancer.'], 422);
+        }
+
+        try {
+            $breakdown = $this->orders->previewFees($freelancer, number_format((float) $validated['amount'], 2, '.', ''));
+        } catch (InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'fees' => $breakdown->toPublicArray(),
+            'rates' => $this->commerceRatesForView(),
+        ]);
+    }
+
+    /**
+     * @return array<string, float|int|bool>
+     */
+    protected function commerceRatesForView(): array
+    {
+        return [
+            'processing_threshold' => (float) config('commerce.processing_fee.threshold_inr'),
+            'processing_percent' => (float) config('commerce.processing_fee.percent'),
+            'gst_on_processing_percent' => (float) config('commerce.gst_on_processing_fee_percent'),
+            'flat_order_percent' => (float) config('commerce.flat_order_fee_percent'),
+            'tcs_percent' => (float) config('commerce.tcs_when_gst_registered_percent'),
+            'tds_threshold' => (float) config('commerce.tds.cumulative_net_threshold_inr'),
+            'tds_percent' => (float) config('commerce.tds.percent_after_threshold'),
+            'no_gst_fy_cap' => (float) config('commerce.seller_no_gst_max_net_payout_per_fy_inr'),
+        ];
     }
 
     public function store(Request $request, GatewayManager $gatewayManager): RedirectResponse
@@ -150,7 +193,7 @@ class PaymentController extends Controller
                 'status' => 'pending',
             ]);
 
-            $returnUrl = route('payments.cashfree.return', ['pid' => $payment->id], true);
+            $returnUrl = route('payments.return', ['pid' => $payment->id], true);
 
             $result = $driver->initiatePayment($amountDecimal, [
                 'payment_id' => $payment->id,
@@ -212,13 +255,7 @@ class PaymentController extends Controller
             return redirect()->route('payments.checkout', $payment);
         }
 
-        $message = is_array($payload)
-            ? (string) ($payload['message'] ?? ($payload['error'] ?? ($payment->status === 'completed' ? 'Payment recorded successfully.' : 'Payment could not be started.')))
-            : 'Done.';
-
-        return redirect()
-            ->route('payments.create', ['freelancer' => $freelancer->id])
-            ->with('status', $message.' Reference: #'.$payment->id.($payment->gateway_reference ? ' · '.$payment->gateway_reference : ''));
+        return $this->redirectToResult($payment);
     }
 
     public function checkout(Payment $payment): View|RedirectResponse
@@ -226,9 +263,7 @@ class PaymentController extends Controller
         $this->authorizePayment($payment);
 
         if ($payment->status !== 'pending') {
-            return redirect()
-                ->route('payments.create')
-                ->with('status', 'This payment is no longer pending.');
+            return $this->redirectToResult($payment);
         }
 
         $payload = $payment->driver_payload ?? [];
@@ -255,26 +290,67 @@ class PaymentController extends Controller
         ]);
     }
 
+    /** Gateway return URL — works for Cashfree and future hosted checkouts. */
+    public function returnFromGateway(Request $request): RedirectResponse
+    {
+        $payment = $this->resolveReturnPayment($request);
+
+        if (! $payment) {
+            return redirect()->route('payments.create')->withErrors(['amount' => 'Invalid payment return link.']);
+        }
+
+        $payment = $this->paymentReturns->syncFromGateway($payment);
+
+        return $this->redirectToResult($payment);
+    }
+
     public function cashfreeReturn(Request $request): RedirectResponse
     {
-        $pid = (int) $request->query('pid', 0);
-        if ($pid <= 0) {
-            return redirect()->route('payments.create')->withErrors(['amount' => 'Invalid return link.']);
+        return $this->returnFromGateway($request);
+    }
+
+    public function success(Payment $payment): View|RedirectResponse
+    {
+        $this->authorizePayment($payment);
+        $payment->loadMissing(['gateway', 'order.freelancer']);
+
+        if ($payment->status !== 'completed') {
+            return $this->redirectToResult($payment);
         }
 
-        $payment = Payment::query()->whereKey($pid)->where('user_id', $request->user()->id)->first();
-        if (! $payment) {
-            abort(403);
+        return view('payments.success', $this->paymentReturns->resultContext($payment));
+    }
+
+    public function failed(Payment $payment): View|RedirectResponse
+    {
+        $this->authorizePayment($payment);
+        $payment->loadMissing(['gateway', 'order.freelancer']);
+
+        if ($payment->status === 'completed') {
+            return redirect()->route('payments.success', $payment);
         }
 
-        $payment->load('gateway');
-        $message = $this->syncCashfreeOrderAndFinalize($payment);
+        if ($payment->status === 'pending') {
+            return redirect()->route('payments.pending', $payment);
+        }
 
-        $freelancerId = $payment->order?->freelancer_id;
+        return view('payments.failed', $this->paymentReturns->resultContext($payment));
+    }
 
-        return redirect()
-            ->route('payments.create', $freelancerId ? ['freelancer' => $freelancerId] : [])
-            ->with('status', $message);
+    public function pending(Payment $payment): View|RedirectResponse
+    {
+        $this->authorizePayment($payment);
+        $payment = $this->paymentReturns->syncFromGateway($payment);
+
+        if ($payment->status === 'completed') {
+            return redirect()->route('payments.success', $payment);
+        }
+
+        if ($payment->status === 'failed') {
+            return redirect()->route('payments.failed', $payment);
+        }
+
+        return view('payments.pending', $this->paymentReturns->resultContext($payment));
     }
 
     protected function authorizePayment(Payment $payment): void
@@ -291,9 +367,10 @@ class PaymentController extends Controller
         $bufferDays = max(0, (int) config('paybycc.settlement_buffer_days', 2));
 
         $userNote = trim((string) ($payment->remark ?? ''));
+        $gatewayLabel = $payment->gateway?->name ?? 'Gateway';
         $note = $userNote !== ''
-            ? $userNote.' · Cashfree card'
-            : 'Card payment via Cashfree';
+            ? $userNote.' · '.$gatewayLabel
+            : 'Payment via '.$gatewayLabel;
 
         Transaction::create([
             'user_id' => $userId,
@@ -310,100 +387,27 @@ class PaymentController extends Controller
         ]);
     }
 
-    protected function syncCashfreeOrderAndFinalize(Payment $payment): string
+    protected function resolveReturnPayment(Request $request): ?Payment
     {
-        if ($payment->status === 'completed') {
-            return 'Payment already completed. Reference: #'.$payment->id.'.';
+        $pid = (int) $request->query('pid', 0);
+        if ($pid <= 0) {
+            return null;
         }
 
-        if ($payment->status === 'failed') {
-            return 'This payment was not successful. Reference: #'.$payment->id.'.';
-        }
-
-        $payload = $payment->driver_payload ?? [];
-        if (! is_array($payload) || ($payload['mode'] ?? '') !== 'cashfree_hosted') {
-            return 'Unable to verify this payment.';
-        }
-
-        $gateway = $payment->gateway;
-        if (! $gateway instanceof Gateway) {
-            return 'Gateway configuration missing.';
-        }
-
-        $creds = is_array($gateway->credentials) ? $gateway->credentials : [];
-        $clientId = (string) ($creds['client_id'] ?? '');
-        $secret = (string) ($creds['client_secret'] ?? '');
-        $orderId = $payment->gateway_reference;
-
-        if ($clientId === '' || $secret === '' || ! is_string($orderId) || $orderId === '') {
-            return 'Payment could not be verified (missing gateway or order reference).';
-        }
-
-        $sandbox = Cashfree::isSandboxCredentials($creds);
-        $api = $this->cashfreeClient->fetchOrder($clientId, $secret, $sandbox, $orderId);
-
-        if (! $api['ok'] || ! isset($api['data']) || ! is_array($api['data'])) {
-            return 'Could not confirm payment with Cashfree yet. If you were charged, contact support with reference #'.$payment->id.'.';
-        }
-
-        $data = $api['data'];
-        $orderStatus = strtoupper((string) ($data['order_status'] ?? ''));
-        $orderAmount = isset($data['order_amount']) ? (float) $data['order_amount'] : null;
-
-        if ($orderAmount !== null && abs($orderAmount - (float) $payment->amount) > 0.02) {
-            report(new \RuntimeException('Cashfree order amount mismatch for payment '.$payment->id));
-
-            return 'Payment verification failed (amount mismatch). Contact support with reference #'.$payment->id.'.';
-        }
-
-        if ($orderStatus === 'PAID') {
-            return $this->finalizePaidCashfreePayment($payment, $data);
-        }
-
-        if (in_array($orderStatus, ['EXPIRED', 'TERMINATED'], true)) {
-            $payment->update(['status' => 'failed']);
-            $payment->order?->update(['payment_status' => 'failed']);
-
-            return 'Payment window expired or was cancelled. Reference: #'.$payment->id.'.';
-        }
-
-        return 'Payment not completed yet (status: '.$orderStatus.'). Reference: #'.$payment->id.'. You can retry from Pay or contact support.';
+        return Payment::query()
+            ->whereKey($pid)
+            ->where('user_id', $request->user()->id)
+            ->first();
     }
 
-    protected function finalizePaidCashfreePayment(Payment $payment, array $cashfreeOrderData): string
+    protected function redirectToResult(Payment $payment): RedirectResponse
     {
-        $amountDecimal = number_format((float) $payment->amount, 2, '.', '');
+        $payment->refresh();
 
-        DB::transaction(function () use ($payment, $cashfreeOrderData, $amountDecimal) {
-            $locked = Payment::query()->whereKey($payment->id)->lockForUpdate()->first();
-            if (! $locked) {
-                return;
-            }
-
-            if ($locked->status === 'completed') {
-                return;
-            }
-
-            if ($locked->status !== 'pending') {
-                return;
-            }
-
-            $basePayload = is_array($locked->driver_payload) ? $locked->driver_payload : [];
-
-            $locked->update([
-                'status' => 'completed',
-                'driver_payload' => array_merge($basePayload, [
-                    'cashfree_order_snapshot' => $cashfreeOrderData,
-                ]),
-            ]);
-
-            $fresh = $locked->fresh();
-            if ($fresh) {
-                $this->createCardPaymentTransaction((int) $locked->user_id, $fresh, $amountDecimal);
-                $this->orders->recordPaymentSuccess($fresh);
-            }
-        });
-
-        return 'Payment successful. Reference: #'.$payment->id.' · '.$payment->gateway_reference;
+        return match ($this->paymentReturns->outcome($payment)) {
+            'success' => redirect()->route('payments.success', $payment),
+            'failed' => redirect()->route('payments.failed', $payment),
+            default => redirect()->route('payments.pending', $payment),
+        };
     }
 }

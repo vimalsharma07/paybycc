@@ -10,7 +10,7 @@
     <div class="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-lg shadow-slate-200/60 ring-1 ring-slate-900/5 sm:rounded-3xl">
         <div class="border-b border-indigo-100 bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 px-6 py-8 text-white sm:px-10 sm:py-10">
             <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Pay a freelancer</h1>
-            <p class="mt-2 max-w-xl text-sm leading-relaxed text-white/90">Search for a seller, enter the amount in INR, then complete checkout with your card on Cashfree.</p>
+            <p class="mt-2 max-w-xl text-sm leading-relaxed text-white/90">Search for a seller, enter the amount in INR, then pay on Cashfree (card, UPI, netbanking, and more).</p>
             <p class="mt-3">
                 <a href="{{ route('marketplace.index') }}" class="text-sm font-semibold text-white/90 underline decoration-white/40 underline-offset-4 hover:text-white">Browse all freelancers →</a>
             </p>
@@ -87,6 +87,8 @@
                     @error('amount')
                         <p class="text-sm text-red-600">{{ $message }}</p>
                     @enderror
+
+                    @include('payments.partials.fee-estimate', ['commerceRates' => $commerceRates ?? []])
                 </div>
 
                 <div class="rounded-2xl border border-indigo-100 bg-gradient-to-br from-white via-indigo-50/40 to-violet-50/50 p-5 shadow-inner shadow-indigo-950/5 sm:p-6 {{ $selectedFreelancer ? '' : 'pointer-events-none opacity-50' }}">
@@ -115,12 +117,87 @@
                 </div>
 
                 <button type="submit" @disabled(! $selectedFreelancer) class="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-4 text-base font-bold text-white shadow-lg shadow-indigo-900/20 transition hover:brightness-110 focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-500/40 disabled:cursor-not-allowed disabled:opacity-50">
-                    Continue to card checkout
+                    Continue to checkout
                 </button>
             </form>
 
             <script>
                 (function () {
+                    var feePanel = document.getElementById('fee-estimate-panel');
+                    var amountInput = document.getElementById('amount');
+                    var freelancerInput = document.querySelector('input[name="freelancer_id"]');
+                    var feeEstimateUrl = @json(route('payments.fee-estimate'));
+                    var feeTimer = null;
+
+                    function inr(n) {
+                        if (n === null || n === undefined || isNaN(n)) return '—';
+                        return '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    }
+
+                    function setFeeLine(id, value, hideZero) {
+                        var el = document.getElementById(id);
+                        var wrap = document.getElementById(id + '-wrap');
+                        if (!el) return;
+                        var num = Number(value) || 0;
+                        el.textContent = inr(num);
+                        if (wrap) {
+                            wrap.classList.toggle('hidden', hideZero && num <= 0);
+                        }
+                    }
+
+                    function fetchFeeEstimate() {
+                        if (!feePanel || !amountInput || !freelancerInput) return;
+                        var fid = freelancerInput.value;
+                        var amt = parseFloat(String(amountInput.value).replace(/,/g, ''));
+                        var errEl = document.getElementById('fee-estimate-error');
+                        if (!fid || !amt || amt <= 0) {
+                            feePanel.classList.add('hidden');
+                            return;
+                        }
+                        var url = feeEstimateUrl + '?freelancer_id=' + encodeURIComponent(fid) + '&amount=' + encodeURIComponent(amt);
+                        fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+                            .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+                            .then(function (res) {
+                                feePanel.classList.remove('hidden');
+                                if (!res.ok) {
+                                    if (errEl) {
+                                        errEl.textContent = res.j.message || 'Could not estimate fees.';
+                                        errEl.classList.remove('hidden');
+                                    }
+                                    document.getElementById('fee-net').textContent = '—';
+                                    return;
+                                }
+                                if (errEl) errEl.classList.add('hidden');
+                                var f = res.j.fees || {};
+                                document.getElementById('fee-order-amount').textContent = inr(f.order_amount);
+                                var procLabel = document.getElementById('fee-processing-label');
+                                if (procLabel) {
+                                    procLabel.textContent = f.processing_fee > 0 ? '' : '(not applied below threshold)';
+                                }
+                                setFeeLine('fee-processing', f.processing_fee, true);
+                                document.getElementById('fee-gst').textContent = inr(f.gst_on_processing_fee);
+                                document.getElementById('fee-flat').textContent = inr(f.flat_order_fee);
+                                var tcsWrap = document.getElementById('fee-tcs-wrap');
+                                if (tcsWrap) tcsWrap.classList.toggle('hidden', !f.tcs_applied);
+                                document.getElementById('fee-tcs').textContent = inr(f.tcs_amount);
+                                var tdsWrap = document.getElementById('fee-tds-wrap');
+                                if (tdsWrap) tdsWrap.classList.toggle('hidden', !f.tds_applied);
+                                document.getElementById('fee-tds').textContent = inr(f.tds_amount);
+                                document.getElementById('fee-net').textContent = inr(f.net_settlement);
+                            })
+                            .catch(function () {
+                                feePanel.classList.add('hidden');
+                            });
+                    }
+
+                    if (amountInput && freelancerInput) {
+                        amountInput.addEventListener('input', function () {
+                            clearTimeout(feeTimer);
+                            feeTimer = setTimeout(fetchFeeEstimate, 400);
+                        });
+                        fetchFeeEstimate();
+                    }
+
                     var ta = document.getElementById('remark');
                     var countEl = document.getElementById('remark-count');
                     var chips = document.querySelectorAll('[data-remark-preset]');

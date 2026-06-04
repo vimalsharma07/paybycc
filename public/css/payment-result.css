@@ -1,0 +1,185 @@
+/* Payment result pages — success / failed / pending */
+
+@keyframes pay-icon-pop {
+    0% {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+    55% {
+        transform: scale(1.08);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pay-ring-pulse {
+    0% {
+        transform: scale(0.85);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(1.35);
+        opacity: 0;
+    }
+}
+
+@keyframes pay-check-draw {
+    0% {
+        stroke-dashoffset: 48;
+    }
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes pay-shake-soft {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    20% {
+        transform: translateX(-6px);
+    }
+    40% {
+        transform: translateX(6px);
+    }
+    60% {
+        transform: translateX(-4px);
+    }
+    80% {
+        transform: translateX(4px);
+    }
+}
+
+@keyframes pay-spin-slow {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pay-confetti-fall {
+    0% {
+        opacity: 0;
+        transform: translateY(-12px) rotate(0deg);
+    }
+    15% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(72px) rotate(180deg);
+    }
+}
+
+.pay-result-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.pay-result-icon-wrap {
+    position: relative;
+    display: inline-flex;
+    height: 5.5rem;
+    width: 5.5rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.pay-result-icon-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    animation: pay-ring-pulse 1.8s ease-out infinite;
+}
+
+.pay-result-success .pay-result-icon-wrap::before {
+    background: rgba(16, 185, 129, 0.25);
+}
+
+.pay-result-failed .pay-result-icon-wrap::before {
+    background: rgba(244, 63, 94, 0.2);
+}
+
+.pay-result-pending .pay-result-icon-wrap::before {
+    background: rgba(245, 158, 11, 0.22);
+}
+
+.pay-result-icon {
+    position: relative;
+    z-index: 1;
+    animation: pay-icon-pop 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.pay-result-failed .pay-result-icon {
+    animation: pay-icon-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+        pay-shake-soft 0.5s ease-in-out 0.55s;
+}
+
+.pay-check-path {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: pay-check-draw 0.55s ease forwards 0.35s;
+}
+
+.pay-pending-ring {
+    animation: pay-spin-slow 1.2s linear infinite;
+}
+
+.pay-confetti {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.pay-confetti span {
+    position: absolute;
+    top: 12%;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    opacity: 0;
+    animation: pay-confetti-fall 1.4s ease-out forwards;
+}
+
+.pay-confetti span:nth-child(1) {
+    left: 18%;
+    background: #34d399;
+    animation-delay: 0.2s;
+}
+.pay-confetti span:nth-child(2) {
+    left: 32%;
+    background: #818cf8;
+    animation-delay: 0.35s;
+}
+.pay-confetti span:nth-child(3) {
+    left: 48%;
+    background: #fbbf24;
+    animation-delay: 0.15s;
+}
+.pay-confetti span:nth-child(4) {
+    left: 62%;
+    background: #22d3ee;
+    animation-delay: 0.45s;
+}
+.pay-confetti span:nth-child(5) {
+    left: 78%;
+    background: #a78bfa;
+    animation-delay: 0.28s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pay-result-icon,
+    .pay-result-icon-wrap::before,
+    .pay-check-path,
+    .pay-pending-ring,
+    .pay-confetti span {
+        animation: none !important;
+    }
+    .pay-check-path {
+        stroke-dashoffset: 0;
+    }
+}

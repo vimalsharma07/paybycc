@@ -72,7 +72,7 @@ class Order extends Model
 
     public function latestPayment(): HasOne
     {
-        return $this->hasOne(Payment::class)->latestOfMany();
+        return $this->hasOne(Payment::class)->ofMany('id', 'max');
     }
 
     public function settlements(): HasMany

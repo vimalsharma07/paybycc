@@ -135,4 +135,16 @@ return [
 
     'cache_clear_secret' => env('CACHE_CLEAR_SECRET'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Remote migrate (GET /run-migrate?token=...)
+    |--------------------------------------------------------------------------
+    |
+    | Set a long random string in MIGRATE_SECRET. If empty, the route returns 403.
+    | Runs `php artisan migrate --force`. Use only over HTTPS; disable after deploy.
+    |
+    */
+
+    'migrate_secret' => env('MIGRATE_SECRET'),
+
 ];

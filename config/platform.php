@@ -30,7 +30,7 @@ return [
     ],
 
     'marketplace' => [
-        'platform_fee_percent' => (float) env('MARKETPLACE_PLATFORM_FEE_PERCENT', 0),
+        // Order fees: config/commerce.php + App\Constants\CommerceConstants
         'min_order_amount' => (float) env('MARKETPLACE_MIN_ORDER_AMOUNT', 1),
         'max_order_amount' => (float) env('MARKETPLACE_MAX_ORDER_AMOUNT', 500000),
     ],

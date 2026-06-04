@@ -12,7 +12,8 @@ use App\Services\Payments\CashfreeClient;
  * - client_secret: Secret key
  * - env: "sandbox" or "production"
  *
- * Orders restrict payment methods to credit & debit cards only (cc, dc).
+ * payment_methods in credentials or CASHFREE_PAYMENT_METHODS limits checkout;
+ * leave blank to show all methods enabled on your Cashfree merchant dashboard.
  */
 class Cashfree extends AbstractGateway
 {
@@ -77,6 +78,11 @@ class Cashfree extends AbstractGateway
         $customerId = 'paybycc_u'.$userId;
         $orderNote = 'PayByCC #'.$paymentId;
 
+        $paymentMethods = trim((string) $this->credential('payment_methods', ''));
+        if ($paymentMethods === '') {
+            $paymentMethods = trim((string) config('cashfree.payment_methods', ''));
+        }
+
         $api = $this->client->createOrder(
             clientId: $clientId,
             clientSecret: $secret,
@@ -89,7 +95,7 @@ class Cashfree extends AbstractGateway
             customerName: $name,
             returnUrl: $returnUrl,
             orderNote: $orderNote,
-            paymentMethods: 'cc,dc',
+            paymentMethods: $paymentMethods !== '' ? $paymentMethods : null,
         );
 
         if (! $api['ok'] || ! isset($api['data']) || ! is_array($api['data'])) {

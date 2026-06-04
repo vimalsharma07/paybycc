@@ -19,7 +19,6 @@ class OrderController extends Controller
             ->with([
                 'customer:id,name,email,user_code',
                 'freelancer:id,name,email,user_code,company_name',
-                'latestPayment:id,order_id,amount,status,gateway_reference',
             ])
             ->when($q !== '', function ($query) use ($q) {
                 $like = '%'.$q.'%';
