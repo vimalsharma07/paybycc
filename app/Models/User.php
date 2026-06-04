@@ -27,8 +27,34 @@ class User extends Authenticatable
         return (int) $this->kyc_status === self::KYC_ACTIVE;
     }
 
+    public function hasSkippedKyc(): bool
+    {
+        return $this->kyc_skipped_at !== null && ! $this->hasActiveKyc();
+    }
+
+    /** Explore dashboard, pay (when allowed), profile — without full KYC. */
+    public function canUsePlatform(): bool
+    {
+        return $this->is_admin || $this->hasActiveKyc() || $this->hasSkippedKyc();
+    }
+
+    /** Bank payouts and settlements require verified KYC. */
+    public function canReceivePayouts(): bool
+    {
+        return ! $this->is_admin && $this->hasActiveKyc();
+    }
+
+    public function isSeller(): bool
+    {
+        return $this->role === 'seller';
+    }
+
     public function getKycStatusLabelAttribute(): string
     {
+        if ($this->hasSkippedKyc()) {
+            return 'Skipped';
+        }
+
         return match ((int) $this->kyc_status) {
             self::KYC_INCOMPLETE => 'Incomplete',
             self::KYC_INACTIVE => 'Inactive',
@@ -68,6 +94,7 @@ class User extends Authenticatable
         'status',
         'email_verified_at',
         'phone_verified_at',
+        'kyc_skipped_at',
     ];
 
     /**
@@ -90,6 +117,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
+            'kyc_skipped_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'accept_only_kyc_customers' => 'boolean',
@@ -113,5 +141,37 @@ class User extends Authenticatable
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function sellerSubservices(): HasMany
+    {
+        return $this->hasMany(SellerSubservice::class);
+    }
+
+    public function ordersAsCustomer(): HasMany
+    {
+        return $this->hasMany(Order::class, 'customer_id');
+    }
+
+    public function ordersAsFreelancer(): HasMany
+    {
+        return $this->hasMany(Order::class, 'freelancer_id');
+    }
+
+    public function acceptsCustomer(User $customer): bool
+    {
+        if (! $this->accept_only_kyc_customers) {
+            return true;
+        }
+
+        return $customer->hasActiveKyc();
+    }
+
+    public function scopeMarketplaceSellers($query)
+    {
+        return $query
+            ->where('is_admin', false)
+            ->where('status', 'active')
+            ->where('role', 'seller');
     }
 }

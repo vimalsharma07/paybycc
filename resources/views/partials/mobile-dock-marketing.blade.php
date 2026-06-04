@@ -1,7 +1,7 @@
 {{-- Marketing site: bottom bar (mobile only). "Menu" opens icon grid sheet. --}}
 @php
     $admin = auth()->check() && auth()->user()->is_admin;
-    $kyc = auth()->check() && auth()->user()->hasActiveKyc() && ! $admin;
+    $kyc = auth()->check() && auth()->user()->canUsePlatform() && ! $admin;
     $dialogId = 'mobile-explore-marketing';
 
     $tilesLegal = [

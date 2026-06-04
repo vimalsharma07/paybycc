@@ -29,6 +29,12 @@ return [
         'pending_review', 'safe', 'hold', 'rejected',
     ],
 
+    'marketplace' => [
+        'platform_fee_percent' => (float) env('MARKETPLACE_PLATFORM_FEE_PERCENT', 0),
+        'min_order_amount' => (float) env('MARKETPLACE_MIN_ORDER_AMOUNT', 1),
+        'max_order_amount' => (float) env('MARKETPLACE_MAX_ORDER_AMOUNT', 500000),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Page / route map by area (current + planned)
@@ -38,8 +44,8 @@ return [
         'public' => ['home', 'about', 'contact', 'privacy', 'terms', 'login', 'register'],
         'customer' => [
             'dashboard',
-            'search_freelancers', // planned
-            'place_order',        // planned
+            'search_freelancers',
+            'place_order',
             'profile',
             'kyc',
         ],
@@ -62,10 +68,10 @@ return [
             'logs',
             'gateways',
             'website-settings',
+            'orders',
             'services',           // planned
             'service_approvals',  // planned
             'kyc_reviews',        // planned
-            'orders',             // planned
             'settlements',        // planned
             'compliance_reports', // planned
         ],

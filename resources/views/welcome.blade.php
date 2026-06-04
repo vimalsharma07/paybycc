@@ -20,11 +20,11 @@
                 </p>
                 <div class="animate-fade-up animate-delay-300 mt-10 flex flex-wrap gap-3">
                     @auth
-                        @php $payUrl = auth()->user()->hasActiveKyc() ? route('payments.create') : route('kyc.index'); @endphp
+                        @php $payUrl = auth()->user()->canUsePlatform() ? route('payments.create') : route('kyc.index'); @endphp
                         <a href="{{ $payUrl }}" class="pay-now-btn inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 px-8 py-3.5 text-base font-bold text-white shadow-xl transition hover:brightness-110">
-                            {{ auth()->user()->hasActiveKyc() ? 'Pay with card' : 'Complete KYC to pay' }}
+                            {{ auth()->user()->canUsePlatform() ? 'Pay with card' : 'Complete KYC to pay' }}
                         </a>
-                        <a href="{{ auth()->user()->hasActiveKyc() ? route('dashboard') : route('kyc.index') }}" class="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/5 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-white/10">
+                        <a href="{{ auth()->user()->canUsePlatform() ? route('dashboard') : route('kyc.index') }}" class="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/5 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-white/10">
                             Dashboard
                         </a>
                     @else
@@ -189,7 +189,7 @@
                     <a href="{{ route('register') }}" class="pay-now-btn inline-flex rounded-2xl bg-gradient-to-r from-cyan-400 via-white to-amber-200 px-8 py-3.5 text-base font-bold text-slate-900 shadow-lg transition hover:brightness-105">Create account</a>
                     <a href="{{ route('login') }}" class="inline-flex rounded-2xl border-2 border-fuchsia-300/50 bg-fuchsia-500/20 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-fuchsia-500/30">Log in</a>
                 @else
-                    <a href="{{ auth()->user()->hasActiveKyc() ? route('payments.create') : route('kyc.index') }}" class="pay-now-btn inline-flex rounded-2xl bg-gradient-to-r from-cyan-400 via-white to-amber-200 px-8 py-3.5 text-base font-bold text-slate-900 shadow-lg transition hover:brightness-105">Pay with card</a>
+                    <a href="{{ auth()->user()->canUsePlatform() ? route('payments.create') : route('kyc.index') }}" class="pay-now-btn inline-flex rounded-2xl bg-gradient-to-r from-cyan-400 via-white to-amber-200 px-8 py-3.5 text-base font-bold text-slate-900 shadow-lg transition hover:brightness-105">Pay with card</a>
                     <a href="{{ route('dashboard') }}" class="inline-flex rounded-2xl border-2 border-white/40 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-white/10">Dashboard</a>
                 @endguest
                 <a href="{{ route('contact') }}" class="inline-flex rounded-2xl border border-white/30 px-6 py-3.5 text-base font-semibold text-white/90 transition hover:bg-white/10">Contact us</a>

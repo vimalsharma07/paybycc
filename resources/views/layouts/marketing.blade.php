@@ -42,8 +42,8 @@
                     @php
                         $dash = auth()->user()->is_admin
                             ? route('admin.dashboard')
-                            : (auth()->user()->hasActiveKyc() ? route('dashboard') : route('kyc.index'));
-                        $payHref = auth()->user()->hasActiveKyc() ? route('payments.create') : route('kyc.index');
+                            : (auth()->user()->canUsePlatform() ? route('dashboard') : route('kyc.index'));
+                        $payHref = auth()->user()->canUsePlatform() ? route('payments.create') : route('kyc.index');
                     @endphp
                     @if (! auth()->user()->is_admin)
                         <a href="{{ $payHref }}" class="pay-now-btn rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 px-4 py-2 text-sm font-bold text-white transition hover:brightness-110">

@@ -30,7 +30,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('sub_services', function (Blueprint $table) {
+        Schema::create('subservices', function (Blueprint $table) {
             $table->id();
             $table->foreignId('service_id')->constrained()->cascadeOnDelete();
             $table->string('name');
@@ -48,7 +48,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('service_id')->nullable()->constrained()->nullOnDelete();
             $table->string('proposed_service_name')->nullable();
-            $table->string('proposed_sub_service_name');
+            $table->string('proposed_subservice_name');
             $table->text('description')->nullable();
             $table->string('status', 20)->default('pending')->index();
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
@@ -57,23 +57,23 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('freelancer_services', function (Blueprint $table) {
+        Schema::create('seller_subservices', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('sub_service_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('subservice_id')->constrained('subservices')->cascadeOnDelete();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->unique(['user_id', 'sub_service_id']);
+            $table->unique(['user_id', 'subservice_id']);
         });
 
-        Schema::create('marketplace_orders', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->string('order_code', 24)->unique();
             $table->foreignId('customer_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('freelancer_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('service_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('sub_service_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('subservice_id')->nullable()->constrained('subservices')->nullOnDelete();
             $table->decimal('order_amount', 15, 2);
             $table->decimal('platform_fee', 15, 2)->default(0);
             $table->decimal('gst_amount', 15, 2)->default(0);
@@ -93,9 +93,9 @@ return new class extends Migration
             $table->index(['freelancer_id', 'settlement_status']);
         });
 
-        Schema::create('marketplace_settlements', function (Blueprint $table) {
+        Schema::create('settlements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('marketplace_order_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
             $table->foreignId('freelancer_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('bank_id')->nullable()->constrained()->nullOnDelete();
             $table->decimal('amount', 15, 2);
@@ -108,11 +108,11 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('marketplace_settlements');
-        Schema::dropIfExists('marketplace_orders');
-        Schema::dropIfExists('freelancer_services');
+        Schema::dropIfExists('settlements');
+        Schema::dropIfExists('orders');
+        Schema::dropIfExists('seller_subservices');
         Schema::dropIfExists('service_submissions');
-        Schema::dropIfExists('sub_services');
+        Schema::dropIfExists('subservices');
         Schema::dropIfExists('services');
 
         Schema::table('users', function (Blueprint $table) {

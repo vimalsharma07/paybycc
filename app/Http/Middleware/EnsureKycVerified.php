@@ -12,7 +12,7 @@ class EnsureKycVerified
     {
         $user = $request->user();
 
-        if ($user->is_admin || $user->hasActiveKyc()) {
+        if ($user->is_admin || $user->canUsePlatform()) {
             return $next($request);
         }
 

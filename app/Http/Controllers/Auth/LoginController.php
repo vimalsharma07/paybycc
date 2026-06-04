@@ -84,10 +84,10 @@ class LoginController extends Controller
             return route('admin.dashboard');
         }
 
-        if (! $user->hasActiveKyc()) {
-            return route('kyc.index');
+        if ($user->canUsePlatform()) {
+            return route('dashboard');
         }
 
-        return route('dashboard');
+        return route('kyc.index');
     }
 }

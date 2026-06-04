@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\BankController as AdminBankController;
 use App\Http\Controllers\Admin\GatewayController as AdminGatewayController;
 use App\Http\Controllers\Admin\LogController as AdminLogController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\WebsiteSettingController as AdminWebsiteSettingController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KycController;
+use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
@@ -69,21 +71,27 @@ Route::middleware('auth')->group(function () {
 
     Route::get('kyc', [KycController::class, 'index'])->name('kyc.index');
     Route::post('kyc/pan', [KycController::class, 'storePan'])->name('kyc.pan');
+    Route::post('kyc/skip', [KycController::class, 'skip'])->name('kyc.skip');
 
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
 
-    Route::middleware('kyc.verified')->group(function () {
+    Route::middleware('platform.access')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        Route::get('banks', [BankController::class, 'index'])->name('banks.index');
-        Route::post('banks', [BankController::class, 'store'])->name('banks.store');
-        Route::patch('banks/{bank}', [BankController::class, 'update'])->name('banks.update');
-        Route::delete('banks/{bank}', [BankController::class, 'destroy'])->name('banks.destroy');
+        Route::get('marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
+        Route::get('marketplace/freelancers/{freelancer}', [MarketplaceController::class, 'show'])->name('marketplace.show');
 
         Route::get('payments', [PaymentController::class, 'create'])->name('payments.create');
         Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
         Route::get('payments/cashfree/return', [PaymentController::class, 'cashfreeReturn'])->name('payments.cashfree.return');
         Route::get('payments/{payment}/checkout', [PaymentController::class, 'checkout'])->name('payments.checkout');
+    });
+
+    Route::middleware('kyc.active')->group(function () {
+        Route::get('banks', [BankController::class, 'index'])->name('banks.index');
+        Route::post('banks', [BankController::class, 'store'])->name('banks.store');
+        Route::patch('banks/{bank}', [BankController::class, 'update'])->name('banks.update');
+        Route::delete('banks/{bank}', [BankController::class, 'destroy'])->name('banks.destroy');
 
         Route::get('wallet', [WalletController::class, 'index'])->name('wallet.index');
         Route::patch('wallet', [WalletController::class, 'update'])->name('wallet.update');
@@ -102,6 +110,9 @@ Route::middleware('auth')->group(function () {
         Route::get('admin/banks', [AdminBankController::class, 'index'])->name('admin.banks.index');
         Route::get('admin/banks/{bank}/edit', [AdminBankController::class, 'edit'])->name('admin.banks.edit');
         Route::patch('admin/banks/{bank}', [AdminBankController::class, 'update'])->name('admin.banks.update');
+
+        Route::get('admin/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
+        Route::get('admin/orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
 
         Route::get('admin/transactions', [AdminTransactionController::class, 'index'])->name('admin.transactions.index');
 

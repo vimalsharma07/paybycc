@@ -6,23 +6,35 @@ use App\Gateways\Cashfree;
 use App\Models\Gateway;
 use App\Models\Payment;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Models\Wallet;
+use App\Services\Orders\OrderService;
+use App\Services\Orders\SellerSearch;
 use App\Services\Payments\CashfreeClient;
+use App\Services\Payments\CashfreeGatewaySync;
 use App\Services\Payments\GatewayManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use InvalidArgumentException;
 
 class PaymentController extends Controller
 {
     public function __construct(
         protected CashfreeClient $cashfreeClient,
+        protected OrderService $orders,
+        protected SellerSearch $sellerSearch,
     ) {}
 
-    public function create(GatewayManager $gatewayManager): View
+    public function create(Request $request, GatewayManager $gatewayManager): View
     {
         $primary = $gatewayManager->primaryGateway();
+
+        if (! $primary && CashfreeGatewaySync::credentialsConfigured()) {
+            CashfreeGatewaySync::sync();
+            $primary = $gatewayManager->primaryGateway();
+        }
 
         $wallet = Wallet::firstOrCreate(
             ['user_id' => auth()->id()],
@@ -33,9 +45,19 @@ class PaymentController extends Controller
             ]
         );
 
+        $freelancerId = (int) $request->query('freelancer', 0);
+        $selectedFreelancer = $freelancerId > 0 ? $this->sellerSearch->findSeller($freelancerId) : null;
+
+        $searchQ = $request->string('q')->trim()->toString();
+        $searchResults = $this->sellerSearch->suggest($searchQ !== '' ? $searchQ : null);
+
         return view('payments.create', [
             'gateway' => $primary,
+            'gatewayConfigured' => CashfreeGatewaySync::credentialsConfigured(),
             'wallet' => $wallet,
+            'selectedFreelancer' => $selectedFreelancer,
+            'searchQ' => $searchQ,
+            'searchResults' => $searchResults,
         ]);
     }
 
@@ -46,30 +68,42 @@ class PaymentController extends Controller
         if (! $gateway || ! $gateway->isActive()) {
             return back()
                 ->withInput()
-                ->withErrors(['amount' => 'Payments are unavailable: no active primary gateway. Contact support.']);
+                ->withErrors(['amount' => 'Payments are unavailable: no active primary gateway. Add Cashfree keys to .env or Admin → Gateways.']);
         }
 
         $validated = $request->validate([
+            'freelancer_id' => ['required', 'integer', 'exists:users,id'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'remark' => ['nullable', 'string', 'max:160'],
         ]);
 
+        $freelancer = $this->sellerSearch->findSeller((int) $validated['freelancer_id']);
+        if (! $freelancer) {
+            return back()->withInput()->withErrors(['freelancer_id' => 'Select a valid freelancer or seller from search.']);
+        }
+
+        try {
+            $this->orders->assertCanPay($request->user(), $freelancer);
+        } catch (InvalidArgumentException $e) {
+            return back()->withInput()->withErrors(['freelancer_id' => $e->getMessage()]);
+        }
+
         $remarkRaw = isset($validated['remark']) ? trim((string) $validated['remark']) : '';
         $remark = $remarkRaw === '' ? null : $remarkRaw;
 
-        $wallet = Wallet::firstOrCreate(
-            ['user_id' => $request->user()->id],
-            [
-                'balance' => 0,
-                'auto_settle_to_bank' => true,
-                'default_bank_id' => null,
-            ]
-        );
-        $wallet->update([
-            'auto_settle_to_bank' => $request->boolean('auto_settle_to_bank'),
-        ]);
-
         $amountDecimal = number_format((float) $validated['amount'], 2, '.', '');
+
+        try {
+            $order = $this->orders->createOrder(
+                $request->user(),
+                $freelancer,
+                $amountDecimal,
+                $remark
+            );
+        } catch (InvalidArgumentException $e) {
+            return back()->withInput()->withErrors(['amount' => $e->getMessage()]);
+        }
+
         $min = (float) $gateway->min_txn;
         $max = (float) $gateway->max_txn;
         $amt = (float) $amountDecimal;
@@ -103,13 +137,16 @@ class PaymentController extends Controller
             return back()->withInput()->withErrors(['amount' => 'Payment gateway configuration error. Please try again later.']);
         }
 
-        $payment = DB::transaction(function () use ($request, $gateway, $amountDecimal, $driver, $remark) {
+        $orderNote = $remark ?? ('Payment to '.$freelancer->name.' · '.$order->order_code);
+
+        $payment = DB::transaction(function () use ($request, $gateway, $amountDecimal, $driver, $orderNote, $order, $freelancer) {
             $payment = Payment::create([
                 'user_id' => $request->user()->id,
                 'gateway_id' => $gateway->id,
+                'order_id' => $order->id,
                 'amount' => $amountDecimal,
                 'currency' => 'INR',
-                'remark' => $remark,
+                'remark' => $orderNote,
                 'status' => 'pending',
             ]);
 
@@ -150,6 +187,7 @@ class PaymentController extends Controller
                 $payment = $payment->fresh();
                 if ($payment) {
                     $this->createCardPaymentTransaction($request->user()->id, $payment, $amountDecimal);
+                    $this->orders->recordPaymentSuccess($payment);
                 }
             } else {
                 $payment->update([
@@ -157,6 +195,7 @@ class PaymentController extends Controller
                     'driver_payload' => $result,
                     'status' => 'failed',
                 ]);
+                $order->update(['payment_status' => 'failed']);
             }
 
             return $payment->fresh();
@@ -178,7 +217,7 @@ class PaymentController extends Controller
             : 'Done.';
 
         return redirect()
-            ->route('payments.create')
+            ->route('payments.create', ['freelancer' => $freelancer->id])
             ->with('status', $message.' Reference: #'.$payment->id.($payment->gateway_reference ? ' · '.$payment->gateway_reference : ''));
     }
 
@@ -207,6 +246,8 @@ class PaymentController extends Controller
                 ->with('status', 'Payment session missing. Please start a new payment.');
         }
 
+        $payment->load('order.freelancer');
+
         return view('payments.checkout', [
             'payment' => $payment,
             'paymentSessionId' => $sessionId,
@@ -229,8 +270,10 @@ class PaymentController extends Controller
         $payment->load('gateway');
         $message = $this->syncCashfreeOrderAndFinalize($payment);
 
+        $freelancerId = $payment->order?->freelancer_id;
+
         return redirect()
-            ->route('payments.create')
+            ->route('payments.create', $freelancerId ? ['freelancer' => $freelancerId] : [])
             ->with('status', $message);
     }
 
@@ -267,9 +310,6 @@ class PaymentController extends Controller
         ]);
     }
 
-    /**
-     * Fetch Cashfree order status and mark local payment + wallet transaction when PAID.
-     */
     protected function syncCashfreeOrderAndFinalize(Payment $payment): string
     {
         if ($payment->status === 'completed') {
@@ -322,6 +362,7 @@ class PaymentController extends Controller
 
         if (in_array($orderStatus, ['EXPIRED', 'TERMINATED'], true)) {
             $payment->update(['status' => 'failed']);
+            $payment->order?->update(['payment_status' => 'failed']);
 
             return 'Payment window expired or was cancelled. Reference: #'.$payment->id.'.';
         }
@@ -329,9 +370,6 @@ class PaymentController extends Controller
         return 'Payment not completed yet (status: '.$orderStatus.'). Reference: #'.$payment->id.'. You can retry from Pay or contact support.';
     }
 
-    /**
-     * Mark payment completed and create transaction (idempotent).
-     */
     protected function finalizePaidCashfreePayment(Payment $payment, array $cashfreeOrderData): string
     {
         $amountDecimal = number_format((float) $payment->amount, 2, '.', '');
@@ -359,7 +397,11 @@ class PaymentController extends Controller
                 ]),
             ]);
 
-            $this->createCardPaymentTransaction((int) $locked->user_id, $locked->fresh(), $amountDecimal);
+            $fresh = $locked->fresh();
+            if ($fresh) {
+                $this->createCardPaymentTransaction((int) $locked->user_id, $fresh, $amountDecimal);
+                $this->orders->recordPaymentSuccess($fresh);
+            }
         });
 
         return 'Payment successful. Reference: #'.$payment->id.' · '.$payment->gateway_reference;

@@ -20,22 +20,22 @@ Collect and store:
 - PAN, GST (optional), company name (optional), address
 - Bank accounts (existing `banks` table)
 - KYC (`users` + future `user_kyc` audit table)
-- Services / sub-services (`freelancer_services` pivot)
+- Services / subservices (`seller_subservices` pivot)
 
 ## Service catalog
 
 | Table | Purpose |
 |-------|---------|
 | `services` | Master categories |
-| `sub_services` | Master sub-categories |
+| `subservices` | Master sub-categories |
 | `service_submissions` | Freelancer-proposed items pending admin approval |
-| `freelancer_services` | Approved links: user ↔ sub_service |
+| `seller_subservices` | Approved links: seller ↔ subservice |
 
 ## Customer features (planned)
 
 Search by: mobile, PAN, service, sub-service, name/company.
 
-## Orders (`marketplace_orders`)
+## Orders (`orders`)
 
 Separate from card `payments` / ledger `transactions`.
 

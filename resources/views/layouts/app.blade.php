@@ -15,8 +15,11 @@
         <div class="mx-auto flex max-w-5xl items-center justify-center px-4 py-3 sm:px-6 lg:justify-between lg:py-4">
             @include('partials.site-brand-header', ['href' => route('dashboard'), 'variant' => 'light', 'wrapperClass' => ''])
             <nav class="hidden flex-wrap items-center gap-3 text-sm lg:flex lg:gap-4">
-                @if (! auth()->user()->is_admin && auth()->user()->hasActiveKyc())
+                @if (! auth()->user()->is_admin && auth()->user()->canUsePlatform())
+                    <a href="{{ route('marketplace.index') }}" class="font-medium text-slate-700 hover:text-indigo-600">Find freelancers</a>
                     <a href="{{ route('payments.create') }}" class="pay-now-btn inline-flex items-center rounded-lg bg-gradient-to-r from-cyan-600 via-indigo-600 to-violet-600 px-4 py-2 text-sm font-bold text-white shadow-md transition hover:brightness-110">Pay now</a>
+                @endif
+                @if (! auth()->user()->is_admin && auth()->user()->canReceivePayouts())
                     <a href="{{ route('wallet.index') }}" class="font-medium text-slate-700 hover:text-indigo-600">Wallet</a>
                     <a href="{{ route('banks.index') }}" class="font-medium text-slate-700 hover:text-indigo-600">Banks</a>
                 @endif

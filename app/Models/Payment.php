@@ -11,6 +11,7 @@ class Payment extends Model
     protected $fillable = [
         'user_id',
         'gateway_id',
+        'order_id',
         'amount',
         'currency',
         'remark',
@@ -35,6 +36,11 @@ class Payment extends Model
     public function gateway(): BelongsTo
     {
         return $this->belongsTo(Gateway::class);
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     public function transactions(): HasMany

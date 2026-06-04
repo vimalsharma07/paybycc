@@ -15,6 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call([
+            GatewaySeeder::class,
+            PlatformSeeder::class,
+        ]);
+
         User::factory()->create([
             'user_code' => 'ADMIN00001',
             'name' => 'Administrator',

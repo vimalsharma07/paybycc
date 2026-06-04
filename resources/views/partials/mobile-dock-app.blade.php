@@ -2,8 +2,9 @@
 @php
     $u = auth()->user();
     $isAdmin = $u->is_admin;
-    $kyc = $u->hasActiveKyc();
-    $payHref = $kyc ? route('payments.create') : route('kyc.index');
+    $canPay = $u->canUsePlatform();
+    $canPayout = $u->canReceivePayouts();
+    $payHref = $canPay ? route('payments.create') : route('kyc.index');
     $dialogId = 'mobile-explore-app';
 
     $tilesBase = [
@@ -21,6 +22,11 @@
         ['logout' => true, 'label' => 'Log out', 'icon' => 'logout'],
     ]);
 
+    $tilesAppBrowse = array_merge($tilesBase, [
+        ['href' => route('kyc.index'), 'label' => 'Complete KYC', 'icon' => 'user-plus'],
+        ['logout' => true, 'label' => 'Log out', 'icon' => 'logout'],
+    ]);
+
     $tilesAppNoKyc = array_merge($tilesBase, [
         ['href' => route('kyc.index'), 'label' => 'Complete KYC', 'icon' => 'user-plus'],
         ['logout' => true, 'label' => 'Log out', 'icon' => 'logout'],
@@ -29,7 +35,7 @@
 
 @if (! $isAdmin)
     <nav class="mobile-dock fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/90 bg-white/95 backdrop-blur-md lg:hidden mobile-dock-safe" aria-label="App navigation">
-        @if ($kyc)
+        @if ($canPayout)
             <div class="relative mx-auto grid min-h-[4.75rem] max-w-lg grid-cols-5 items-end px-0.5 pb-1.5 pt-3">
                 <a href="{{ route('dashboard') }}" class="mobile-dock-item flex flex-col items-center justify-end gap-0.5 pb-1.5 pt-1 text-slate-600 hover:text-indigo-600 {{ request()->routeIs('dashboard') ? 'text-indigo-600' : '' }}">
                     <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10"/></svg>
@@ -47,6 +53,30 @@
                 <a href="{{ route('banks.index') }}" class="mobile-dock-item flex flex-col items-center justify-end gap-0.5 pb-1.5 pt-1 text-slate-600 hover:text-indigo-600 {{ request()->routeIs('banks.*') ? 'text-indigo-600' : '' }}">
                     <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-4h6v4"/></svg>
                     <span class="text-[10px] font-semibold leading-none">Banks</span>
+                </a>
+                <button type="button" data-open-dialog="{{ $dialogId }}" class="mobile-dock-item flex w-full flex-col items-center justify-end gap-0.5 pb-1.5 pt-1 text-slate-600 hover:text-indigo-600">
+                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                    <span class="text-[10px] font-semibold leading-none">Menu</span>
+                </button>
+            </div>
+        @elseif ($canPay)
+            <div class="relative mx-auto grid min-h-[4.75rem] max-w-lg grid-cols-5 items-end px-0.5 pb-1.5 pt-3">
+                <a href="{{ route('dashboard') }}" class="mobile-dock-item flex flex-col items-center justify-end gap-0.5 pb-1.5 pt-1 text-slate-600 hover:text-indigo-600 {{ request()->routeIs('dashboard') ? 'text-indigo-600' : '' }}">
+                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10"/></svg>
+                    <span class="text-[10px] font-semibold leading-none">Home</span>
+                </a>
+                <a href="{{ route('kyc.index') }}" class="mobile-dock-item flex flex-col items-center justify-end gap-0.5 pb-1.5 pt-1 text-slate-600 hover:text-indigo-600 {{ request()->routeIs('wallet.*', 'banks.*') ? '' : '' }} {{ request()->routeIs('kyc.*') ? 'text-indigo-600' : '' }}" title="Complete KYC to receive payouts">
+                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-4h6v4"/></svg>
+                    <span class="text-[10px] font-semibold leading-none">KYC</span>
+                </a>
+                <div class="relative z-10 flex min-h-[2.75rem] justify-center">
+                    <a href="{{ $payHref }}" class="mobile-dock-fab absolute bottom-full left-1/2 z-[51] mb-1.5 flex h-[3.25rem] w-[3.25rem] -translate-x-1/2 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 via-indigo-600 to-violet-600 text-xs font-extrabold text-white shadow-lg shadow-indigo-500/40 ring-4 ring-white transition hover:brightness-110 active:scale-95 {{ request()->routeIs('payments.*') ? 'ring-indigo-200' : '' }}" aria-label="Pay now">
+                        Pay
+                    </a>
+                </div>
+                <a href="{{ route('marketplace.index') }}" class="mobile-dock-item flex flex-col items-center justify-end gap-0.5 pb-1.5 pt-1 text-slate-600 hover:text-indigo-600 {{ request()->routeIs('marketplace.*') ? 'text-indigo-600' : '' }}">
+                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    <span class="text-[10px] font-semibold leading-none">Explore</span>
                 </a>
                 <button type="button" data-open-dialog="{{ $dialogId }}" class="mobile-dock-item flex w-full flex-col items-center justify-end gap-0.5 pb-1.5 pt-1 text-slate-600 hover:text-indigo-600">
                     <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7"/></svg>
@@ -83,6 +113,6 @@
     @include('partials.mobile-explore-dialog', [
         'dialogId' => $dialogId,
         'skin' => 'light',
-        'tiles' => $kyc ? $tilesAppKyc : $tilesAppNoKyc,
+        'tiles' => $canPayout ? $tilesAppKyc : ($canPay ? $tilesAppBrowse : $tilesAppNoKyc),
     ])
 @endif

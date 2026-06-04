@@ -15,7 +15,7 @@ class StoreBankRequest extends FormRequest
     {
         $user = $this->user();
 
-        return $user->hasActiveKyc() && ! $user->is_admin;
+        return $user->canReceivePayouts();
     }
 
     public function rules(): array

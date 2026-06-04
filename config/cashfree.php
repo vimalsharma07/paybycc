@@ -2,15 +2,23 @@
 
 return [
 
+    'api_version' => env('CASHFREE_API_VERSION', '2023-08-01'),
+
     /*
     |--------------------------------------------------------------------------
-    | Cashfree Payments API version
+    | Default gateway credentials (synced to Admin → Gateways on boot/seed)
     |--------------------------------------------------------------------------
     |
-    | Sent as the x-api-version header on every request. See Cashfree docs.
+    | Get sandbox keys from https://merchant.cashfree.com/merchants/pg/developers
     |
     */
 
-    'api_version' => env('CASHFREE_API_VERSION', '2023-08-01'),
+    'client_id' => env('CASHFREE_CLIENT_ID'),
+
+    'client_secret' => env('CASHFREE_CLIENT_SECRET'),
+
+    'env' => env('CASHFREE_ENV', 'sandbox'),
+
+    'auto_sync_gateway' => env('CASHFREE_AUTO_SYNC_GATEWAY', true),
 
 ];

@@ -49,6 +49,13 @@
         </div>
     </div>
 
+    @if ($user->hasSkippedKyc())
+        <div class="mt-8 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950">
+            <p class="font-semibold">KYC skipped — you can pay and explore, but cannot receive payouts yet.</p>
+            <a href="{{ route('kyc.index') }}" class="mt-2 inline-flex font-bold text-amber-900 underline decoration-amber-800/40 hover:text-amber-950">Complete KYC →</a>
+        </div>
+    @endif
+
     @if ($user->hasActiveKyc())
         <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <a href="{{ route('payments.create') }}" class="group relative overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-teal-50 p-5 shadow-md ring-1 ring-emerald-900/5 transition hover:border-emerald-300 hover:shadow-lg">
@@ -84,9 +91,25 @@
                 <span class="mt-3 inline-flex text-xs font-bold text-slate-700 group-hover:underline">View →</span>
             </a>
         </div>
+    @elseif ($user->hasSkippedKyc())
+        <div class="mt-8 grid gap-4 sm:grid-cols-2">
+            <a href="{{ route('payments.create') }}" class="group relative overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-teal-50 p-5 shadow-md ring-1 ring-emerald-900/5 transition hover:border-emerald-300 hover:shadow-lg">
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm" aria-hidden="true">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                </span>
+                <p class="mt-4 font-bold text-slate-900">Pay</p>
+                <p class="mt-1 text-xs text-slate-600">Card checkout when sellers allow</p>
+                <span class="mt-3 inline-flex text-xs font-bold text-emerald-700 group-hover:underline">Open →</span>
+            </a>
+            <a href="{{ route('marketplace.index') }}" class="group relative overflow-hidden rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 to-violet-50 p-5 shadow-md ring-1 ring-indigo-900/5 transition hover:border-indigo-300 hover:shadow-lg">
+                <p class="mt-4 font-bold text-slate-900">Find freelancers</p>
+                <p class="mt-1 text-xs text-slate-600">Search sellers and pay with card</p>
+                <span class="mt-3 inline-flex text-xs font-bold text-indigo-700 group-hover:underline">Search →</span>
+            </a>
+        </div>
     @else
         <div class="mt-8 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950">
-            <p class="font-semibold">Finish KYC to unlock Pay, Wallet, and Banks.</p>
+            <p class="font-semibold">Complete or skip KYC to use the platform.</p>
             <a href="{{ route('kyc.index') }}" class="mt-2 inline-flex font-bold text-amber-900 underline decoration-amber-800/40 hover:text-amber-950">Go to KYC →</a>
         </div>
     @endif

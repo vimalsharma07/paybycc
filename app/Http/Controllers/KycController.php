@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Services\Logging\FlowLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class KycController extends Controller
@@ -23,17 +22,36 @@ class KycController extends Controller
         }
 
         if ($user->hasActiveKyc()) {
-            $flow->kyc('kyc.index.already_complete', 'KYC already complete — sent to dashboard', $flow->userContext($user), $user);
-
             return redirect()->route('dashboard');
         }
 
         $flow->kyc('kyc.index.view', 'KYC form opened', $flow->userContext($user, [
             'has_pan' => $user->pan !== null,
-            'has_aadhar' => $user->aadhar !== null,
         ]), $user);
 
         return view('kyc.index', ['user' => $user]);
+    }
+
+    public function skip(Request $request, FlowLog $flow): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($user->is_admin || $user->hasActiveKyc()) {
+            return redirect()->route('dashboard');
+        }
+
+        if ($user->hasSkippedKyc()) {
+            return redirect()->route('dashboard');
+        }
+
+        $user->kyc_skipped_at = now();
+        $user->save();
+
+        $flow->kyc('kyc.skip', 'User skipped KYC for now', $flow->userContext($user), $user);
+
+        return redirect()
+            ->route('dashboard')
+            ->with('status', 'You can explore the platform and pay with card. Complete KYC anytime from your profile to receive payouts.');
     }
 
     public function storePan(Request $request, FlowLog $flow): RedirectResponse
@@ -49,20 +67,11 @@ class KycController extends Controller
             return redirect()->route('dashboard');
         }
 
-        try {
-            $validated = $request->validate([
-                'pan' => ['required', 'string', 'size:10', 'regex:/^[A-Za-z]{5}[0-9]{4}[A-Za-z]{1}$/'],
-                'pan_name' => ['required', 'string', 'max:255'],
-                'aadhar' => ['nullable', 'string', 'size:12', 'regex:/^\d{12}$/'],
-            ]);
-        } catch (ValidationException $e) {
-            $flow->kyc('kyc.submit.validation_failed', 'KYC validation failed', array_merge(
-                $flow->validationErrors($e),
-                $flow->userContext($user)
-            ), $user, LogLevel::Notice);
-
-            throw $e;
-        }
+        $validated = $request->validate([
+            'pan' => ['required', 'string', 'size:10', 'regex:/^[A-Za-z]{5}[0-9]{4}[A-Za-z]{1}$/'],
+            'pan_name' => ['required', 'string', 'max:255'],
+            'aadhar' => ['nullable', 'string', 'size:12', 'regex:/^\d{12}$/'],
+        ]);
 
         $flow->kyc('kyc.submit.attempt', 'KYC submit', array_merge(
             $flow->userContext($user),
@@ -77,12 +86,15 @@ class KycController extends Controller
             $user->aadhar = $validated['aadhar'];
         }
         $user->kyc_status = User::KYC_ACTIVE;
+        $user->kyc_skipped_at = null;
         $user->save();
 
         $flow->kyc('kyc.submit.success', 'KYC completed', $flow->userContext($user, [
             'kyc_status' => User::KYC_ACTIVE,
         ]), $user);
 
-        return redirect()->route('dashboard')->with('status', 'KYC completed successfully.');
+        return redirect()
+            ->route('dashboard')
+            ->with('status', 'KYC completed successfully. You can now receive payouts and manage bank accounts.');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Bank;
 use App\Models\Gateway;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\View\View;
 
@@ -16,6 +17,8 @@ class AdminDashboardController extends Controller
             'userCount' => User::count(),
             'bankCount' => Bank::count(),
             'gatewayCount' => Gateway::count(),
+            'orderCount' => Order::count(),
+            'paidOrderCount' => Order::query()->where('payment_status', 'paid')->count(),
         ]);
     }
 }
