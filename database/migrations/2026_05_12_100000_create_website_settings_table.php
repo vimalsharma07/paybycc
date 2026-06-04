@@ -9,22 +9,28 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('website_settings', function (Blueprint $table) {
-            $table->id();
-            $table->string('site_name', 160);
-            $table->string('tagline', 255)->nullable();
-            $table->string('email', 255)->nullable();
-            $table->string('support_email', 255)->nullable();
-            $table->string('phone', 40)->nullable();
-            $table->text('address')->nullable();
-            $table->string('instagram_url', 500)->nullable();
-            $table->string('linkedin_url', 500)->nullable();
-            $table->string('facebook_url', 500)->nullable();
-            $table->string('twitter_url', 500)->nullable();
-            $table->string('logo_path', 500)->nullable()->comment('Public URL or path under public/, e.g. uploads/site/logo.png');
-            $table->string('status', 20)->default('active')->index();
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('website_settings')) {
+            Schema::create('website_settings', function (Blueprint $table) {
+                $table->id();
+                $table->string('site_name', 160);
+                $table->string('tagline', 255)->nullable();
+                $table->string('email', 255)->nullable();
+                $table->string('support_email', 255)->nullable();
+                $table->string('phone', 40)->nullable();
+                $table->text('address')->nullable();
+                $table->string('instagram_url', 500)->nullable();
+                $table->string('linkedin_url', 500)->nullable();
+                $table->string('facebook_url', 500)->nullable();
+                $table->string('twitter_url', 500)->nullable();
+                $table->string('logo_path', 500)->nullable()->comment('Public URL or path under public/, e.g. uploads/site/logo.png');
+                $table->string('status', 20)->default('active')->index();
+                $table->timestamps();
+            });
+        }
+
+        if (DB::table('website_settings')->exists()) {
+            return;
+        }
 
         DB::table('website_settings')->insert([
             'site_name' => config('app.name', 'PayByCc'),

@@ -147,4 +147,19 @@ return [
 
     'migrate_secret' => env('MIGRATE_SECRET'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Remote DB fresh (GET /run-db-fresh?token=...)
+    |--------------------------------------------------------------------------
+    |
+    | DESTRUCTIVE: runs `php artisan migrate:fresh --force` (drops all tables).
+    | Requires ALLOW_DB_WIPE=true AND a separate DB_WIPE_SECRET. Add ?seed=1
+    | to run seeders. Turn ALLOW_DB_WIPE off immediately after use.
+    |
+    */
+
+    'allow_db_wipe' => filter_var(env('ALLOW_DB_WIPE', false), FILTER_VALIDATE_BOOL),
+
+    'db_wipe_secret' => env('DB_WIPE_SECRET'),
+
 ];

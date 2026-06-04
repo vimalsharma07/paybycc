@@ -15,13 +15,13 @@ use App\Http\Controllers\Auth\RegisterOtpController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeployController;
 use App\Http\Controllers\KycController;
 use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WalletController;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PageController::class, 'home'])->name('home');
@@ -31,39 +31,17 @@ Route::post('/contact', [PageController::class, 'contactSubmit'])->name('contact
 Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [PageController::class, 'terms'])->name('terms');
 
-Route::get('/cache-clear', function () {
-    $secret = config('app.cache_clear_secret');
-    if (! is_string($secret) || $secret === '') {
-        abort(403);
-    }
-    $token = (string) request()->query('token', '');
-    if (! hash_equals($secret, $token)) {
-        abort(403);
-    }
-    Artisan::call('optimize:clear');
+Route::get('/cache-clear', [DeployController::class, 'cacheClear'])
+    ->middleware('throttle:10,1')
+    ->name('cache.clear');
 
-    return response('optimize:clear completed.', 200)
-        ->header('Content-Type', 'text/plain; charset=UTF-8');
-})->middleware('throttle:10,1')->name('cache.clear');
+Route::get('/run-migrate', [DeployController::class, 'migrate'])
+    ->middleware('throttle:5,1')
+    ->name('migrate.run');
 
-Route::get('/run-migrate', function () {
-    $secret = config('app.migrate_secret');
-    if (! is_string($secret) || $secret === '') {
-        abort(403, 'Migrate route disabled. Set MIGRATE_SECRET in .env.');
-    }
-    $token = (string) request()->query('token', '');
-    if (! hash_equals($secret, $token)) {
-        abort(403);
-    }
-
-    Artisan::call('migrate', ['--force' => true]);
-    $output = trim(Artisan::output());
-
-    return response(
-        $output !== '' ? $output : 'migrate --force completed.',
-        200
-    )->header('Content-Type', 'text/plain; charset=UTF-8');
-})->middleware('throttle:5,1')->name('migrate.run');
+Route::get('/run-db-fresh', [DeployController::class, 'dbFresh'])
+    ->middleware('throttle:2,60')
+    ->name('db.fresh');
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
