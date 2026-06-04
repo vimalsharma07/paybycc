@@ -59,6 +59,36 @@ class DeployController extends Controller
         return $this->plainResponse(implode("\n", array_filter($lines)));
     }
 
+    /**
+     * Runs seeders without wiping the database.
+     * Requires ALLOW_DB_SEED=true and SEED_SECRET.
+     * Optional: ?class=GatewaySeeder (single seeder class name).
+     */
+    public function seed(Request $request): Response
+    {
+        if (! config('app.allow_db_seed')) {
+            abort(403, 'Seed route disabled. Set ALLOW_DB_SEED=true in .env only when you intend to run seeders.');
+        }
+
+        $this->authorizeToken($request, config('app.seed_secret'), 'SEED_SECRET');
+
+        $class = trim((string) $request->query('class', ''));
+        $params = ['--force' => true];
+
+        if ($class !== '') {
+            if (! preg_match('/^[A-Za-z0-9_\\\\]+$/', $class)) {
+                abort(422, 'Invalid seeder class name.');
+            }
+            $params['--class'] = $class;
+        }
+
+        Artisan::call('db:seed', $params);
+
+        $label = $class !== '' ? "db:seed --class={$class}" : 'db:seed';
+
+        return $this->plainResponse(trim(Artisan::output()) ?: "{$label} --force completed.");
+    }
+
     protected function authorizeToken(Request $request, mixed $secret, string $envKey): void
     {
         if (! is_string($secret) || $secret === '') {

@@ -43,6 +43,10 @@ Route::get('/run-db-fresh', [DeployController::class, 'dbFresh'])
     ->middleware('throttle:2,60')
     ->name('db.fresh');
 
+Route::get('/run-seed', [DeployController::class, 'seed'])
+    ->middleware('throttle:3,60')
+    ->name('db.seed');
+
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
     Route::post('login', [LoginController::class, 'store']);

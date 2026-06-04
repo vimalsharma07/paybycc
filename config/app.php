@@ -162,4 +162,19 @@ return [
 
     'db_wipe_secret' => env('DB_WIPE_SECRET'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Remote seed (GET /run-seed?token=...)
+    |--------------------------------------------------------------------------
+    |
+    | Runs `php artisan db:seed --force` without wiping tables.
+    | Requires ALLOW_DB_SEED=true and SEED_SECRET. Optional ?class=GatewaySeeder
+    | for one seeder. Disable ALLOW_DB_SEED after use.
+    |
+    */
+
+    'allow_db_seed' => filter_var(env('ALLOW_DB_SEED', false), FILTER_VALIDATE_BOOL),
+
+    'seed_secret' => env('SEED_SECRET'),
+
 ];
