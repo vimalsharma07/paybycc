@@ -4,8 +4,8 @@
 
 @section('guest_hero')
     <p class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Welcome back</p>
-    <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Sign in and stay on top of bills</h1>
-    <p class="max-w-md text-sm leading-relaxed text-slate-400">Access your wallet, payments, and settlement tools in one place.</p>
+    <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Sign in to your marketplace account</h1>
+    <p class="max-w-md text-sm leading-relaxed text-slate-400">Orders, card payments, wallet, banks, and settlements — all in one place.</p>
 @endsection
 
 @section('content')

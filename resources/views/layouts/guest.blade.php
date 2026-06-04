@@ -27,11 +27,11 @@
             <div class="mt-10 hidden animate-fade-up animate-delay-200 lg:block">
                 <div class="animate-float-soft relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] p-6 backdrop-blur-sm">
                     <div class="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-indigo-500/20 blur-2xl"></div>
-                    <p class="relative text-sm font-medium text-slate-300">Secure payments · Clear settlement · Built for everyday bills</p>
+                    <p class="relative text-sm font-medium text-slate-300">Marketplace · Card payments · KYC &amp; settlements</p>
                     <div class="relative mt-4 flex flex-wrap gap-2">
-                        <span class="rounded-lg bg-white/5 px-2.5 py-1 text-xs font-medium text-slate-400 ring-1 ring-white/10">Tuition</span>
-                        <span class="rounded-lg bg-white/5 px-2.5 py-1 text-xs font-medium text-slate-400 ring-1 ring-white/10">Utilities</span>
-                        <span class="rounded-lg bg-white/5 px-2.5 py-1 text-xs font-medium text-slate-400 ring-1 ring-white/10">Wallet</span>
+                        <span class="rounded-lg bg-white/5 px-2.5 py-1 text-xs font-medium text-slate-400 ring-1 ring-white/10">Freelancers</span>
+                        <span class="rounded-lg bg-white/5 px-2.5 py-1 text-xs font-medium text-slate-400 ring-1 ring-white/10">Card pay</span>
+                        <span class="rounded-lg bg-white/5 px-2.5 py-1 text-xs font-medium text-slate-400 ring-1 ring-white/10">Compliance</span>
                     </div>
                 </div>
             </div>
@@ -69,7 +69,7 @@
             ['href' => route('terms'), 'label' => 'Terms', 'icon' => 'document'],
             ['href' => route('contact'), 'label' => 'Contact', 'icon' => 'mail'],
             ['href' => route('about'), 'label' => 'About', 'icon' => 'info'],
-            ['href' => route('home').'#bills', 'label' => 'Bill types', 'icon' => 'grid'],
+            ['href' => route('home').'#marketplace', 'label' => 'Marketplace', 'icon' => 'grid'],
             ['href' => route('home'), 'label' => 'Home page', 'icon' => 'home'],
             ['href' => route('register'), 'label' => 'Sign up', 'icon' => 'user-plus'],
             ['href' => route('login'), 'label' => 'Log in', 'icon' => 'login'],

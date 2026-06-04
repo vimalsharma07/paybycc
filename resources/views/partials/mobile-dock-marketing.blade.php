@@ -9,7 +9,7 @@
         ['href' => route('terms'), 'label' => 'Terms', 'icon' => 'document'],
         ['href' => route('contact'), 'label' => 'Contact', 'icon' => 'mail'],
         ['href' => route('about'), 'label' => 'About', 'icon' => 'info'],
-        ['href' => route('home').'#bills', 'label' => 'Bill types', 'icon' => 'grid'],
+        ['href' => route('home').'#marketplace', 'label' => 'Marketplace', 'icon' => 'grid'],
     ];
 
     $tilesGuest = array_merge($tilesLegal, [

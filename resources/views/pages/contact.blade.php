@@ -1,22 +1,29 @@
 @extends('layouts.marketing')
 
 @section('title', 'Contact us — '.$siteSettings->displayName())
-@section('meta_description', 'Reach '.$siteSettings->displayName().' for support, partnerships, or privacy questions.')
+@section('meta_description', 'Contact '.$siteSettings->displayName().' for marketplace support, freelancer onboarding, payments, settlements, or privacy requests.')
 
 @section('content')
     <div class="mx-auto grid max-w-6xl gap-12 px-4 py-16 lg:grid-cols-2 lg:py-24">
         <div>
             <p class="text-sm font-semibold uppercase tracking-wider text-indigo-400">Contact</p>
-            <h1 class="mt-3 text-4xl font-bold tracking-tight text-white">We’re listening.</h1>
-            <p class="mt-6 text-lg leading-relaxed text-slate-400">Billing questions, privacy concerns, or feedback about tuition &amp; household payments — send a note. We aim to reply within a few business days.</p>
+            <h1 class="mt-3 text-4xl font-bold tracking-tight text-white">We’re here to help.</h1>
+            <p class="mt-6 text-lg leading-relaxed text-slate-400">Questions about finding freelancers, placing orders, card payments, KYC, settlements, or your account — send a message. We aim to reply within a few business days.</p>
 
             <div class="mt-10 space-y-6 rounded-2xl border border-white/10 bg-white/5 p-8">
+                <div class="flex gap-4">
+                    <span class="text-2xl" aria-hidden="true">💳</span>
+                    <div>
+                        <p class="font-semibold text-white">Payments</p>
+                        <p class="mt-1 text-sm text-slate-400">Card (credit/debit) is our primary checkout method today. Additional payment options may be added over time.</p>
+                    </div>
+                </div>
                 @if ($siteSettings->support_email || $siteSettings->email)
                     <div class="flex gap-4">
-                        <span class="text-2xl">📧</span>
+                        <span class="text-2xl" aria-hidden="true">📧</span>
                         <div>
                             <p class="font-semibold text-white">Email</p>
-                            <p class="mt-1 text-sm text-slate-400">Reach us directly, or use the form for structured requests.</p>
+                            <p class="mt-1 text-sm text-slate-400">Use the form for structured requests, or email us directly.</p>
                             <ul class="mt-3 space-y-1 text-sm">
                                 @if ($siteSettings->support_email)
                                     <li><a href="mailto:{{ $siteSettings->support_email }}" class="font-medium text-indigo-400 underline-offset-2 hover:underline">{{ $siteSettings->support_email }}</a> <span class="text-slate-500">· support</span></li>
@@ -29,7 +36,7 @@
                     </div>
                 @else
                     <div class="flex gap-4">
-                        <span class="text-2xl">📧</span>
+                        <span class="text-2xl" aria-hidden="true">📧</span>
                         <div>
                             <p class="font-semibold text-white">Email</p>
                             <p class="mt-1 text-sm text-slate-400">Use this form for the fastest response. Add support and general addresses in <strong class="text-slate-300">Admin → Website</strong> so they appear here.</p>
@@ -38,7 +45,7 @@
                 @endif
                 @if (filled($siteSettings->phone) || filled($siteSettings->address))
                     <div class="flex gap-4">
-                        <span class="text-2xl">📍</span>
+                        <span class="text-2xl" aria-hidden="true">📍</span>
                         <div>
                             <p class="font-semibold text-white">Location &amp; phone</p>
                             @if (filled($siteSettings->phone))
@@ -51,15 +58,15 @@
                     </div>
                 @endif
                 <div class="flex gap-4">
-                    <span class="text-2xl">🔒</span>
+                    <span class="text-2xl" aria-hidden="true">🔒</span>
                     <div>
-                        <p class="font-semibold text-white">Privacy &amp; data</p>
-                        <p class="mt-1 text-sm text-slate-400">For privacy-specific requests, mention “Privacy” in the subject line so we route your message correctly.</p>
+                        <p class="font-semibold text-white">Privacy &amp; compliance</p>
+                        <p class="mt-1 text-sm text-slate-400">For privacy or data requests, mention “Privacy” in the subject. Sellers: include “Freelancer KYC” for verification help.</p>
                     </div>
                 </div>
             </div>
 
-            <img src="https://images.unsplash.com/photo-1423666639421-p9a89bdca83b?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" class="mt-10 hidden rounded-3xl border border-white/10 object-cover lg:block" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" class="mt-10 hidden rounded-3xl border border-white/10 object-cover lg:block" loading="lazy" />
         </div>
 
         <div class="rounded-3xl border border-white/10 bg-slate-900/60 p-8 shadow-xl backdrop-blur-sm">
@@ -83,7 +90,7 @@
                 </div>
                 <div>
                     <label for="subject" class="mb-2 block text-sm font-medium text-slate-300">Subject <span class="font-normal text-slate-500">(optional)</span></label>
-                    <input id="subject" name="subject" type="text" value="{{ old('subject') }}" maxlength="200"
+                    <input id="subject" name="subject" type="text" value="{{ old('subject') }}" maxlength="200" placeholder="e.g. Order issue, Freelancer onboarding, Card payment"
                         class="w-full rounded-xl border border-white/10 bg-slate-950/80 px-4 py-3 text-white placeholder-slate-600 outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/30" />
                     @error('subject')
                         <p class="mt-1 text-sm text-red-400">{{ $message }}</p>

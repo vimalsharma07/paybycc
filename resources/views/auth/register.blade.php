@@ -5,7 +5,7 @@
 @section('guest_hero')
     <p class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Get started</p>
     <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Create your account in minutes</h1>
-    <p class="max-w-md text-sm leading-relaxed text-slate-400">Pay tuition, utilities, rent, and more — with clear records and secure card flows.</p>
+    <p class="max-w-md text-sm leading-relaxed text-slate-400">Join as a customer or freelancer — verify your mobile, complete KYC, and pay or get paid with secure card checkout.</p>
 @endsection
 
 @section('content')

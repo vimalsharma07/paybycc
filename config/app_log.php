@@ -14,6 +14,7 @@ return [
         'payment',
         'wallet',
         'kyc',
+        'bank',
         'admin',
         'system',
     ],

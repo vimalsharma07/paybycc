@@ -11,7 +11,7 @@
         ['href' => route('terms'), 'label' => 'Terms', 'icon' => 'document'],
         ['href' => route('contact'), 'label' => 'Contact', 'icon' => 'mail'],
         ['href' => route('about'), 'label' => 'About', 'icon' => 'info'],
-        ['href' => route('home').'#bills', 'label' => 'Bill types', 'icon' => 'grid'],
+        ['href' => route('home').'#marketplace', 'label' => 'Marketplace', 'icon' => 'grid'],
         ['href' => route('home'), 'label' => 'Website', 'icon' => 'globe'],
         ['href' => route('profile.show'), 'label' => 'Profile', 'icon' => 'info'],
         ['href' => route('dashboard'), 'label' => 'Dashboard', 'icon' => 'dashboard'],

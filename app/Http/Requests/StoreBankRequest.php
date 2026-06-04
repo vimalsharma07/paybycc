@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\LogsBankValidationFailures;
 use App\Models\Bank;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
 class StoreBankRequest extends FormRequest
 {
+    use LogsBankValidationFailures;
+
     public function authorize(): bool
     {
         $user = $this->user();

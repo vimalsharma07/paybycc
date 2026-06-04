@@ -36,6 +36,50 @@ class FlowLog
         $this->logger->log($level, 'kyc', $event, $message, $context, $subject);
     }
 
+    public function bank(
+        string $event,
+        string $message,
+        array $context = [],
+        ?Model $subject = null,
+        LogLevel $level = LogLevel::Info,
+    ): void {
+        $this->logger->log($level, 'bank', $event, $message, $context, $subject);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function maskedBankAccount(?string $accountNo): array
+    {
+        if ($accountNo === null || $accountNo === '') {
+            return [];
+        }
+
+        $len = strlen($accountNo);
+
+        return [
+            'account_masked' => $len <= 4
+                ? '****'
+                : str_repeat('*', max(0, $len - 4)).substr($accountNo, -4),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function bankContext(?string $ifsc, ?string $bankName = null, array $extra = []): array
+    {
+        $ctx = $extra;
+        if ($ifsc !== null && $ifsc !== '') {
+            $ctx['ifsc'] = strtoupper($ifsc);
+        }
+        if ($bankName !== null && $bankName !== '') {
+            $ctx['bank_name'] = $bankName;
+        }
+
+        return $ctx;
+    }
+
     /**
      * @return array<string, mixed>
      */

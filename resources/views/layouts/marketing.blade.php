@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="description" content="@yield('meta_description', ($siteSettings->tagline ? $siteSettings->tagline.' ' : '').'Pay tuition, utilities, rent & more with '.$siteSettings->displayName().'. Secure card payments & wallet settlements.')">
+    <meta name="description" content="@yield('meta_description', ($siteSettings->tagline ? $siteSettings->tagline.' ' : '').'Freelancer & service marketplace on '.$siteSettings->displayName().'. Card payments, KYC, and compliant settlements.')">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', $siteSettings->displayName().' — Pay bills & tuition securely')</title>
+    <title>@yield('title', $siteSettings->displayName().' — Freelancer marketplace')</title>
     @include('partials.head-styles')
 </head>
 @php
@@ -30,7 +30,7 @@
             @endif
 
             <nav class="hidden flex-1 items-center justify-center gap-1 lg:flex">
-                <a href="{{ route('home') }}#bills" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">Bill types</a>
+                <a href="{{ route('home') }}#marketplace" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">Marketplace</a>
                 <a href="{{ route('about') }}" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">About</a>
                 <a href="{{ route('contact') }}" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">Contact</a>
                 <a href="{{ route('privacy') }}" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white">Privacy</a>
@@ -81,7 +81,7 @@
                         <x-brand-wordmark variant="dark" size="lg" class="leading-none" />
                     @endif
                 </p>
-                <p class="mt-3 max-w-md text-sm leading-relaxed text-slate-400">{{ $siteSettings->tagline ?: 'Pay tuition, household bills, rent & more — with secure card payments, clear settlement timing, and wallet tools built for real life.' }}</p>
+                <p class="mt-3 max-w-md text-sm leading-relaxed text-slate-400">{{ $siteSettings->tagline ?: 'Freelancer & service marketplace — discover talent, pay by card, and settle with KYC and compliance built in.' }}</p>
                 @if ($siteSettings->instagram_url || $siteSettings->linkedin_url || $siteSettings->facebook_url || $siteSettings->twitter_url)
                     <div class="mt-4 flex flex-wrap gap-3">
                         @if ($siteSettings->instagram_url)
@@ -115,7 +115,7 @@
             <div>
                 <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Product</p>
                 <ul class="mt-4 space-y-2 text-sm">
-                    <li><a href="{{ route('home') }}#bills" class="text-slate-400 transition hover:text-white">Bill types</a></li>
+                    <li><a href="{{ route('home') }}#marketplace" class="text-slate-400 transition hover:text-white">Marketplace</a></li>
                     <li><a href="{{ route('about') }}" class="text-slate-400 transition hover:text-white">About us</a></li>
                     @auth
                         <li><a href="{{ route('payments.create') }}" class="text-slate-400 transition hover:text-white">Pay now</a></li>
