@@ -32,7 +32,7 @@ class AccountController extends Controller
 
         $ordersReceived = Order::query()
             ->where('freelancer_id', $user->id)
-            ->with(['customer:id,name,user_code', 'latestPayment:id,order_id,status,amount'])
+            ->with(['customer:id,name,user_code'])
             ->latest()
             ->paginate(10, ['*'], 'orders_page');
 
