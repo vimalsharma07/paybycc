@@ -326,9 +326,44 @@ details > summary::-webkit-details-marker {
     background: rgba(15, 23, 42, 0.4);
 }
 
+/* App shell: sit above the fixed bottom dock so footer actions stay visible */
+.mobile-explore-dialog--light {
+    bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+    max-height: min(72vh, 30rem);
+}
+
 .mobile-explore-dialog__inner {
+    display: flex;
+    max-height: min(82vh, 34rem);
+    flex-direction: column;
     border-radius: 1.25rem 1.25rem 0 0;
     box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.mobile-explore-dialog--light .mobile-explore-dialog__inner {
+    max-height: min(78vh, 32rem);
+}
+
+.mobile-explore-dialog__body {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mobile-explore-dialog__footer {
+    flex-shrink: 0;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+.mobile-explore-logout {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-explore-logout:active {
+    transform: scale(0.99);
 }
 
 .mobile-explore-tile {
