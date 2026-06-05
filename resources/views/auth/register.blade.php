@@ -5,7 +5,7 @@
 @section('guest_hero')
     <p class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Get started</p>
     <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Create your account in minutes</h1>
-    <p class="max-w-md text-sm leading-relaxed text-slate-400">Join as a customer or freelancer — accept or send payments via UPI, cards, net banking, and wallets.</p>
+    <p class="max-w-md text-sm leading-relaxed text-slate-400">For business owners, freelancers, startups &amp; service providers — accept or send business payments online through licensed checkout.</p>
 @endsection
 
 @section('content')

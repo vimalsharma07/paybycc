@@ -27,7 +27,7 @@
             <div class="mt-10 hidden animate-fade-up animate-delay-200 lg:block">
                 <div class="animate-float-soft relative rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] p-6 backdrop-blur-sm">
                     <div class="absolute -right-3 -top-3 h-16 w-16 rounded-full bg-indigo-500/20 blur-2xl"></div>
-                    <p class="relative text-sm font-medium text-slate-300">Freelancers accept UPI, cards, net banking &amp; more</p>
+                    <p class="relative text-sm font-medium text-slate-300">Business owners &amp; freelancers — accept payments the approved way</p>
                     <div class="relative mt-4">
                         <x-payment-methods variant="dark" size="sm" :show-label="false" />
                     </div>

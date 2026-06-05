@@ -1,14 +1,14 @@
 @extends('layouts.marketing')
 
 @section('title', 'Contact us — '.$siteSettings->displayName())
-@section('meta_description', 'Contact '.$siteSettings->displayName().' for marketplace support, freelancer onboarding, payments, settlements, or privacy requests.')
+@section('meta_description', 'Contact '.$siteSettings->displayName().' for business payment onboarding, KYC, settlements, terms, privacy & compliance questions.')
 
 @section('content')
     <div class="mx-auto grid max-w-6xl gap-12 px-4 py-16 lg:grid-cols-2 lg:py-24">
         <div>
             <p class="text-sm font-semibold uppercase tracking-wider text-indigo-400">Contact</p>
             <h1 class="mt-3 text-4xl font-bold tracking-tight text-white">We’re here to help.</h1>
-            <p class="mt-6 text-lg leading-relaxed text-slate-400">Questions about finding freelancers, UPI or card payments, KYC, bank settlements, or your account — send a message. We aim to reply within a few business days.</p>
+            <p class="mt-6 text-lg leading-relaxed text-slate-400">Questions about accepting business payments online, KYC verification, licensed checkout, bank settlements, <a href="{{ route('terms') }}" class="text-indigo-400 hover:text-white">Terms</a>, or <a href="{{ route('privacy') }}" class="text-indigo-400 hover:text-white">Privacy</a> — send a message. We aim to reply within a few business days.</p>
 
             <div class="mt-8">
                 <x-payment-methods variant="dark" size="sm" />
@@ -19,7 +19,7 @@
                     <span class="text-2xl" aria-hidden="true">💳</span>
                     <div>
                         <p class="font-semibold text-white">Payments</p>
-                        <p class="mt-1 text-sm text-slate-400">Clients can pay via UPI, credit &amp; debit cards, net banking, and wallets through our licensed payment gateway.</p>
+                        <p class="mt-1 text-sm text-slate-400">Business payments are collected via RBI-authorised gateway partners — UPI, cards, net banking &amp; wallets — with clear order records.</p>
                     </div>
                 </div>
                 @if ($siteSettings->support_email || $siteSettings->email)

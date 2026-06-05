@@ -34,7 +34,7 @@ return new class extends Migration
 
         DB::table('website_settings')->insert([
             'site_name' => config('app.name', 'PayByCc'),
-            'tagline' => 'Accept UPI, cards & more — settle to your bank.',
+            'tagline' => 'Accept business payments online — licensed, KYC-ready & bank settlement.',
             'email' => null,
             'support_email' => null,
             'phone' => null,

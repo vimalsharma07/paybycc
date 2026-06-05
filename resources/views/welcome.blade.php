@@ -1,7 +1,7 @@
 @extends('layouts.marketing')
 
-@section('title', $siteSettings->displayName().' — Accept payments as a freelancer')
-@section('meta_description', 'Freelancers on '.$siteSettings->displayName().' accept UPI, credit & debit cards, net banking, and wallets. Clients pay their way — you get one settlement to your bank.')
+@section('title', $siteSettings->displayName().' — Accept business payments online')
+@section('meta_description', 'Business owners, freelancers, service providers & startups on '.$siteSettings->displayName().' accept UPI, cards & net banking through licensed gateways — with KYC, GST-ready records & bank settlements.')
 
 @section('content')
     {{-- Hero --}}
@@ -10,13 +10,13 @@
             <div>
                 <p class="animate-fade-up inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-indigo-300">
                     <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span>
-                    For freelancers · All payment methods · Bank payouts
+                    Business owners · Freelancers · Startups · Licensed checkout
                 </p>
                 <h1 class="animate-fade-up animate-delay-100 mt-6 text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-[3.25rem]">
-                    Accept payments <span class="bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">your clients already use.</span>
+                    Accept business payments online — <span class="bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">fast, attractive &amp; approved.</span>
                 </h1>
                 <p class="animate-fade-up animate-delay-200 mt-6 text-lg leading-relaxed text-slate-400">
-                    {{ $siteSettings->displayName() }} is built for Indian freelancers and service providers. List your skills, share a payment link, and let clients pay via <strong class="font-medium text-slate-300">UPI, credit card, debit card, net banking, or wallets</strong> — you receive one clean settlement to your bank.
+                    Whether you run a <strong class="font-medium text-slate-300">startup, small business, freelance practice, or service company</strong>, {{ $siteSettings->displayName() }} lets you collect payments through <strong class="font-medium text-slate-300">licensed payment gateways</strong> — UPI, cards, net banking &amp; wallets — with KYC verification, clear records, and settlement straight to your bank.
                 </p>
                 <div class="animate-fade-up animate-delay-300 mt-8">
                     <x-payment-methods variant="dark" size="sm" :show-label="false" />
@@ -32,7 +32,7 @@
                         </a>
                     @else
                         <a href="{{ route('register') }}" class="pay-now-btn inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 px-8 py-3.5 text-base font-bold text-white shadow-xl transition hover:brightness-110">
-                            Start accepting payments
+                            Start accepting business payments
                         </a>
                         <a href="{{ route('login') }}" class="inline-flex items-center justify-center rounded-2xl border border-fuchsia-400/40 bg-fuchsia-500/10 px-6 py-3.5 text-base font-semibold text-fuchsia-200 transition hover:bg-fuchsia-500/20">
                             Log in
@@ -43,7 +43,7 @@
                     </a>
                 </div>
                 @guest
-                    <p class="animate-fade-up animate-delay-300 mt-4 text-xs text-slate-500">India-first · Licensed gateways · KYC &amp; compliance built in · <x-brand-wordmark variant="dark" size="sm" class="inline-flex align-baseline" /></p>
+                    <p class="animate-fade-up animate-delay-300 mt-4 text-xs text-slate-500">RBI-authorised partners · PAN/KYC · GST &amp; tax fields · <a href="{{ route('terms') }}" class="text-indigo-400 hover:text-white">Terms</a> &amp; <a href="{{ route('privacy') }}" class="text-indigo-400 hover:text-white">Privacy</a> · <x-brand-wordmark variant="dark" size="sm" class="inline-flex align-baseline" /></p>
                 @endguest
                 <dl class="animate-fade-up animate-delay-400 mt-14 grid grid-cols-3 gap-6 border-t border-white/10 pt-10">
                     <div>
@@ -51,12 +51,12 @@
                         <dd class="mt-1 text-sm font-semibold text-white">UPI · Cards · NB</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Freelancers</dt>
-                        <dd class="mt-1 text-sm font-semibold text-white">One bank payout</dd>
+                        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">For</dt>
+                        <dd class="mt-1 text-sm font-semibold text-white">Business &amp; startups</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Trust</dt>
-                        <dd class="mt-1 text-sm font-semibold text-white">KYC &amp; Safe Status</dd>
+                        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Compliant</dt>
+                        <dd class="mt-1 text-sm font-semibold text-white">KYC · GST · TDS/TCS</dd>
                     </div>
                 </dl>
             </div>
@@ -115,8 +115,8 @@
     <section id="marketplace" class="scroll-mt-24 border-b border-white/5 bg-slate-900/40 px-4 py-20 sm:px-6">
         <div class="mx-auto max-w-6xl">
             <div class="max-w-2xl">
-                <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Built for freelancers who invoice globally, settle locally.</h2>
-                <p class="mt-4 text-lg text-slate-400">Clients pay however they prefer. You focus on delivery — we handle checkout, compliance, and bank payouts.</p>
+                <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Built for every kind of business that sells services online.</h2>
+                <p class="mt-4 text-lg text-slate-400">Freelancers, agencies, consultants, and early-stage startups — accept payments in a quick, professional checkout while we handle verification, records, and bank payouts the approved way.</p>
             </div>
             <div class="mt-14 grid gap-6 lg:grid-cols-2">
                 <article class="rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-transparent p-8">
@@ -129,22 +129,22 @@
                     </ul>
                 </article>
                 <article class="rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-500/10 to-transparent p-8">
-                    <p class="text-sm font-semibold uppercase tracking-wider text-violet-300">For you (freelancer)</p>
-                    <h3 class="mt-3 text-xl font-semibold text-white">One link, every payment method</h3>
+                    <p class="text-sm font-semibold uppercase tracking-wider text-violet-300">For business owners &amp; providers</p>
+                    <h3 class="mt-3 text-xl font-semibold text-white">Share a link. Get paid. Stay compliant.</h3>
                     <ul class="mt-4 space-y-2 text-sm text-slate-400">
-                        <li class="flex gap-2"><span class="text-violet-400">✓</span> Accept UPI &amp; cards without juggling multiple apps</li>
-                        <li class="flex gap-2"><span class="text-violet-400">✓</span> Automatic settlement to your linked bank account</li>
-                        <li class="flex gap-2"><span class="text-violet-400">✓</span> KYC, GST/TDS fields, and payout history in one dashboard</li>
+                        <li class="flex gap-2"><span class="text-violet-400">✓</span> Payment links for invoices, retainers &amp; project milestones</li>
+                        <li class="flex gap-2"><span class="text-violet-400">✓</span> Licensed checkout — UPI, cards, net banking &amp; wallets</li>
+                        <li class="flex gap-2"><span class="text-violet-400">✓</span> PAN/KYC, GST/TDS/TCS fields &amp; automatic bank settlement</li>
                     </ul>
                 </article>
             </div>
             <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 @php
                     $tiles = [
-                        ['title' => 'Design & creative', 'desc' => 'Branding, UI, content, and more.', 'icon' => '🎨'],
-                        ['title' => 'Tech & IT', 'desc' => 'Development, support, DevOps.', 'icon' => '💻'],
-                        ['title' => 'Consulting', 'desc' => 'Strategy, finance, legal, coaching.', 'icon' => '📊'],
-                        ['title' => 'Any skill', 'desc' => 'List what you offer — get paid your way.', 'icon' => '✨'],
+                        ['title' => 'Freelancers', 'desc' => 'Designers, developers, writers & more.', 'icon' => '🎨'],
+                        ['title' => 'Service providers', 'desc' => 'Agencies, studios & professional services.', 'icon' => '💼'],
+                        ['title' => 'Startups', 'desc' => 'Collect early revenue with proper records.', 'icon' => '🚀'],
+                        ['title' => 'Small business', 'desc' => 'Quick online pay — no custom gateway build.', 'icon' => '🏪'],
                     ];
                 @endphp
                 @foreach ($tiles as $tile)
@@ -197,13 +197,13 @@
                 />
             </div>
             <div class="order-1 lg:order-2">
-                <h2 class="text-3xl font-bold text-white sm:text-4xl">Payments your accountant will thank you for.</h2>
-                <p class="mt-6 text-lg text-slate-400">Licensed gateways, itemised fees, and GST/TDS/TCS fields — whether the client paid by UPI or card. One ledger, one bank payout.</p>
+                <h2 class="text-3xl font-bold text-white sm:text-4xl">Approved online payments, explained clearly.</h2>
+                <p class="mt-6 text-lg text-slate-400">We route collections through <strong class="text-slate-300">RBI-authorised payment partners</strong> — not informal transfers. Every order carries fee breakdowns, tax fields where applicable, and audit-friendly status from checkout to bank credit.</p>
                 <ul class="mt-8 space-y-4 text-slate-300">
-                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> UPI, cards, net banking &amp; wallets via Cashfree</li>
-                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> Order, payment &amp; settlement status tracking</li>
-                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> GST, TDS &amp; TCS fields for compliance</li>
-                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> Automatic bank payouts — no manual wallet transfers</li>
+                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> Licensed gateway checkout (UPI, cards, net banking &amp; wallets)</li>
+                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> Identity verification (PAN/KYC) before seller bank payouts</li>
+                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> GST, TDS &amp; TCS fields aligned with Indian tax norms</li>
+                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> Clear <a href="{{ route('terms') }}" class="font-semibold text-indigo-300 underline-offset-2 hover:text-white">Terms</a> &amp; <a href="{{ route('privacy') }}" class="font-semibold text-indigo-300 underline-offset-2 hover:text-white">Privacy Policy</a> you can share with clients</li>
                 </ul>
                 <div class="mt-8">
                     <x-payment-methods variant="dark" size="sm" />
@@ -219,8 +219,8 @@
     {{-- CTA --}}
     <section class="px-4 py-24 sm:px-6">
         <div class="mx-auto max-w-4xl rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-600/40 via-violet-600/30 to-slate-900 p-10 text-center shadow-2xl shadow-indigo-500/20 sm:p-14">
-            <h2 class="text-3xl font-bold text-white sm:text-4xl">Ready to accept every payment method?</h2>
-            <p class="mx-auto mt-4 max-w-xl text-lg text-indigo-100/90">Join as a freelancer or pay someone you trust — UPI, cards, net banking, and more, with settlements straight to the bank.</p>
+            <h2 class="text-3xl font-bold text-white sm:text-4xl">Ready to accept business payments the right way?</h2>
+            <p class="mx-auto mt-4 max-w-xl text-lg text-indigo-100/90">For business owners, freelancers, service providers &amp; startups — start in minutes, share payment links, and collect online through approved channels with settlements to your bank.</p>
             <div class="mt-8 flex justify-center">
                 <x-payment-methods variant="dark" size="sm" :show-label="false" class="justify-center" />
             </div>
