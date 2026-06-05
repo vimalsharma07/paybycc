@@ -49,6 +49,12 @@ class User extends Authenticatable
         return $this->role === 'seller';
     }
 
+    /** Active freelancers can create shareable payment links. */
+    public function canCreatePaymentLinks(): bool
+    {
+        return ! $this->is_admin && $this->isSeller() && $this->status === 'active';
+    }
+
     /** Seller has GSTIN on profile (15-char Indian GSTIN). */
     public function hasGstRegistered(): bool
     {
@@ -169,6 +175,11 @@ class User extends Authenticatable
     public function ordersAsFreelancer(): HasMany
     {
         return $this->hasMany(Order::class, 'freelancer_id');
+    }
+
+    public function paymentLinks(): HasMany
+    {
+        return $this->hasMany(PaymentLink::class, 'seller_id');
     }
 
     public function acceptsCustomer(User $customer): bool

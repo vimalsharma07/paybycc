@@ -10,11 +10,11 @@ use App\Services\Orders\OrderService;
 use App\Services\Orders\SellerSearch;
 use App\Services\Payments\CashfreeGatewaySync;
 use App\Services\Payments\GatewayManager;
+use App\Services\Payments\PaymentCheckoutService;
 use App\Services\Payments\PaymentReturnService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use InvalidArgumentException;
 
@@ -24,6 +24,7 @@ class PaymentController extends Controller
         protected OrderService $orders,
         protected SellerSearch $sellerSearch,
         protected PaymentReturnService $paymentReturns,
+        protected PaymentCheckoutService $checkout,
     ) {}
 
     public function create(Request $request, GatewayManager $gatewayManager): View
@@ -93,16 +94,8 @@ class PaymentController extends Controller
         ];
     }
 
-    public function store(Request $request, GatewayManager $gatewayManager): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $gateway = $gatewayManager->primaryGateway();
-
-        if (! $gateway || ! $gateway->isActive()) {
-            return back()
-                ->withInput()
-                ->withErrors(['amount' => 'Payments are unavailable: no active primary gateway. Add Cashfree keys to .env or Admin → Gateways.']);
-        }
-
         $validated = $request->validate([
             'freelancer_id' => ['required', 'integer', 'exists:users,id'],
             'amount' => ['required', 'numeric', 'min:0.01'],
@@ -114,137 +107,26 @@ class PaymentController extends Controller
             return back()->withInput()->withErrors(['freelancer_id' => 'Select a valid freelancer or seller from search.']);
         }
 
-        try {
-            $this->orders->assertCanPay($request->user(), $freelancer);
-        } catch (InvalidArgumentException $e) {
-            return back()->withInput()->withErrors(['freelancer_id' => $e->getMessage()]);
-        }
-
         $remarkRaw = isset($validated['remark']) ? trim((string) $validated['remark']) : '';
         $remark = $remarkRaw === '' ? null : $remarkRaw;
-
         $amountDecimal = number_format((float) $validated['amount'], 2, '.', '');
 
         try {
-            $order = $this->orders->createOrder(
+            $result = $this->checkout->initiate(
                 $request->user(),
                 $freelancer,
                 $amountDecimal,
-                $remark
+                $remark,
             );
         } catch (InvalidArgumentException $e) {
-            return back()->withInput()->withErrors(['amount' => $e->getMessage()]);
+            $field = str_contains(strtolower($e->getMessage()), 'freelancer') || str_contains(strtolower($e->getMessage()), 'yourself') || str_contains(strtolower($e->getMessage()), 'kyc')
+                ? 'freelancer_id'
+                : 'amount';
+
+            return back()->withInput()->withErrors([$field => $e->getMessage()]);
         }
 
-        $min = (float) $gateway->min_txn;
-        $max = (float) $gateway->max_txn;
-        $amt = (float) $amountDecimal;
-
-        if ($amt < $min) {
-            return back()->withInput()->withErrors(['amount' => 'Amount is below the minimum for this gateway ('.$gateway->min_txn.').']);
-        }
-
-        if ($amt > $max) {
-            return back()->withInput()->withErrors(['amount' => 'Amount is above the maximum for this gateway ('.$gateway->max_txn.').']);
-        }
-
-        $dailyCap = (float) $gateway->daily_limit;
-        if ($dailyCap > 0) {
-            $usedToday = (float) Payment::query()
-                ->where('gateway_id', $gateway->id)
-                ->whereDate('created_at', today())
-                ->whereIn('status', ['pending', 'completed'])
-                ->sum('amount');
-
-            if ($usedToday + $amt > $dailyCap + 0.00001) {
-                return back()->withInput()->withErrors(['amount' => 'Daily volume limit for this gateway would be exceeded. Try again tomorrow or use a smaller amount.']);
-            }
-        }
-
-        try {
-            $driver = $gatewayManager->resolveDriver($gateway);
-        } catch (\Throwable $e) {
-            report($e);
-
-            return back()->withInput()->withErrors(['amount' => 'Payment gateway configuration error. Please try again later.']);
-        }
-
-        $orderNote = $remark ?? ('Payment to '.$freelancer->name.' · '.$order->order_code);
-
-        $payment = DB::transaction(function () use ($request, $gateway, $amountDecimal, $driver, $orderNote, $order, $freelancer) {
-            $payment = Payment::create([
-                'user_id' => $request->user()->id,
-                'gateway_id' => $gateway->id,
-                'order_id' => $order->id,
-                'amount' => $amountDecimal,
-                'currency' => 'INR',
-                'remark' => $orderNote,
-                'status' => 'pending',
-            ]);
-
-            $returnUrl = route('payments.return', ['pid' => $payment->id], true);
-
-            $result = $driver->initiatePayment($amountDecimal, [
-                'payment_id' => $payment->id,
-                'user_id' => $request->user()->id,
-                'currency' => 'INR',
-                'customer_email' => $request->user()->email,
-                'customer_name' => $request->user()->name,
-                'customer_phone' => (string) $request->user()->phone,
-                'return_url' => $returnUrl,
-            ]);
-
-            $hosted = (($result['mode'] ?? '') === 'cashfree_hosted') && ($result['success'] ?? false);
-            $reference = $result['reference']
-                ?? $result['gateway_reference']
-                ?? $result['payment_reference']
-                ?? $result['cashfree_order_id']
-                ?? null;
-
-            $success = (bool) ($result['success'] ?? false);
-
-            if ($hosted) {
-                $payment->update([
-                    'gateway_reference' => is_string($reference) ? $reference : null,
-                    'driver_payload' => $result,
-                    'status' => 'pending',
-                ]);
-            } elseif ($success) {
-                $payment->update([
-                    'gateway_reference' => is_string($reference) ? $reference : null,
-                    'driver_payload' => $result,
-                    'status' => 'completed',
-                ]);
-
-                $payment = $payment->fresh();
-                if ($payment) {
-                    $this->createCardPaymentTransaction($request->user()->id, $payment, $amountDecimal);
-                    $this->orders->recordPaymentSuccess($payment);
-                }
-            } else {
-                $payment->update([
-                    'gateway_reference' => is_string($reference) ? $reference : null,
-                    'driver_payload' => $result,
-                    'status' => 'failed',
-                ]);
-                $order->update(['payment_status' => 'failed']);
-            }
-
-            return $payment->fresh();
-        });
-
-        if (! $payment) {
-            return back()->withInput()->withErrors(['amount' => 'Could not start payment.']);
-        }
-
-        $payload = $payment->driver_payload ?? [];
-        $hostedDone = is_array($payload) && (($payload['mode'] ?? '') === 'cashfree_hosted') && $payment->status === 'pending';
-
-        if ($hostedDone) {
-            return redirect()->route('payments.checkout', $payment);
-        }
-
-        return $this->redirectToResult($payment);
+        return $this->redirectAfterCheckout($result['payment'], $result['hosted_checkout']);
     }
 
     public function checkout(Payment $payment): View|RedirectResponse
@@ -347,35 +229,6 @@ class PaymentController extends Controller
         abort_unless((int) $payment->user_id === (int) auth()->id(), 403);
     }
 
-    protected function createCardPaymentTransaction(int $userId, Payment $payment, string $amountDecimal): void
-    {
-        if ($payment->transactions()->exists()) {
-            return;
-        }
-
-        $bufferDays = max(0, (int) config('paybycc.settlement_buffer_days', 2));
-
-        $userNote = trim((string) ($payment->remark ?? ''));
-        $gatewayLabel = $payment->gateway?->name ?? 'Gateway';
-        $note = $userNote !== ''
-            ? $userNote.' · '.$gatewayLabel
-            : 'Payment via '.$gatewayLabel;
-
-        Transaction::create([
-            'user_id' => $userId,
-            'bank_id' => null,
-            'payment_id' => $payment->id,
-            'parent_transaction_id' => null,
-            'type' => Transaction::TYPE_CARD_PAYMENT,
-            'amount' => $amountDecimal,
-            'currency' => 'INR',
-            'status' => 'completed',
-            'settlement_trigger_at' => now()->addDays($bufferDays),
-            'settled_at' => null,
-            'note' => $note,
-        ]);
-    }
-
     protected function resolveReturnPayment(Request $request): ?Payment
     {
         $pid = (int) $request->query('pid', 0);
@@ -387,6 +240,18 @@ class PaymentController extends Controller
             ->whereKey($pid)
             ->where('user_id', $request->user()->id)
             ->first();
+    }
+
+    /**
+     * @return RedirectResponse
+     */
+    protected function redirectAfterCheckout(Payment $payment, bool $hostedCheckout): RedirectResponse
+    {
+        if ($hostedCheckout) {
+            return redirect()->route('payments.checkout', $payment);
+        }
+
+        return $this->redirectToResult($payment);
     }
 
     protected function redirectToResult(Payment $payment): RedirectResponse

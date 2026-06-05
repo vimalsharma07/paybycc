@@ -48,6 +48,13 @@
                 <p class="mt-2 text-3xl font-bold tabular-nums text-slate-900">{{ $stats['payments_sent'] }}</p>
                 <p class="mt-1 text-xs text-emerald-700">{{ $stats['payments_completed'] }} completed</p>
             </a>
+            @if ($user->canCreatePaymentLinks())
+                <a href="{{ route('payment-links.index') }}" class="app-stat-card group rounded-2xl border border-fuchsia-200/80 bg-gradient-to-br from-fuchsia-50 to-indigo-50 p-5 shadow-sm transition hover:border-fuchsia-300 hover:shadow-md">
+                    <p class="text-xs font-bold uppercase tracking-wide text-fuchsia-800">Payment links</p>
+                    <p class="mt-2 text-sm font-bold text-slate-900">Share &amp; get paid</p>
+                    <p class="mt-1 text-xs font-bold text-fuchsia-700 group-hover:underline">Create a link →</p>
+                </a>
+            @endif
             @if ($user->isSeller())
                 <a href="{{ route('account.settlements') }}" class="app-stat-card group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm ring-1 ring-slate-900/5 transition hover:border-emerald-200 hover:shadow-md">
                     <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Received (net)</p>

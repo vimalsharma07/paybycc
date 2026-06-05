@@ -35,6 +35,12 @@ return [
         'max_order_amount' => (float) env('MARKETPLACE_MAX_ORDER_AMOUNT', 500000),
     ],
 
+    'payment_links' => [
+        'default_expiry_days' => (int) env('PAYMENT_LINK_DEFAULT_EXPIRY_DAYS', 30),
+        'max_expiry_days' => (int) env('PAYMENT_LINK_MAX_EXPIRY_DAYS', 90),
+        'max_active_per_seller' => (int) env('PAYMENT_LINK_MAX_ACTIVE_PER_SELLER', 50),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Page / route map by area (current + planned)
@@ -51,6 +57,7 @@ return [
         ],
         'seller' => [
             'dashboard',
+            'payment_links',
             'onboarding',         // planned
             'services',           // planned
             'orders',             // planned

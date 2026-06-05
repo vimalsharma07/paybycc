@@ -7,6 +7,7 @@ use App\Models\Gateway;
 use App\Models\Payment;
 use App\Models\Transaction;
 use App\Services\Orders\OrderService;
+use App\Services\PaymentLinks\PaymentLinkService;
 use Illuminate\Support\Facades\DB;
 
 class PaymentReturnService
@@ -14,6 +15,7 @@ class PaymentReturnService
     public function __construct(
         protected CashfreeClient $cashfreeClient,
         protected OrderService $orders,
+        protected PaymentLinkService $paymentLinks,
     ) {}
 
     /**
@@ -156,6 +158,7 @@ class PaymentReturnService
             if ($fresh) {
                 $this->createPayerTransaction($fresh, $amountDecimal);
                 $this->orders->recordPaymentSuccess($fresh);
+                $this->paymentLinks->markPaidFromPayment($fresh);
             }
         });
     }

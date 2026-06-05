@@ -23,6 +23,7 @@ final class AppNavigation
             $items[] = self::item('marketplace.index', 'Marketplace', 'grid', ['marketplace.*']);
             $items[] = self::item('account.payments', 'Payments sent', 'card', ['account.payments']);
             if ($isSeller) {
+                $items[] = self::item('payment-links.index', 'Payment links', 'link', ['payment-links.*']);
                 $items[] = self::item('account.settlements', 'Received & settlements', 'inbox', ['account.settlements']);
             }
         }

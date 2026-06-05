@@ -12,6 +12,7 @@ class Payment extends Model
         'user_id',
         'gateway_id',
         'order_id',
+        'payment_link_id',
         'amount',
         'currency',
         'remark',
@@ -41,6 +42,11 @@ class Payment extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function paymentLink(): BelongsTo
+    {
+        return $this->belongsTo(PaymentLink::class);
     }
 
     public function transactions(): HasMany

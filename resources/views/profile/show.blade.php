@@ -123,6 +123,21 @@
         </div>
 
         <div class="space-y-4">
+            @if ($user->canCreatePaymentLinks())
+                <a href="{{ route('payment-links.index') }}" class="group relative block overflow-hidden rounded-2xl border border-fuchsia-200/80 bg-gradient-to-br from-fuchsia-50 via-white to-indigo-50 p-6 shadow-md ring-1 ring-fuchsia-900/5 transition hover:border-fuchsia-300 hover:shadow-lg">
+                    <div class="flex items-center gap-4">
+                        <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-600 text-white shadow-md" aria-hidden="true">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="font-bold text-slate-900 group-hover:text-fuchsia-700">Payment links</p>
+                            <p class="mt-0.5 text-xs text-slate-600">Create shareable links — clients pay via UPI, card, or net banking.</p>
+                        </div>
+                        <span class="text-lg font-bold text-fuchsia-400 transition group-hover:text-fuchsia-600" aria-hidden="true">→</span>
+                    </div>
+                </a>
+            @endif
+
             <a href="{{ $user->canReceivePayouts() ? route('account.transactions') : route('kyc.index') }}" class="group relative block overflow-hidden rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 shadow-md ring-1 ring-indigo-900/5 transition hover:border-indigo-300 hover:shadow-lg {{ $user->canReceivePayouts() ? '' : 'opacity-90' }}">
                 <div class="flex items-center gap-4">
                     <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-md" aria-hidden="true">
