@@ -85,7 +85,80 @@
         </div>
     </section>
 
-    @include('partials.checkout-methods-showcase')
+    {{-- Payment methods --}}
+    <section class="border-y border-white/10 bg-slate-900/60 px-4 py-16 sm:px-6 sm:py-20">
+        <div class="mx-auto max-w-6xl">
+            <div class="mx-auto max-w-3xl text-center">
+                <p class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-emerald-300">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                    Licensed checkout
+                </p>
+                <h2 class="mt-5 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                    Every way your clients pay —
+                    <span class="bg-gradient-to-r from-emerald-300 via-cyan-300 to-indigo-300 bg-clip-text text-transparent">one business settlement.</span>
+                </h2>
+                <p class="mt-4 text-lg leading-relaxed text-slate-400">
+                    UPI, cards, net banking &amp; wallets through RBI-authorised partners. Your customer picks what feels natural — you get one clear order and one bank payout.
+                </p>
+            </div>
+
+            <div class="mt-12 overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-900 shadow-2xl shadow-black/30">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700/70 bg-slate-800/90 px-4 py-3 sm:px-5">
+                    <p class="text-xs font-bold uppercase tracking-widest text-slate-300">Payment methods at checkout</p>
+                    <span class="rounded-full border border-slate-600 bg-slate-900 px-2.5 py-0.5 text-xs font-semibold text-slate-400">5 channels</span>
+                </div>
+                <div class="grid grid-cols-1 divide-y divide-slate-700/60 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-5">
+                    @foreach ([
+                        ['n' => '01', 'label' => 'UPI', 'desc' => 'Instant for most Indian clients', 'tags' => 'GPay · PhonePe · Paytm', 'bar' => 'bg-emerald-500', 'icon' => 'bg-emerald-500/15 text-emerald-400'],
+                        ['n' => '02', 'label' => 'Credit card', 'desc' => 'Retainers & milestones', 'tags' => 'Visa · MC · RuPay', 'bar' => 'bg-indigo-500', 'icon' => 'bg-indigo-500/15 text-indigo-400'],
+                        ['n' => '03', 'label' => 'Debit card', 'desc' => 'Familiar bank checkout', 'tags' => 'All major banks', 'bar' => 'bg-violet-500', 'icon' => 'bg-violet-500/15 text-violet-400'],
+                        ['n' => '04', 'label' => 'Net banking', 'desc' => 'Trusted by businesses', 'tags' => '50+ banks', 'bar' => 'bg-cyan-500', 'icon' => 'bg-cyan-500/15 text-cyan-400'],
+                        ['n' => '05', 'label' => 'Wallets', 'desc' => 'Where enabled on gateway', 'tags' => 'Paytm & more', 'bar' => 'bg-fuchsia-500', 'icon' => 'bg-fuchsia-500/15 text-fuchsia-400'],
+                    ] as $m)
+                        <div class="group relative flex min-h-[10.5rem] flex-col p-4 transition hover:bg-slate-800/60 sm:p-5">
+                            <span class="absolute inset-x-0 top-0 h-0.5 {{ $m['bar'] }}"></span>
+                            <div class="mb-3 flex items-center justify-between">
+                                <span class="text-xs font-bold tabular-nums text-slate-500">{{ $m['n'] }}</span>
+                                <span class="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 {{ $m['icon'] }}">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+                                </span>
+                            </div>
+                            <h3 class="text-base font-bold text-white">{{ $m['label'] }}</h3>
+                            <p class="mt-1 flex-1 text-sm leading-relaxed text-slate-400">{{ $m['desc'] }}</p>
+                            <p class="mt-3 border-t border-slate-700/50 pt-3 text-xs font-medium text-slate-500">{{ $m['tags'] }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="mt-6 overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-900 shadow-xl shadow-black/20">
+                <div class="border-b border-slate-700/70 bg-slate-800/90 px-4 py-3 sm:px-5">
+                    <p class="text-xs font-bold uppercase tracking-widest text-slate-300">How checkout feels <span class="font-normal normal-case tracking-normal text-slate-500">· One order · One payout</span></p>
+                </div>
+                <div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-3 sm:gap-6 sm:p-6">
+                    @foreach ([
+                        ['step' => '1', 'title' => 'Client pays', 'sub' => 'UPI, card or bank', 'ring' => 'border-emerald-500/40 text-emerald-300'],
+                        ['step' => '2', 'title' => 'Licensed gateway', 'sub' => 'RBI-authorised partner', 'ring' => 'border-indigo-500/40 text-indigo-300'],
+                        ['step' => '3', 'title' => 'Your bank', 'sub' => 'Settlement to account', 'ring' => 'border-cyan-500/40 text-cyan-300'],
+                    ] as $s)
+                        <div class="flex items-center gap-3 rounded-xl border border-slate-700/50 bg-slate-800/40 p-4">
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 bg-slate-950 text-sm font-bold {{ $s['ring'] }}">{{ $s['step'] }}</span>
+                            <div>
+                                <p class="text-sm font-bold text-white">{{ $s['title'] }}</p>
+                                <p class="text-xs text-slate-500">{{ $s['sub'] }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <p class="mt-8 text-center text-sm text-slate-500">
+                RBI-authorised partners · Secure checkout · KYC-ready ·
+                <a href="{{ route('terms') }}" class="font-semibold text-indigo-400 hover:text-white">Terms</a> ·
+                <a href="{{ route('privacy') }}" class="font-semibold text-indigo-400 hover:text-white">Privacy</a>
+            </p>
+        </div>
+    </section>
 
     {{-- Who it's for --}}
     <section id="marketplace" class="scroll-mt-24 border-b border-white/5 bg-slate-900/40 px-4 py-20 sm:px-6">
