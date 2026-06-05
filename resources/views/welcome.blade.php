@@ -85,31 +85,7 @@
         </div>
     </section>
 
-    {{-- Payment methods spotlight --}}
-    <section class="border-y border-white/5 bg-gradient-to-b from-slate-900/60 to-slate-950/40 px-4 py-16 sm:px-6 sm:py-20">
-        <div class="mx-auto max-w-6xl text-center">
-            <p class="text-sm font-semibold uppercase tracking-wider text-emerald-400">Every way clients pay online</p>
-            <h2 class="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">Not just cards — the full Indian checkout.</h2>
-            <p class="mx-auto mt-4 max-w-2xl text-lg text-slate-400">Your clients choose what feels natural. You see one order, one settlement — whether they paid with PhonePe, a Visa card, or net banking.</p>
-            <div class="pay-methods__grid pay-methods__grid--5 mx-auto mt-12 max-w-5xl text-left">
-                @foreach ([
-                    ['code' => 'UPI', 'label' => 'UPI', 'desc' => 'GPay, PhonePe, Paytm, BHIM — instant for most clients.', 'tone' => 'emerald'],
-                    ['code' => 'CC', 'label' => 'Credit card', 'desc' => 'Visa, Mastercard, RuPay — ideal for retainers & milestones.', 'tone' => 'indigo'],
-                    ['code' => 'DC', 'label' => 'Debit card', 'desc' => 'Every major bank — familiar checkout in seconds.', 'tone' => 'violet'],
-                    ['code' => 'NB', 'label' => 'Net banking', 'desc' => 'Direct bank transfer at checkout — trusted by businesses.', 'tone' => 'cyan'],
-                    ['code' => 'APP', 'label' => 'Wallets', 'desc' => 'Paytm and other wallets where enabled on gateway.', 'tone' => 'fuchsia'],
-                ] as $card)
-                    <article class="pay-method-pill pay-method-pill--{{ $card['tone'] }} pay-method-pill--dark flex-col !items-start !gap-3 !p-5">
-                        <span class="pay-method-pill__code">{{ $card['code'] }}</span>
-                        <div>
-                            <p class="pay-method-pill__label text-base">{{ $card['label'] }}</p>
-                            <p class="mt-2 text-sm leading-relaxed text-slate-400">{{ $card['desc'] }}</p>
-                        </div>
-                    </article>
-                @endforeach
-            </div>
-        </div>
-    </section>
+    @include('partials.checkout-methods-showcase')
 
     {{-- Who it's for --}}
     <section id="marketplace" class="scroll-mt-24 border-b border-white/5 bg-slate-900/40 px-4 py-20 sm:px-6">
