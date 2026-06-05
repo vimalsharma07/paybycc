@@ -2,11 +2,11 @@
 
 @section('title', 'Transaction history — '.config('app.name'))
 @section('page_heading', 'Transaction history')
-@section('page_subheading', 'Wallet ledger, settlement timing, and bank payouts')
+@section('page_subheading', 'Payments, settlement timing, and bank payouts')
 
 @section('content')
     <div class="mb-6 flex flex-wrap gap-3">
-        <a href="{{ route('wallet.index') }}" class="inline-flex items-center rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-800 hover:bg-indigo-100">Wallet &amp; settings</a>
+        <a href="{{ route('banks.index') }}" class="inline-flex items-center rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-800 hover:bg-indigo-100">Bank accounts</a>
         <a href="{{ route('account.payments') }}" class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-800 hover:bg-slate-50">Payments sent</a>
     </div>
 

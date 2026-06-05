@@ -22,9 +22,9 @@
             $kycPillCard = 'bg-amber-100 text-amber-900 ring-1 ring-amber-400/45';
         }
         $kycHint = $user->hasSkippedKyc()
-            ? 'Skipped for now — you can pay and explore. Complete KYC to receive payouts and use wallet & banks.'
+            ? 'Skipped for now — you can pay and explore. Complete KYC to receive bank payouts.'
             : match ($k) {
-                \App\Models\User::KYC_ACTIVE => 'Verified — you can pay, use your wallet, and manage banks.',
+                \App\Models\User::KYC_ACTIVE => 'Verified — you can pay and receive settlements to your bank.',
                 \App\Models\User::KYC_INACTIVE => 'KYC is not active. Contact support if this looks wrong.',
                 \App\Models\User::KYC_INCOMPLETE => 'Complete KYC to receive payouts, or skip from the KYC page to pay only.',
                 default => 'KYC status unknown.',
@@ -123,14 +123,14 @@
         </div>
 
         <div class="space-y-4">
-            <a href="{{ $user->canReceivePayouts() ? route('wallet.index') : route('kyc.index') }}" class="group relative block overflow-hidden rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 shadow-md ring-1 ring-indigo-900/5 transition hover:border-indigo-300 hover:shadow-lg {{ $user->canReceivePayouts() ? '' : 'opacity-90' }}">
+            <a href="{{ $user->canReceivePayouts() ? route('account.transactions') : route('kyc.index') }}" class="group relative block overflow-hidden rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 shadow-md ring-1 ring-indigo-900/5 transition hover:border-indigo-300 hover:shadow-lg {{ $user->canReceivePayouts() ? '' : 'opacity-90' }}">
                 <div class="flex items-center gap-4">
                     <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-md" aria-hidden="true">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H12a2.25 2.25 0 00-2.25 2.25v6.75A2.25 2.25 0 009.75 21.75h-1.5A2.25 2.25 0 016 19.5V12a2.25 2.25 0 00-2.25-2.25H3"/><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.375H9.75A2.25 2.25 0 0112 5.625v.75m0 0h3.75m-3.75 0H9m0 0H5.625A2.25 2.25 0 003 8.25v.375c0 .621.504 1.125 1.125 1.125h16.5c.621 0 1.125-.504 1.125-1.125V8.25A2.25 2.25 0 0019.875 6H16.5"/></svg>
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z"/></svg>
                     </span>
                     <div class="min-w-0 flex-1">
-                        <p class="font-bold text-slate-900 group-hover:text-indigo-700">Wallet</p>
-                        <p class="mt-0.5 text-xs text-slate-600">{{ $user->canReceivePayouts() ? 'Balance, auto-settlement, transaction history.' : 'Requires KYC to receive payouts.' }}</p>
+                        <p class="font-bold text-slate-900 group-hover:text-indigo-700">Transactions</p>
+                        <p class="mt-0.5 text-xs text-slate-600">{{ $user->canReceivePayouts() ? 'Payment and bank settlement history.' : 'Requires KYC to receive payouts.' }}</p>
                     </div>
                     <span class="text-lg font-bold text-indigo-400 transition group-hover:text-indigo-600" aria-hidden="true">→</span>
                 </div>

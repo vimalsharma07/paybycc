@@ -1,7 +1,7 @@
 @extends('layouts.marketing')
 
-@section('title', $siteSettings->displayName().' — Freelancer & service marketplace')
-@section('meta_description', 'Find freelancers, place orders, and pay securely on '.$siteSettings->displayName().'. Card-first payments with KYC, compliance, and transparent settlements.')
+@section('title', $siteSettings->displayName().' — Accept payments as a freelancer')
+@section('meta_description', 'Freelancers on '.$siteSettings->displayName().' accept UPI, credit & debit cards, net banking, and wallets. Clients pay their way — you get one settlement to your bank.')
 
 @section('content')
     {{-- Hero --}}
@@ -10,26 +10,29 @@
             <div>
                 <p class="animate-fade-up inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-indigo-300">
                     <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span>
-                    Marketplace · Card payments · Settlements
+                    For freelancers · All payment methods · Bank payouts
                 </p>
                 <h1 class="animate-fade-up animate-delay-100 mt-6 text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-[3.25rem]">
-                    Hire talent. Get paid. <span class="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">One trusted platform.</span>
+                    Accept payments <span class="bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">your clients already use.</span>
                 </h1>
                 <p class="animate-fade-up animate-delay-200 mt-6 text-lg leading-relaxed text-slate-400">
-                    {{ $siteSettings->displayName() }} connects customers with freelancers and service providers. Discover skills, place orders, and pay securely — with <strong class="font-medium text-slate-300">credit &amp; debit cards</strong> as our primary checkout today and more payment methods coming soon.
+                    {{ $siteSettings->displayName() }} is built for Indian freelancers and service providers. List your skills, share a payment link, and let clients pay via <strong class="font-medium text-slate-300">UPI, credit card, debit card, net banking, or wallets</strong> — you receive one clean settlement to your bank.
                 </p>
+                <div class="animate-fade-up animate-delay-300 mt-8">
+                    <x-payment-methods variant="dark" size="sm" :show-label="false" />
+                </div>
                 <div class="animate-fade-up animate-delay-300 mt-10 flex flex-wrap gap-3">
                     @auth
                         @php $payUrl = auth()->user()->canUsePlatform() ? route('payments.create') : route('kyc.index'); @endphp
                         <a href="{{ $payUrl }}" class="pay-now-btn inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 px-8 py-3.5 text-base font-bold text-white shadow-xl transition hover:brightness-110">
-                            {{ auth()->user()->canUsePlatform() ? 'Pay with card' : 'Complete KYC to pay' }}
+                            {{ auth()->user()->canUsePlatform() ? 'Pay a freelancer' : 'Complete KYC to pay' }}
                         </a>
                         <a href="{{ auth()->user()->canUsePlatform() ? route('dashboard') : route('kyc.index') }}" class="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/5 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-white/10">
                             Dashboard
                         </a>
                     @else
                         <a href="{{ route('register') }}" class="pay-now-btn inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 px-8 py-3.5 text-base font-bold text-white shadow-xl transition hover:brightness-110">
-                            Join free
+                            Start accepting payments
                         </a>
                         <a href="{{ route('login') }}" class="inline-flex items-center justify-center rounded-2xl border border-fuchsia-400/40 bg-fuchsia-500/10 px-6 py-3.5 text-base font-semibold text-fuchsia-200 transition hover:bg-fuchsia-500/20">
                             Log in
@@ -40,67 +43,98 @@
                     </a>
                 </div>
                 @guest
-                    <p class="animate-fade-up animate-delay-300 mt-4 text-xs text-slate-500">India-first · KYC &amp; compliance built in · <x-brand-wordmark variant="dark" size="sm" class="inline-flex align-baseline" /></p>
+                    <p class="animate-fade-up animate-delay-300 mt-4 text-xs text-slate-500">India-first · Licensed gateways · KYC &amp; compliance built in · <x-brand-wordmark variant="dark" size="sm" class="inline-flex align-baseline" /></p>
                 @endguest
                 <dl class="animate-fade-up animate-delay-400 mt-14 grid grid-cols-3 gap-6 border-t border-white/10 pt-10">
                     <div>
-                        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Payments</dt>
-                        <dd class="mt-1 text-sm font-semibold text-white">Cards first (CC/DC)</dd>
+                        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Checkout</dt>
+                        <dd class="mt-1 text-sm font-semibold text-white">UPI · Cards · NB</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Sellers</dt>
-                        <dd class="mt-1 text-sm font-semibold text-white">KYC before payout</dd>
+                        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Freelancers</dt>
+                        <dd class="mt-1 text-sm font-semibold text-white">One bank payout</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Trust</dt>
-                        <dd class="mt-1 text-sm font-semibold text-white">Risk &amp; Safe Status</dd>
+                        <dd class="mt-1 text-sm font-semibold text-white">KYC &amp; Safe Status</dd>
                     </div>
                 </dl>
             </div>
             <div class="relative lg:pl-8">
                 <div class="animate-float-soft relative mx-auto max-w-lg">
-                    <div class="absolute -right-6 -top-6 h-40 w-40 rounded-full bg-gradient-to-br from-indigo-500/40 to-transparent blur-2xl"></div>
+                    <div class="absolute -right-6 -top-6 h-40 w-40 rounded-full bg-gradient-to-br from-emerald-500/40 to-transparent blur-2xl"></div>
+                    <div class="absolute -left-4 top-1/3 h-32 w-32 rounded-full bg-gradient-to-br from-indigo-500/30 to-transparent blur-2xl"></div>
                     <img
                         src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&amp;fit=crop&amp;w=900&amp;q=80"
-                        alt="Secure card payment on marketplace"
+                        alt="Freelancer accepting UPI and card payments"
                         class="relative z-10 rounded-3xl border border-white/10 shadow-2xl shadow-black/40"
                         width="900"
                         height="600"
                         loading="eager"
                     />
-                    <div class="absolute -bottom-6 -left-4 z-20 max-w-[240px] rounded-2xl border border-white/10 bg-slate-900/95 p-4 shadow-xl backdrop-blur-md">
-                        <p class="text-xs font-medium text-indigo-300">Settlement engine</p>
-                        <p class="mt-1 text-sm text-slate-300">Funds release to freelancers only after payment, KYC, and risk checks pass.</p>
+                    <div class="absolute -bottom-6 -left-4 z-20 max-w-[260px] rounded-2xl border border-emerald-500/20 bg-slate-900/95 p-4 shadow-xl backdrop-blur-md">
+                        <p class="text-xs font-medium text-emerald-300">Client paid via UPI</p>
+                        <p class="mt-1 font-mono text-lg font-bold text-white">₹25,000</p>
+                        <p class="mt-1 text-xs text-slate-400">Settled to your bank · GST-ready records</p>
+                    </div>
+                    <div class="absolute -right-2 top-8 z-20 rounded-xl border border-indigo-500/25 bg-indigo-950/90 px-3 py-2 text-xs font-bold text-indigo-200 shadow-lg backdrop-blur-sm">
+                        + Credit card
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
+    {{-- Payment methods spotlight --}}
+    <section class="border-y border-white/5 bg-gradient-to-b from-slate-900/60 to-slate-950/40 px-4 py-16 sm:px-6 sm:py-20">
+        <div class="mx-auto max-w-6xl text-center">
+            <p class="text-sm font-semibold uppercase tracking-wider text-emerald-400">Every way clients pay online</p>
+            <h2 class="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">Not just cards — the full Indian checkout.</h2>
+            <p class="mx-auto mt-4 max-w-2xl text-lg text-slate-400">Your clients choose what feels natural. You see one order, one settlement — whether they paid with PhonePe, a Visa card, or net banking.</p>
+            <div class="pay-methods__grid pay-methods__grid--5 mx-auto mt-12 max-w-5xl text-left">
+                @foreach ([
+                    ['code' => 'UPI', 'label' => 'UPI', 'desc' => 'GPay, PhonePe, Paytm, BHIM — instant for most clients.', 'tone' => 'emerald'],
+                    ['code' => 'CC', 'label' => 'Credit card', 'desc' => 'Visa, Mastercard, RuPay — ideal for retainers & milestones.', 'tone' => 'indigo'],
+                    ['code' => 'DC', 'label' => 'Debit card', 'desc' => 'Every major bank — familiar checkout in seconds.', 'tone' => 'violet'],
+                    ['code' => 'NB', 'label' => 'Net banking', 'desc' => 'Direct bank transfer at checkout — trusted by businesses.', 'tone' => 'cyan'],
+                    ['code' => 'APP', 'label' => 'Wallets', 'desc' => 'Paytm and other wallets where enabled on gateway.', 'tone' => 'fuchsia'],
+                ] as $card)
+                    <article class="pay-method-pill pay-method-pill--{{ $card['tone'] }} pay-method-pill--dark flex-col !items-start !gap-3 !p-5">
+                        <span class="pay-method-pill__code">{{ $card['code'] }}</span>
+                        <div>
+                            <p class="pay-method-pill__label text-base">{{ $card['label'] }}</p>
+                            <p class="mt-2 text-sm leading-relaxed text-slate-400">{{ $card['desc'] }}</p>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
     {{-- Who it's for --}}
-    <section id="marketplace" class="scroll-mt-24 border-y border-white/5 bg-slate-900/40 px-4 py-20 sm:px-6">
+    <section id="marketplace" class="scroll-mt-24 border-b border-white/5 bg-slate-900/40 px-4 py-20 sm:px-6">
         <div class="mx-auto max-w-6xl">
             <div class="max-w-2xl">
-                <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Built for both sides of the deal.</h2>
-                <p class="mt-4 text-lg text-slate-400">Customers find verified talent. Freelancers get paid through a compliant settlement path — not informal transfers.</p>
+                <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Built for freelancers who invoice globally, settle locally.</h2>
+                <p class="mt-4 text-lg text-slate-400">Clients pay however they prefer. You focus on delivery — we handle checkout, compliance, and bank payouts.</p>
             </div>
             <div class="mt-14 grid gap-6 lg:grid-cols-2">
                 <article class="rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-transparent p-8">
-                    <p class="text-sm font-semibold uppercase tracking-wider text-cyan-300">Customers</p>
-                    <h3 class="mt-3 text-xl font-semibold text-white">Find &amp; pay with confidence</h3>
+                    <p class="text-sm font-semibold uppercase tracking-wider text-cyan-300">For your clients</p>
+                    <h3 class="mt-3 text-xl font-semibold text-white">Pay the way they already do</h3>
                     <ul class="mt-4 space-y-2 text-sm text-slate-400">
-                        <li class="flex gap-2"><span class="text-cyan-400">✓</span> Search by service, provider, or identity (as search rolls out)</li>
-                        <li class="flex gap-2"><span class="text-cyan-400">✓</span> Place orders with clear status tracking</li>
-                        <li class="flex gap-2"><span class="text-cyan-400">✓</span> Pay with card — primary method today</li>
+                        <li class="flex gap-2"><span class="text-cyan-400">✓</span> UPI, cards, net banking &amp; wallets at secure checkout</li>
+                        <li class="flex gap-2"><span class="text-cyan-400">✓</span> Search freelancers by name, skill, or code</li>
+                        <li class="flex gap-2"><span class="text-cyan-400">✓</span> Clear payment status from checkout to receipt</li>
                     </ul>
                 </article>
                 <article class="rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-500/10 to-transparent p-8">
-                    <p class="text-sm font-semibold uppercase tracking-wider text-violet-300">Freelancers &amp; sellers</p>
-                    <h3 class="mt-3 text-xl font-semibold text-white">Onboard once, get settled right</h3>
+                    <p class="text-sm font-semibold uppercase tracking-wider text-violet-300">For you (freelancer)</p>
+                    <h3 class="mt-3 text-xl font-semibold text-white">One link, every payment method</h3>
                     <ul class="mt-4 space-y-2 text-sm text-slate-400">
-                        <li class="flex gap-2"><span class="text-violet-400">✓</span> List services &amp; sub-services you offer</li>
-                        <li class="flex gap-2"><span class="text-violet-400">✓</span> Mandatory KYC before bank settlement</li>
-                        <li class="flex gap-2"><span class="text-violet-400">✓</span> Optional: only accept KYC-verified customers</li>
+                        <li class="flex gap-2"><span class="text-violet-400">✓</span> Accept UPI &amp; cards without juggling multiple apps</li>
+                        <li class="flex gap-2"><span class="text-violet-400">✓</span> Automatic settlement to your linked bank account</li>
+                        <li class="flex gap-2"><span class="text-violet-400">✓</span> KYC, GST/TDS fields, and payout history in one dashboard</li>
                     </ul>
                 </article>
             </div>
@@ -109,12 +143,12 @@
                     $tiles = [
                         ['title' => 'Design & creative', 'desc' => 'Branding, UI, content, and more.', 'icon' => '🎨'],
                         ['title' => 'Tech & IT', 'desc' => 'Development, support, DevOps.', 'icon' => '💻'],
-                        ['title' => 'Business services', 'desc' => 'Consulting, accounting, legal.', 'icon' => '📊'],
-                        ['title' => 'Custom skills', 'desc' => 'Request new categories — admin approves.', 'icon' => '✨'],
+                        ['title' => 'Consulting', 'desc' => 'Strategy, finance, legal, coaching.', 'icon' => '📊'],
+                        ['title' => 'Any skill', 'desc' => 'List what you offer — get paid your way.', 'icon' => '✨'],
                     ];
                 @endphp
                 @foreach ($tiles as $tile)
-                    <article class="rounded-2xl border border-white/10 bg-slate-900/60 p-5 transition hover:border-indigo-500/30">
+                    <article class="rounded-2xl border border-white/10 bg-slate-900/60 p-5 transition hover:border-indigo-500/30 hover:shadow-lg hover:shadow-indigo-500/5">
                         <span class="text-2xl">{{ $tile['icon'] }}</span>
                         <h3 class="mt-3 font-semibold text-white">{{ $tile['title'] }}</h3>
                         <p class="mt-2 text-sm text-slate-400">{{ $tile['desc'] }}</p>
@@ -128,22 +162,22 @@
     <section class="px-4 py-20 sm:px-6">
         <div class="mx-auto max-w-6xl">
             <h2 class="text-center text-3xl font-bold text-white sm:text-4xl">How it works</h2>
-            <p class="mx-auto mt-4 max-w-2xl text-center text-lg text-slate-400">From discovery to settlement — with card payments at the centre.</p>
+            <p class="mx-auto mt-4 max-w-2xl text-center text-lg text-slate-400">From first hello to money in your bank — with every major payment method in between.</p>
             <div class="mt-16 grid gap-10 lg:grid-cols-3">
                 <div class="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-8 text-center">
                     <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/20 text-xl font-bold text-indigo-300">1</span>
-                    <h3 class="mt-6 text-xl font-semibold text-white">Discover &amp; order</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-slate-400">Customers find freelancers by service. Sellers complete onboarding and KYC.</p>
+                    <h3 class="mt-6 text-xl font-semibold text-white">List &amp; share</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-slate-400">Complete KYC, add your bank, and share your profile or payment link with clients.</p>
                 </div>
-                <div class="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-8 text-center">
-                    <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/20 text-xl font-bold text-violet-300">2</span>
-                    <h3 class="mt-6 text-xl font-semibold text-white">Pay by card</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-slate-400">Checkout via secure payment partners. Credit &amp; debit cards supported now; more methods planned.</p>
+                <div class="rounded-2xl border border-emerald-500/20 bg-gradient-to-b from-emerald-500/10 to-transparent p-8 text-center">
+                    <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/20 text-xl font-bold text-emerald-300">2</span>
+                    <h3 class="mt-6 text-xl font-semibold text-white">Client pays their way</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-slate-400">UPI, credit card, debit card, net banking, or wallet — one secure Cashfree checkout.</p>
                 </div>
                 <div class="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-8 text-center">
                     <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-500/20 text-xl font-bold text-cyan-300">3</span>
-                    <h3 class="mt-6 text-xl font-semibold text-white">Settle safely</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-slate-400">Payouts after risk review (Safe Status), tax fields, and compliance checks — not before.</p>
+                    <h3 class="mt-6 text-xl font-semibold text-white">Settle to your bank</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-slate-400">Net amount lands in your bank after compliance checks — with full transaction history.</p>
                 </div>
             </div>
         </div>
@@ -155,7 +189,7 @@
             <div class="order-2 lg:order-1">
                 <img
                     src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&amp;fit=crop&amp;w=900&amp;q=80"
-                    alt="Secure card checkout"
+                    alt="Secure multi-method checkout for freelancers"
                     class="rounded-3xl border border-white/10 shadow-xl"
                     loading="lazy"
                     width="900"
@@ -163,14 +197,17 @@
                 />
             </div>
             <div class="order-1 lg:order-2">
-                <h2 class="text-3xl font-bold text-white sm:text-4xl">Payments you can explain to finance.</h2>
-                <p class="mt-6 text-lg text-slate-400">We are building support for multiple payment rails. Today, <strong class="text-slate-300">card payments (CC/DC)</strong> are the main checkout path — fast for customers and familiar for reconciliation.</p>
+                <h2 class="text-3xl font-bold text-white sm:text-4xl">Payments your accountant will thank you for.</h2>
+                <p class="mt-6 text-lg text-slate-400">Licensed gateways, itemised fees, and GST/TDS/TCS fields — whether the client paid by UPI or card. One ledger, one bank payout.</p>
                 <ul class="mt-8 space-y-4 text-slate-300">
-                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> Licensed payment gateways</li>
-                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> Order, payment &amp; settlement status</li>
+                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> UPI, cards, net banking &amp; wallets via Cashfree</li>
+                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> Order, payment &amp; settlement status tracking</li>
                     <li class="flex gap-3"><span class="text-emerald-400">✓</span> GST, TDS &amp; TCS fields for compliance</li>
-                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> Wallet &amp; bank payout tools for sellers</li>
+                    <li class="flex gap-3"><span class="text-emerald-400">✓</span> Automatic bank payouts — no manual wallet transfers</li>
                 </ul>
+                <div class="mt-8">
+                    <x-payment-methods variant="dark" size="sm" />
+                </div>
                 <div class="mt-10 flex flex-wrap gap-4">
                     <a href="{{ route('privacy') }}" class="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-200">Privacy policy</a>
                     <a href="{{ route('terms') }}" class="rounded-xl border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10">Terms &amp; conditions</a>
@@ -182,14 +219,17 @@
     {{-- CTA --}}
     <section class="px-4 py-24 sm:px-6">
         <div class="mx-auto max-w-4xl rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-600/40 via-violet-600/30 to-slate-900 p-10 text-center shadow-2xl shadow-indigo-500/20 sm:p-14">
-            <h2 class="text-3xl font-bold text-white sm:text-4xl">Ready to join the marketplace?</h2>
-            <p class="mx-auto mt-4 max-w-xl text-lg text-indigo-100/90">Whether you hire freelancers or offer services — start with a free account, verify when required, and pay or get paid with clarity.</p>
+            <h2 class="text-3xl font-bold text-white sm:text-4xl">Ready to accept every payment method?</h2>
+            <p class="mx-auto mt-4 max-w-xl text-lg text-indigo-100/90">Join as a freelancer or pay someone you trust — UPI, cards, net banking, and more, with settlements straight to the bank.</p>
+            <div class="mt-8 flex justify-center">
+                <x-payment-methods variant="dark" size="sm" :show-label="false" class="justify-center" />
+            </div>
             <div class="mt-10 flex flex-wrap justify-center gap-3 sm:gap-4">
                 @guest
-                    <a href="{{ route('register') }}" class="pay-now-btn inline-flex rounded-2xl bg-gradient-to-r from-cyan-400 via-white to-amber-200 px-8 py-3.5 text-base font-bold text-slate-900 shadow-lg transition hover:brightness-105">Create account</a>
+                    <a href="{{ route('register') }}" class="pay-now-btn inline-flex rounded-2xl bg-gradient-to-r from-cyan-400 via-white to-amber-200 px-8 py-3.5 text-base font-bold text-slate-900 shadow-lg transition hover:brightness-105">Create free account</a>
                     <a href="{{ route('login') }}" class="inline-flex rounded-2xl border-2 border-fuchsia-300/50 bg-fuchsia-500/20 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-fuchsia-500/30">Log in</a>
                 @else
-                    <a href="{{ auth()->user()->canUsePlatform() ? route('payments.create') : route('kyc.index') }}" class="pay-now-btn inline-flex rounded-2xl bg-gradient-to-r from-cyan-400 via-white to-amber-200 px-8 py-3.5 text-base font-bold text-slate-900 shadow-lg transition hover:brightness-105">Pay with card</a>
+                    <a href="{{ auth()->user()->canUsePlatform() ? route('payments.create') : route('kyc.index') }}" class="pay-now-btn inline-flex rounded-2xl bg-gradient-to-r from-cyan-400 via-white to-amber-200 px-8 py-3.5 text-base font-bold text-slate-900 shadow-lg transition hover:brightness-105">Pay now</a>
                     <a href="{{ route('dashboard') }}" class="inline-flex rounded-2xl border-2 border-white/40 px-6 py-3.5 text-base font-semibold text-white transition hover:bg-white/10">Dashboard</a>
                 @endguest
                 <a href="{{ route('contact') }}" class="inline-flex rounded-2xl border border-white/30 px-6 py-3.5 text-base font-semibold text-white/90 transition hover:bg-white/10">Contact us</a>

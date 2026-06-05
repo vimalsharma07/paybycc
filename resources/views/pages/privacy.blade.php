@@ -1,7 +1,7 @@
 @extends('layouts.marketing')
 
 @section('title', 'Privacy policy — '.$siteSettings->displayName())
-@section('meta_description', 'How '.$siteSettings->displayName().' collects and protects data for customers, freelancers, orders, and card payments.')
+@section('meta_description', 'How '.$siteSettings->displayName().' collects and protects data for customers, freelancers, orders, and UPI/card payments.')
 
 @section('content')
     <article class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:py-24">
@@ -41,7 +41,7 @@
                 <ul class="mt-4 list-disc space-y-2 pl-5">
                     <li>Operate the marketplace (search, orders, payments, settlements).</li>
                     <li>Verify identity and manage risk (including Safe Status for settlements).</li>
-                    <li>Process <strong class="text-slate-200">card and other payments</strong> via partners.</li>
+                    <li>Process <strong class="text-slate-200">UPI, card, net banking, wallet, and other payments</strong> via partners.</li>
                     <li>Comply with law (tax, AML, regulatory requests).</li>
                     <li>Prevent fraud and improve reliability (including structured audit logs).</li>
                     <li>Respond to support inquiries.</li>

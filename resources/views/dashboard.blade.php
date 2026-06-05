@@ -2,7 +2,7 @@
 
 @section('title', 'Dashboard — '.config('app.name'))
 @section('page_heading', 'Overview')
-@section('page_subheading', 'Your marketplace hub — pay, track, and settle')
+@section('page_subheading', 'Accept UPI, cards & more — track payouts to your bank')
 
 @section('content')
     @php
@@ -25,8 +25,10 @@
             </div>
             @if ($user->canReceivePayouts())
                 <div class="rounded-2xl bg-white/15 px-5 py-4 ring-1 ring-white/25 backdrop-blur-sm">
-                    <p class="text-xs font-bold uppercase text-white/70">Wallet balance</p>
-                    <p class="mt-1 font-mono text-3xl font-bold tabular-nums">₹{{ number_format($walletBalance, 2) }}</p>
+                    <p class="text-xs font-bold uppercase text-white/70">You accept</p>
+                    <p class="mt-1 text-sm text-white/90">UPI · Cards · Net banking · Wallets</p>
+                    <p class="mt-2 text-xs text-white/75">Settlements go straight to your bank.</p>
+                    <a href="{{ route('banks.index') }}" class="mt-2 inline-flex text-xs font-bold text-cyan-200 hover:underline">Manage banks →</a>
                 </div>
             @endif
         </div>
@@ -34,7 +36,7 @@
 
     @if ($user->hasSkippedKyc())
         <div class="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950">
-            <p class="font-semibold">KYC skipped — you can pay and explore; payouts need verification.</p>
+            <p class="font-semibold">KYC skipped — you can pay and explore; bank payouts need verification.</p>
             <a href="{{ route('kyc.index') }}" class="mt-2 inline-flex font-bold text-amber-900 underline">Complete KYC →</a>
         </div>
     @endif
@@ -55,23 +57,23 @@
             @endif
             @if ($user->canReceivePayouts())
                 <a href="{{ route('account.transactions') }}" class="app-stat-card group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm ring-1 ring-slate-900/5 transition hover:border-violet-200 hover:shadow-md">
-                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Wallet</p>
-                    <p class="mt-2 font-mono text-2xl font-bold tabular-nums text-indigo-800">₹{{ number_format($walletBalance, 2) }}</p>
-                    <p class="mt-1 text-xs font-bold text-indigo-600 group-hover:underline">Transaction history →</p>
+                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Transactions</p>
+                    <p class="mt-2 text-3xl font-bold text-indigo-800">{{ $recentTransactions->count() > 0 ? 'Active' : '—' }}</p>
+                    <p class="mt-1 text-xs font-bold text-indigo-600 group-hover:underline">Payment history →</p>
                 </a>
                 <a href="{{ route('banks.index') }}" class="app-stat-card group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm ring-1 ring-slate-900/5 transition hover:border-violet-200 hover:shadow-md">
                     <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Bank accounts</p>
                     <p class="mt-2 text-3xl font-bold text-slate-900">{{ (int) $user->banks_count }}</p>
-                    <p class="mt-1 text-xs font-bold text-violet-600 group-hover:underline">Manage →</p>
+                    <p class="mt-1 text-xs font-bold text-violet-600 group-hover:underline">Auto payout enabled</p>
                 </a>
             @else
                 <a href="{{ route('marketplace.index') }}" class="app-stat-card rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 to-violet-50 p-5 shadow-sm sm:col-span-2">
                     <p class="font-bold text-slate-900">Find freelancers</p>
-                    <p class="mt-1 text-sm text-slate-600">Search sellers and pay with card</p>
+                    <p class="mt-1 text-sm text-slate-600">Pay with UPI, card, or net banking</p>
                 </a>
                 <a href="{{ route('kyc.index') }}" class="app-stat-card rounded-2xl border border-amber-200/80 bg-amber-50 p-5 shadow-sm">
                     <p class="font-bold text-amber-950">Complete KYC</p>
-                    <p class="mt-1 text-sm text-amber-900/90">Unlock wallet &amp; settlements</p>
+                    <p class="mt-1 text-sm text-amber-900/90">Unlock bank payouts</p>
                 </a>
             @endif
         </div>
@@ -148,7 +150,7 @@
     @if ($user->canUsePlatform() && $recentPayments->isEmpty() && (! $user->isSeller() || $recentOrdersReceived->isEmpty()))
         <div class="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
             <p class="text-lg font-bold text-slate-900">Start on the marketplace</p>
-            <p class="mt-2 text-sm text-slate-600">Pay a freelancer or complete KYC to receive payouts.</p>
+            <p class="mt-2 text-sm text-slate-600">Pay a freelancer any way you like — or complete KYC to start accepting payments to your bank.</p>
             <div class="mt-6 flex flex-wrap justify-center gap-3">
                 <a href="{{ route('marketplace.index') }}" class="rounded-2xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-800 hover:bg-slate-50">Explore</a>
                 <a href="{{ route('payments.create') }}" class="rounded-2xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-indigo-500">Pay now</a>

@@ -38,9 +38,16 @@
                 </ul>
             @endif
 
+            <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Payment options at checkout</p>
+                <div class="mt-3">
+                    <x-payment-methods variant="light" size="sm" :show-label="false" />
+                </div>
+            </div>
+
             @unless ($seller->hasActiveKyc())
                 <p class="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-                    This seller has not finished KYC. You can still pay; settlement to their wallet is held until they verify.
+                    This seller has not finished KYC. You can still pay; bank settlement is held until they verify.
                 </p>
             @endunless
 

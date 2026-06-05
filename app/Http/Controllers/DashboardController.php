@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Payment;
-use App\Models\Wallet;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -19,16 +18,6 @@ class DashboardController extends Controller
         }
 
         $user->loadCount('banks');
-
-        $wallet = null;
-        $walletBalance = 0.0;
-        if ($user->canReceivePayouts()) {
-            $wallet = Wallet::firstOrCreate(
-                ['user_id' => $user->id],
-                ['balance' => 0, 'auto_settle_to_bank' => true, 'default_bank_id' => null]
-            );
-            $walletBalance = (float) $wallet->balance;
-        }
 
         $stats = [
             'payments_sent' => $user->canUsePlatform()
@@ -69,8 +58,6 @@ class DashboardController extends Controller
 
         return view('dashboard', [
             'user' => $user,
-            'wallet' => $wallet,
-            'walletBalance' => $walletBalance,
             'stats' => $stats,
             'recentPayments' => $recentPayments,
             'recentTransactions' => $recentTransactions,

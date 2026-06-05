@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Bank accounts — '.config('app.name'))
+@section('page_heading', 'Bank accounts')
+@section('page_subheading', 'Payouts settle automatically to your primary bank')
 
 @php
     $openAddPanel = old('_intent') === 'create' && $errors->any();
@@ -8,29 +10,12 @@
 @endphp
 
 @section('content')
-    <div class="overflow-hidden rounded-3xl border border-violet-200/80 bg-gradient-to-br from-violet-600 via-indigo-600 to-slate-900 shadow-xl shadow-indigo-900/20">
-        <div class="px-6 py-8 text-white sm:px-8 sm:py-10">
-            <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-                <div class="flex items-start gap-4">
-                    <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25" aria-hidden="true">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-4h6v4"/></svg>
-                    </span>
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-widest text-white/70">Payouts</p>
-                        <h1 class="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Bank accounts</h1>
-                        <p class="mt-2 max-w-xl text-sm leading-relaxed text-white/85">Save the accounts you want to receive money in. You can add more anytime — details stay easy to review.</p>
-                    </div>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <a href="{{ route('profile.show') }}" class="inline-flex items-center rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15">Profile</a>
-                    <a href="{{ route('dashboard') }}" class="inline-flex items-center rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15">Dashboard</a>
-                    <a href="{{ route('wallet.index') }}" class="inline-flex items-center rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-indigo-700 shadow-lg shadow-black/10 transition hover:bg-violet-50">Wallet</a>
-                </div>
-            </div>
-        </div>
+    <div class="mb-6 rounded-2xl border border-violet-200/80 bg-violet-50 px-5 py-4 text-sm text-violet-950">
+        <p class="font-semibold">Automatic bank transfer is on</p>
+        <p class="mt-1 text-violet-900/90">When you receive payments, we route settlement to your <strong>primary</strong> bank account. Mark one account as primary below.</p>
     </div>
 
-    <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h2 class="text-lg font-bold text-slate-900">Your accounts</h2>
             <p class="text-sm text-slate-600">{{ $banks->count() }} account{{ $banks->count() === 1 ? '' : 's' }} saved</p>

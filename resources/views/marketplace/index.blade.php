@@ -2,9 +2,16 @@
 
 @section('title', 'Find freelancers — '.config('app.name'))
 @section('page_heading', 'Marketplace')
-@section('page_subheading', 'Search freelancers and pay with card')
+@section('page_subheading', 'Find freelancers — pay with UPI, card, or net banking')
 
 @section('content')
+    <div class="mb-6 overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-r from-emerald-50 via-white to-indigo-50 p-4 sm:p-5">
+        <p class="text-sm font-semibold text-slate-800">Clients pay their way — freelancers get one bank settlement.</p>
+        <div class="mt-3">
+            <x-payment-methods variant="light" size="sm" :show-label="false" />
+        </div>
+    </div>
+
     <div class="mb-8 lg:hidden">
         <p class="text-sm text-slate-600">Search by name, user code, company, city, or skill.</p>
     </div>

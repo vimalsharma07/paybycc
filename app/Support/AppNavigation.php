@@ -29,7 +29,6 @@ final class AppNavigation
 
         if ($canPayout) {
             $items[] = self::item('account.transactions', 'Transaction history', 'chart', ['account.transactions']);
-            $items[] = self::item('wallet.index', 'Wallet', 'wallet', ['wallet.*']);
             $items[] = self::item('banks.index', 'Bank accounts', 'bank', ['banks.*']);
         } elseif ($canPay) {
             $items[] = self::item('kyc.index', 'Complete KYC', 'shield', ['kyc.*']);

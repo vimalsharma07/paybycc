@@ -3,57 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateWalletRequest;
-use App\Models\Wallet;
+use App\Services\Wallet\WalletService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
 
+/**
+ * Wallet UI is hidden — routes redirect to bank accounts.
+ * Backend wallet ledger remains active for settlements.
+ */
 class WalletController extends Controller
 {
-    public function index(): View
+    public function __construct(
+        protected WalletService $wallets,
+    ) {}
+
+    public function index(): RedirectResponse
     {
-        $user = auth()->user();
-
-        $wallet = Wallet::firstOrCreate(
-            ['user_id' => $user->id],
-            [
-                'balance' => 0,
-                'auto_settle_to_bank' => true,
-                'default_bank_id' => null,
-            ]
-        );
-
-        $transactions = $user->transactions()
-            ->with(['bank:id,bank_name', 'payment:id,amount'])
-            ->latest()
-            ->paginate(20);
-
-        $banks = $user->banks()
-            ->where('status', 'active')
-            ->orderByDesc('is_primary')
-            ->orderBy('bank_name')
-            ->get();
-
-        return view('wallet.index', compact('wallet', 'transactions', 'banks'));
+        return redirect()->route('banks.index');
     }
 
     public function update(UpdateWalletRequest $request): RedirectResponse
     {
-        $wallet = Wallet::firstOrCreate(
-            ['user_id' => $request->user()->id],
-            [
-                'balance' => 0,
-                'auto_settle_to_bank' => true,
-                'default_bank_id' => null,
-            ]
-        );
+        $bankId = $request->validated()['default_bank_id'] ?? null;
+        $bankId = $bankId === '' || $bankId === null ? null : (int) $bankId;
 
-        $data = $request->validated();
-        if (($data['default_bank_id'] ?? null) === '' || $data['default_bank_id'] === null) {
-            $data['default_bank_id'] = null;
+        if ($bankId !== null) {
+            abort_unless($request->user()->banks()->whereKey($bankId)->exists(), 422);
         }
 
-        $wallet->update($data);
+        $this->wallets->setDefaultBank($request->user(), $bankId);
 
-        return back()->with('status', 'Wallet settings saved.');
+        return redirect()
+            ->route('banks.index')
+            ->with('status', 'Payout bank preference saved.');
     }
 }

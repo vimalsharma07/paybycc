@@ -5,7 +5,7 @@
 @section('guest_hero')
     <p class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Verification</p>
     <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Complete your KYC</h1>
-    <p class="max-w-md text-sm leading-relaxed text-slate-400">Verify with PAN to receive payouts. You can skip for now to explore and pay with card.</p>
+    <p class="max-w-md text-sm leading-relaxed text-slate-400">Verify with PAN to receive payouts. You can skip for now to explore and pay via UPI, card, or net banking.</p>
 @endsection
 
 @section('content')

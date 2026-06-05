@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Settlement;
-use App\Models\Wallet;
 use Illuminate\View\View;
 
 class AccountController extends Controller
@@ -43,17 +42,12 @@ class AccountController extends Controller
             ->latest()
             ->paginate(10, ['*'], 'settlements_page');
 
-        $wallet = Wallet::firstOrCreate(
-            ['user_id' => $user->id],
-            ['balance' => 0, 'auto_settle_to_bank' => true, 'default_bank_id' => null]
-        );
-
         $receivedTotal = (float) Order::query()
             ->where('freelancer_id', $user->id)
             ->where('payment_status', 'paid')
             ->sum('net_settlement_amount');
 
-        return view('account.settlements', compact('ordersReceived', 'settlements', 'wallet', 'receivedTotal'));
+        return view('account.settlements', compact('ordersReceived', 'settlements', 'receivedTotal'));
     }
 
     public function transactions(): View

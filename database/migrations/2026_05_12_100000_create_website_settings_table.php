@@ -34,7 +34,7 @@ return new class extends Migration
 
         DB::table('website_settings')->insert([
             'site_name' => config('app.name', 'PayByCc'),
-            'tagline' => 'Secure card payments & wallet settlements.',
+            'tagline' => 'Accept UPI, cards & more — settle to your bank.',
             'email' => null,
             'support_email' => null,
             'phone' => null,

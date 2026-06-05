@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureKycActive
 {
-    /** Wallet, banks, and receiving settlements require completed KYC. */
+    /** Banks and receiving settlements require completed KYC. */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();

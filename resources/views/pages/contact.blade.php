@@ -8,14 +8,18 @@
         <div>
             <p class="text-sm font-semibold uppercase tracking-wider text-indigo-400">Contact</p>
             <h1 class="mt-3 text-4xl font-bold tracking-tight text-white">We’re here to help.</h1>
-            <p class="mt-6 text-lg leading-relaxed text-slate-400">Questions about finding freelancers, placing orders, card payments, KYC, settlements, or your account — send a message. We aim to reply within a few business days.</p>
+            <p class="mt-6 text-lg leading-relaxed text-slate-400">Questions about finding freelancers, UPI or card payments, KYC, bank settlements, or your account — send a message. We aim to reply within a few business days.</p>
+
+            <div class="mt-8">
+                <x-payment-methods variant="dark" size="sm" />
+            </div>
 
             <div class="mt-10 space-y-6 rounded-2xl border border-white/10 bg-white/5 p-8">
                 <div class="flex gap-4">
                     <span class="text-2xl" aria-hidden="true">💳</span>
                     <div>
                         <p class="font-semibold text-white">Payments</p>
-                        <p class="mt-1 text-sm text-slate-400">Card (credit/debit) is our primary checkout method today. Additional payment options may be added over time.</p>
+                        <p class="mt-1 text-sm text-slate-400">Clients can pay via UPI, credit &amp; debit cards, net banking, and wallets through our licensed payment gateway.</p>
                     </div>
                 </div>
                 @if ($siteSettings->support_email || $siteSettings->email)

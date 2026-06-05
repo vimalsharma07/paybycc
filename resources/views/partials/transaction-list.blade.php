@@ -3,7 +3,7 @@
 @if ($transactions->isEmpty())
     <div class="px-6 py-14 text-center sm:px-8">
         <p class="text-base font-semibold text-slate-900">No transactions yet</p>
-        <p class="mx-auto mt-2 max-w-sm text-sm text-slate-600">Wallet movements and card payment settlements appear here.</p>
+        <p class="mx-auto mt-2 max-w-sm text-sm text-slate-600">UPI, card payments, and bank settlement activity appear here.</p>
     </div>
 @else
     <div class="divide-y divide-slate-100 md:hidden">

@@ -6,7 +6,7 @@ use App\Listeners\SendOpsNotificationOnUserRegistered;
 use App\Models\ApplicationLog;
 use App\Models\Transaction;
 use App\Models\User;
-use App\Models\Wallet;
+use App\Services\Wallet\WalletService;
 use App\Models\WebsiteSetting;
 use App\Observers\TransactionObserver;
 use App\Contracts\SmsSender;
@@ -83,14 +83,7 @@ class AppServiceProvider extends ServiceProvider
         Transaction::observe(TransactionObserver::class);
 
         User::created(function (User $user) {
-            Wallet::firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'balance' => 0,
-                    'auto_settle_to_bank' => true,
-                    'default_bank_id' => null,
-                ]
-            );
+            app(WalletService::class)->ensureForUser($user);
         });
 
         if (config('cashfree.auto_sync_gateway') && Schema::hasTable('gateways') && Gateway::count() === 0) {

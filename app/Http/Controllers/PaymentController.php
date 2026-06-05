@@ -6,7 +6,6 @@ use App\Models\Gateway;
 use App\Models\Payment;
 use App\Models\Transaction;
 use App\Models\User;
-use App\Models\Wallet;
 use App\Services\Orders\OrderService;
 use App\Services\Orders\SellerSearch;
 use App\Services\Payments\CashfreeGatewaySync;
@@ -36,15 +35,6 @@ class PaymentController extends Controller
             $primary = $gatewayManager->primaryGateway();
         }
 
-        $wallet = Wallet::firstOrCreate(
-            ['user_id' => auth()->id()],
-            [
-                'balance' => 0,
-                'auto_settle_to_bank' => true,
-                'default_bank_id' => null,
-            ]
-        );
-
         $freelancerId = (int) $request->query('freelancer', 0);
         $selectedFreelancer = $freelancerId > 0 ? $this->sellerSearch->findSeller($freelancerId) : null;
 
@@ -54,7 +44,6 @@ class PaymentController extends Controller
         return view('payments.create', [
             'gateway' => $primary,
             'gatewayConfigured' => CashfreeGatewaySync::credentialsConfigured(),
-            'wallet' => $wallet,
             'selectedFreelancer' => $selectedFreelancer,
             'searchQ' => $searchQ,
             'searchResults' => $searchResults,

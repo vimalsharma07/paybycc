@@ -7,12 +7,17 @@ use App\Http\Requests\StoreBankRequest;
 use App\Http\Requests\UpdateBankRequest;
 use App\Models\Bank;
 use App\Services\Logging\FlowLog;
+use App\Services\Wallet\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class BankController extends Controller
 {
+    public function __construct(
+        protected WalletService $wallets,
+    ) {}
+
     public function index(FlowLog $flow): View|RedirectResponse
     {
         if ($r = $this->redirectAdmin()) {
@@ -20,6 +25,9 @@ class BankController extends Controller
         }
 
         $user = auth()->user();
+        $this->wallets->ensureForUser($user);
+        $this->wallets->syncDefaultBankFromPrimary($user);
+
         $banks = $user->banks()
             ->orderByDesc('is_primary')
             ->orderByDesc('updated_at')
@@ -83,6 +91,10 @@ class BankController extends Controller
             ['bank_id' => $bank->id, 'is_primary' => $bank->is_primary]
         ), $bank);
 
+        if ($bank->is_primary) {
+            $this->wallets->syncDefaultBankFromPrimary($user);
+        }
+
         return redirect()->route('banks.index')->with('status', 'Bank account added.');
     }
 
@@ -133,6 +145,10 @@ class BankController extends Controller
             $flow->userContext($user),
             ['bank_id' => $bank->id, 'is_primary' => $bank->is_primary, 'status' => $bank->status]
         ), $bank);
+
+        if ($bank->is_primary) {
+            $this->wallets->syncDefaultBankFromPrimary($user);
+        }
 
         return redirect()->route('banks.index')->with('status', 'Bank account updated.');
     }

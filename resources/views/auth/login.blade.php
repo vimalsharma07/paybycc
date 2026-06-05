@@ -5,7 +5,7 @@
 @section('guest_hero')
     <p class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Welcome back</p>
     <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Sign in to your marketplace account</h1>
-    <p class="max-w-md text-sm leading-relaxed text-slate-400">Orders, card payments, wallet, banks, and settlements — all in one place.</p>
+    <p class="max-w-md text-sm leading-relaxed text-slate-400">UPI, cards, net banking, bank payouts, and settlements — all in one freelancer marketplace.</p>
 @endsection
 
 @section('content')

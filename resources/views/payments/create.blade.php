@@ -2,7 +2,7 @@
 
 @section('title', 'Pay — '.config('app.name'))
 @section('page_heading', 'Pay now')
-@section('page_subheading', 'Send a secure card payment to a freelancer')
+@section('page_subheading', 'Pay via UPI, card, net banking, or wallet')
 
 @php
     $remarkPresets = ['Project milestone', 'Freelance work', 'Consulting', 'Design', 'Development', 'Monthly retainer'];
@@ -12,7 +12,10 @@
     <div class="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-lg shadow-slate-200/60 ring-1 ring-slate-900/5 sm:rounded-3xl">
         <div class="border-b border-indigo-100 bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 px-6 py-8 text-white sm:px-10 sm:py-10">
             <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Pay a freelancer</h1>
-            <p class="mt-2 max-w-xl text-sm leading-relaxed text-white/90">Search for a seller, enter the amount in INR, then pay on Cashfree (card, UPI, netbanking, and more).</p>
+            <p class="mt-2 max-w-xl text-sm leading-relaxed text-white/90">Search for a seller, enter the amount in INR, then choose UPI, credit card, debit card, net banking, or wallet at secure checkout.</p>
+            <div class="mt-4">
+                <x-payment-methods variant="dark" size="sm" :show-label="false" />
+            </div>
             <p class="mt-3">
                 <a href="{{ route('marketplace.index') }}" class="text-sm font-semibold text-white/90 underline decoration-white/40 underline-offset-4 hover:text-white">Browse all freelancers →</a>
             </p>
@@ -250,7 +253,7 @@
         @else
             <div class="mx-auto max-w-xl space-y-4 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 text-sm text-amber-950">
                 <p class="font-semibold">Payments need a Cashfree gateway</p>
-                <p class="leading-relaxed">No active payment gateway is configured. To enable card checkout:</p>
+                <p class="leading-relaxed">No active payment gateway is configured. To enable UPI, card, and net banking checkout:</p>
                 <ol class="list-decimal space-y-2 pl-5">
                     <li>Add your Cashfree sandbox keys to <span class="font-mono text-xs">.env</span> (see below).</li>
                     <li>Run <span class="font-mono text-xs">php artisan db:seed --class=GatewaySeeder</span> or reload this page (auto-sync when keys are set).</li>

@@ -2,14 +2,14 @@
 
 @section('title', 'Payments sent — '.config('app.name'))
 @section('page_heading', 'Payments sent')
-@section('page_subheading', 'Card and gateway payments you made to freelancers')
+@section('page_subheading', 'UPI, card & gateway payments you made to freelancers')
 
 @section('content')
     <div class="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-lg ring-1 ring-slate-900/5">
         @if ($payments->isEmpty())
             <div class="px-6 py-16 text-center">
                 <p class="text-lg font-bold text-slate-900">No payments yet</p>
-                <p class="mt-2 text-sm text-slate-600">Find a freelancer and pay securely with card.</p>
+                <p class="mt-2 text-sm text-slate-600">Find a freelancer and pay with UPI, card, or net banking.</p>
                 <a href="{{ route('payments.create') }}" class="mt-6 inline-flex rounded-2xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-indigo-500">Pay now</a>
             </div>
         @else

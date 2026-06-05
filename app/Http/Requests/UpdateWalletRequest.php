@@ -23,7 +23,7 @@ class UpdateWalletRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'auto_settle_to_bank' => $this->boolean('auto_settle_to_bank'),
+            'auto_settle_to_bank' => true,
         ]);
     }
 

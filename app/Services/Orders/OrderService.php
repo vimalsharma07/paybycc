@@ -5,13 +5,14 @@ namespace App\Services\Orders;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
-use App\Models\Wallet;
+use App\Services\Wallet\WalletService;
 use InvalidArgumentException;
 
 class OrderService
 {
     public function __construct(
         protected OrderFeeCalculator $fees,
+        protected WalletService $wallets,
     ) {}
 
     public function assertCanPay(User $customer, User $freelancer): void
@@ -86,14 +87,7 @@ class OrderService
         ]);
 
         if ($canSettle && (float) $order->net_settlement_amount > 0) {
-            $wallet = Wallet::firstOrCreate(
-                ['user_id' => $freelancer->id],
-                [
-                    'balance' => 0,
-                    'auto_settle_to_bank' => true,
-                    'default_bank_id' => null,
-                ]
-            );
+            $wallet = $this->wallets->ensureForUser($freelancer);
             $wallet->increment('balance', (float) $order->net_settlement_amount);
         }
     }

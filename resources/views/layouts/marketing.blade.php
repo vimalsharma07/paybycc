@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="description" content="@yield('meta_description', ($siteSettings->tagline ? $siteSettings->tagline.' ' : '').'Freelancer & service marketplace on '.$siteSettings->displayName().'. Card payments, KYC, and compliant settlements.')">
+    <meta name="description" content="@yield('meta_description', ($siteSettings->tagline ? $siteSettings->tagline.' ' : '').'Freelancer marketplace on '.$siteSettings->displayName().'. Accept UPI, cards, net banking & wallets. KYC and bank settlements.')">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', $siteSettings->displayName().' — Freelancer marketplace')</title>
     @include('partials.head-styles')
@@ -81,7 +81,7 @@
                         <x-brand-wordmark variant="dark" size="lg" class="leading-none" />
                     @endif
                 </p>
-                <p class="mt-3 max-w-md text-sm leading-relaxed text-slate-400">{{ $siteSettings->tagline ?: 'Freelancer & service marketplace — discover talent, pay by card, and settle with KYC and compliance built in.' }}</p>
+                <p class="mt-3 max-w-md text-sm leading-relaxed text-slate-400">{{ $siteSettings->tagline ?: 'Freelancer marketplace — accept UPI, cards, net banking & wallets. One settlement to your bank.' }}</p>
                 @if ($siteSettings->instagram_url || $siteSettings->linkedin_url || $siteSettings->facebook_url || $siteSettings->twitter_url)
                     <div class="mt-4 flex flex-wrap gap-3">
                         @if ($siteSettings->instagram_url)

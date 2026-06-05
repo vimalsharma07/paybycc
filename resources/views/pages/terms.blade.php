@@ -1,7 +1,7 @@
 @extends('layouts.marketing')
 
 @section('title', 'Terms & conditions — '.$siteSettings->displayName())
-@section('meta_description', 'Terms of use for '.$siteSettings->displayName().' — marketplace roles, orders, card payments, settlements, and acceptable use.')
+@section('meta_description', 'Terms of use for '.$siteSettings->displayName().' — marketplace roles, orders, UPI & card payments, settlements, and acceptable use.')
 
 @section('content')
     <article class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:py-24">
@@ -49,7 +49,7 @@
             <section>
                 <h2 class="text-xl font-semibold text-white">6. Payments</h2>
                 <ul class="mt-4 list-disc space-y-2 pl-5">
-                    <li>Payments are processed through licensed <strong class="text-slate-200">payment gateways</strong>. <strong class="text-slate-200">Credit and debit cards</strong> are the primary method offered today; additional methods may be introduced later.</li>
+                    <li>Payments are processed through licensed <strong class="text-slate-200">payment gateways</strong>. Supported methods may include <strong class="text-slate-200">UPI, credit and debit cards, net banking, wallets,</strong> and other options enabled on the gateway and your merchant account.</li>
                     <li>Payment status (pending, authorized, paid, failed, refunded, etc.) is shown in the product where available.</li>
                     <li>You authorize us and partners to charge the selected method for confirmed orders and applicable fees disclosed before confirmation.</li>
                     <li>Chargebacks and card-network rules may affect settlements; you agree to cooperate with reasonable fraud and dispute investigations.</li>
