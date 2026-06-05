@@ -303,16 +303,19 @@ details > summary::-webkit-details-marker {
 /* Mobile explore sheet (dialog) — icon grid, bottom sheet */
 .mobile-explore-dialog {
     position: fixed;
-    inset: auto 0 0 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     top: auto;
     width: 100%;
     max-width: 100%;
-    max-height: min(88vh, 36rem);
+    height: auto;
+    max-height: 92dvh;
     margin: 0;
     padding: 0;
     border: none;
     background: transparent;
-    overflow: visible;
+    overflow: hidden;
     z-index: 80;
 }
 
@@ -326,22 +329,23 @@ details > summary::-webkit-details-marker {
     background: rgba(15, 23, 42, 0.4);
 }
 
-/* App shell: sit above the fixed bottom dock so footer actions stay visible */
+/* App shell: sit above the fixed bottom dock so logout footer stays visible */
 .mobile-explore-dialog--light {
-    bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
-    max-height: min(72vh, 30rem);
+    bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+    max-height: calc(92dvh - 4.5rem - env(safe-area-inset-bottom, 0px));
 }
 
 .mobile-explore-dialog__inner {
     display: flex;
-    max-height: min(82vh, 34rem);
+    width: 100%;
+    max-height: min(85dvh, 34rem);
     flex-direction: column;
     border-radius: 1.25rem 1.25rem 0 0;
     box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.25);
 }
 
 .mobile-explore-dialog--light .mobile-explore-dialog__inner {
-    max-height: min(78vh, 32rem);
+    max-height: min(calc(85dvh - 4.5rem - env(safe-area-inset-bottom, 0px)), 30rem);
 }
 
 .mobile-explore-dialog__body {
@@ -351,11 +355,27 @@ details > summary::-webkit-details-marker {
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.25rem;
+}
+
+.mobile-explore-dialog__grid .mobile-explore-tile {
+    min-height: 5.25rem;
+    padding: 0.5rem 0.25rem 0.45rem;
+}
+
+.mobile-explore-dialog__grid .mobile-explore-tile__icon {
+    width: 2.5rem;
+    height: 2.5rem;
 }
 
 .mobile-explore-dialog__footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
     flex-shrink: 0;
-    padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+    padding-top: 0.5rem;
+    padding-bottom: max(0.875rem, env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
 }
 
 .mobile-explore-logout {

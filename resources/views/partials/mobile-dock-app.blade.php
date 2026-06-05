@@ -7,11 +7,9 @@
     $payHref = $canPay ? route('payments.create') : route('kyc.index');
     $dialogId = 'mobile-explore-app';
 
-    $tilesBase = [
-        ['href' => route('account.payments'), 'label' => 'Payments', 'icon' => 'card'],
-        ['href' => route('account.transactions'), 'label' => 'Transactions', 'icon' => 'chart'],
+    // Menu sheet: only links not already on the bottom dock (keeps sheet short; logout stays in footer).
+    $menuCommon = [
         ['href' => route('marketplace.index'), 'label' => 'Marketplace', 'icon' => 'grid'],
-        ['href' => route('banks.index'), 'label' => 'Banks', 'icon' => 'bank'],
         ['href' => route('profile.show'), 'label' => 'Profile', 'icon' => 'user'],
         ['href' => route('privacy'), 'label' => 'Privacy', 'icon' => 'shield'],
         ['href' => route('terms'), 'label' => 'Terms', 'icon' => 'document'],
@@ -19,27 +17,33 @@
         ['href' => route('home'), 'label' => 'Website', 'icon' => 'globe'],
     ];
 
-    if ($u->isSeller()) {
-        array_splice($tilesBase, 2, 0, [['href' => route('account.settlements'), 'label' => 'Received', 'icon' => 'inbox']]);
-    }
+    $logoutTile = ['logout' => true, 'label' => 'Log out', 'icon' => 'logout'];
 
-    if ($u->canCreatePaymentLinks()) {
-        array_splice($tilesBase, 2, 0, [['href' => route('payment-links.index'), 'label' => 'Payment links', 'icon' => 'link']]);
-    }
+    $tilesAppKyc = array_merge(
+        [
+            ['href' => route('account.payments'), 'label' => 'Payments', 'icon' => 'card'],
+            ['href' => route('account.transactions'), 'label' => 'Transactions', 'icon' => 'chart'],
+        ],
+        $menuCommon,
+        [$logoutTile],
+    );
 
-    $tilesAppKyc = array_merge($tilesBase, [
-        ['logout' => true, 'label' => 'Log out', 'icon' => 'logout'],
-    ]);
+    $tilesAppBrowse = array_merge(
+        [
+            ['href' => route('account.payments'), 'label' => 'Payments', 'icon' => 'card'],
+            ['href' => route('kyc.index'), 'label' => 'Complete KYC', 'icon' => 'user-plus'],
+        ],
+        $menuCommon,
+        [$logoutTile],
+    );
 
-    $tilesAppBrowse = array_merge($tilesBase, [
-        ['href' => route('kyc.index'), 'label' => 'Complete KYC', 'icon' => 'user-plus'],
-        ['logout' => true, 'label' => 'Log out', 'icon' => 'logout'],
-    ]);
-
-    $tilesAppNoKyc = array_merge($tilesBase, [
-        ['href' => route('kyc.index'), 'label' => 'Complete KYC', 'icon' => 'user-plus'],
-        ['logout' => true, 'label' => 'Log out', 'icon' => 'logout'],
-    ]);
+    $tilesAppNoKyc = array_merge(
+        [
+            ['href' => route('kyc.index'), 'label' => 'Complete KYC', 'icon' => 'user-plus'],
+        ],
+        $menuCommon,
+        [$logoutTile],
+    );
 @endphp
 
 @if (! $isAdmin)

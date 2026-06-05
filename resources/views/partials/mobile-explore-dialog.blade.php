@@ -30,8 +30,8 @@
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-        <div class="mobile-explore-dialog__body px-3 py-4 sm:px-4">
-            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div class="mobile-explore-dialog__body px-3 py-3 sm:px-4">
+            <div class="mobile-explore-dialog__grid grid grid-cols-3 gap-2">
                 @foreach ($navTiles as $tile)
                     <a href="{{ $tile['href'] }}" class="mobile-explore-tile {{ $isLight ? 'mobile-explore-tile--light border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50' : 'border-white/10 bg-white/[0.04] hover:border-cyan-400/30 hover:bg-white/[0.08]' }}">
                         <span class="mobile-explore-tile__icon {{ $isLight ? 'bg-indigo-100 text-indigo-700' : 'bg-cyan-500/15 text-cyan-200' }}">
