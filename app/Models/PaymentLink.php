@@ -23,6 +23,7 @@ class PaymentLink extends Model
         'amount',
         'currency',
         'description',
+        'is_default',
         'max_uses',
         'uses_count',
         'status',
@@ -35,6 +36,7 @@ class PaymentLink extends Model
     {
         return [
             'amount' => 'decimal:2',
+            'is_default' => 'boolean',
             'max_uses' => 'integer',
             'uses_count' => 'integer',
             'expires_at' => 'datetime',
@@ -65,6 +67,11 @@ class PaymentLink extends Model
     public function publicUrl(): string
     {
         return route('payment-links.pay.show', $this->link_token, true);
+    }
+
+    public function isDefault(): bool
+    {
+        return (bool) $this->is_default;
     }
 
     public function isOpenAmount(): bool

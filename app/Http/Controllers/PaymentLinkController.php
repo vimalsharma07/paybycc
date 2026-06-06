@@ -27,6 +27,7 @@ class PaymentLinkController extends Controller
 
         $links = PaymentLink::query()
             ->where('seller_id', $seller->id)
+            ->where('is_default', false)
             ->with(['order', 'latestPayment'])
             ->latest()
             ->paginate(15);

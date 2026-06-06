@@ -4,11 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\PaymentLinks\PaymentLinkService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        protected PaymentLinkService $paymentLinks,
+    ) {}
+
     public function index(): View|RedirectResponse
     {
         $user = auth()->user();
@@ -56,12 +61,18 @@ class DashboardController extends Controller
                 ->get()
             : collect();
 
+        $defaultPaymentLink = null;
+        if ($user->canCreatePaymentLinks() && $user->hasActiveKyc()) {
+            $defaultPaymentLink = $this->paymentLinks->ensureDefaultForSeller($user);
+        }
+
         return view('dashboard', [
             'user' => $user,
             'stats' => $stats,
             'recentPayments' => $recentPayments,
             'recentTransactions' => $recentTransactions,
             'recentOrdersReceived' => $recentOrdersReceived,
+            'defaultPaymentLink' => $defaultPaymentLink,
         ]);
     }
 }

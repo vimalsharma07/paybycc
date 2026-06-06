@@ -2,7 +2,7 @@
 
 @section('title', 'Payment link — '.config('app.name'))
 @section('page_heading', 'Payment link')
-@section('page_subheading', 'Share this URL with your client')
+@section('page_subheading', $paymentLink->isDefault() ? 'Your default link — share URL or QR' : 'Share this URL with your client')
 
 @section('content')
     @php
@@ -47,6 +47,12 @@
                         </button>
                     </div>
                     <p class="mt-3 text-xs text-slate-500">Send via WhatsApp, email, or invoice. Client pays with UPI, card, or net banking.</p>
+                    @if ($paymentLink->isDefault())
+                        <div class="mt-5 border-t border-slate-100 pt-5">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">QR code</p>
+                            <x-payment-link-qr :payment-link="$paymentLink" prefix="show" class="mt-3" />
+                        </div>
+                    @endif
                 </div>
             @endif
 
@@ -54,10 +60,12 @@
                 <a href="{{ route('payment-links.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50">← All links</a>
                 @if ($paymentLink->status === \App\Models\PaymentLink::STATUS_OPEN)
                     <a href="{{ $publicUrl }}" target="_blank" rel="noopener" class="rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-bold text-indigo-700 hover:bg-indigo-100">Preview as client</a>
-                    <form method="POST" action="{{ route('payment-links.cancel', $paymentLink) }}" class="inline" onsubmit="return confirm('Cancel this payment link?');">
-                        @csrf
-                        <button type="submit" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-bold text-rose-700 hover:bg-rose-100">Cancel link</button>
-                    </form>
+                    @unless ($paymentLink->isDefault())
+                        <form method="POST" action="{{ route('payment-links.cancel', $paymentLink) }}" class="inline" onsubmit="return confirm('Cancel this payment link?');">
+                            @csrf
+                            <button type="submit" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-bold text-rose-700 hover:bg-rose-100">Cancel link</button>
+                        </form>
+                    @endunless
                 @endif
             </div>
         </div>

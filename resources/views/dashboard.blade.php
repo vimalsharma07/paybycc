@@ -41,6 +41,39 @@
         </div>
     @endif
 
+    @if ($defaultPaymentLink ?? null)
+        <section class="mt-6 overflow-hidden rounded-2xl border border-fuchsia-200/80 bg-gradient-to-br from-fuchsia-50 via-white to-indigo-50 shadow-lg ring-1 ring-fuchsia-900/5">
+            <div class="border-b border-fuchsia-100 bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-5 py-5 text-white sm:px-6">
+                <p class="text-xs font-bold uppercase tracking-widest text-white/75">Your default payment link</p>
+                <h3 class="mt-1 text-lg font-bold">Accept any amount · unlimited uses · no expiry</h3>
+                <p class="mt-1 text-sm text-white/85">Share this link or QR — clients pay via UPI, card, or net banking.</p>
+            </div>
+            <div class="space-y-4 p-5 sm:p-6">
+                <div>
+                    <label for="default-payment-link-url" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Payment URL</label>
+                    <div class="mt-2 flex flex-col gap-2 sm:flex-row">
+                        <input id="default-payment-link-url" type="text" readonly value="{{ $defaultPaymentLink->publicUrl() }}"
+                            class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 font-mono text-xs text-slate-800">
+                        <button type="button" data-copy-target="default-payment-link-url"
+                            class="shrink-0 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow hover:bg-indigo-500"
+                            onclick="navigator.clipboard?.writeText(document.getElementById(this.dataset.copyTarget).value)">
+                            Copy link
+                        </button>
+                    </div>
+                </div>
+                <x-payment-link-qr :payment-link="$defaultPaymentLink" prefix="default" />
+                <div class="flex flex-wrap gap-3 text-xs">
+                    <span class="rounded-full bg-white px-3 py-1 font-semibold text-slate-600 ring-1 ring-slate-200">{{ $defaultPaymentLink->amountLabel() }}</span>
+                    <span class="rounded-full bg-white px-3 py-1 font-semibold text-slate-600 ring-1 ring-slate-200">{{ $defaultPaymentLink->usageLimitLabel() }}</span>
+                    @if ($defaultPaymentLink->uses_count > 0)
+                        <span class="rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-800 ring-1 ring-emerald-200">{{ $defaultPaymentLink->uses_count }} payments received</span>
+                    @endif
+                </div>
+                <a href="{{ route('payment-links.show', $defaultPaymentLink) }}" class="inline-flex text-xs font-bold text-indigo-700 hover:underline">View link details →</a>
+            </div>
+        </section>
+    @endif
+
     @if ($user->canUsePlatform())
         <div class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <a href="{{ route('account.payments') }}" class="app-stat-card group rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm ring-1 ring-slate-900/5 transition hover:border-indigo-200 hover:shadow-md">

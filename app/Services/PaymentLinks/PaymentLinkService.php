@@ -35,6 +35,7 @@ class PaymentLinkService
         $maxActive = (int) config('platform.payment_links.max_active_per_seller', 50);
         $activeCount = PaymentLink::query()
             ->where('seller_id', $seller->id)
+            ->where('is_default', false)
             ->where('status', PaymentLink::STATUS_OPEN)
             ->count();
 
@@ -182,8 +183,51 @@ class PaymentLinkService
         return $payment;
     }
 
+    public function ensureDefaultForSeller(User $seller): ?PaymentLink
+    {
+        if (! $seller->canCreatePaymentLinks()) {
+            return null;
+        }
+
+        $existing = PaymentLink::query()
+            ->where('seller_id', $seller->id)
+            ->where('is_default', true)
+            ->first();
+
+        if ($existing) {
+            if (! $existing->isOpen() || $existing->amount !== null || $existing->max_uses !== null || $existing->expires_at !== null) {
+                $existing->update([
+                    'amount' => null,
+                    'max_uses' => null,
+                    'uses_count' => $existing->uses_count,
+                    'expires_at' => null,
+                    'status' => PaymentLink::STATUS_OPEN,
+                ]);
+            }
+
+            return $existing->fresh();
+        }
+
+        return PaymentLink::create([
+            'link_token' => $this->uniqueLinkToken(),
+            'seller_id' => $seller->id,
+            'amount' => null,
+            'currency' => 'INR',
+            'description' => 'Default payment link',
+            'is_default' => true,
+            'max_uses' => null,
+            'uses_count' => 0,
+            'status' => PaymentLink::STATUS_OPEN,
+            'expires_at' => null,
+        ]);
+    }
+
     public function cancel(PaymentLink $paymentLink, User $seller): void
     {
+        if ($paymentLink->isDefault()) {
+            throw new InvalidArgumentException('Your default payment link cannot be cancelled.');
+        }
+
         if ((int) $paymentLink->seller_id !== (int) $seller->id) {
             throw new InvalidArgumentException('You cannot cancel this payment link.');
         }
