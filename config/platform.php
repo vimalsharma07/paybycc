@@ -39,6 +39,9 @@ return [
         'default_expiry_days' => (int) env('PAYMENT_LINK_DEFAULT_EXPIRY_DAYS', 30),
         'max_expiry_days' => (int) env('PAYMENT_LINK_MAX_EXPIRY_DAYS', 90),
         'max_active_per_seller' => (int) env('PAYMENT_LINK_MAX_ACTIVE_PER_SELLER', 50),
+        'default_daily_limit' => (float) env('PAYMENT_LINK_DEFAULT_DAILY_LIMIT', 100000),
+        'default_monthly_limit' => (float) env('PAYMENT_LINK_DEFAULT_MONTHLY_LIMIT', 300000),
+        'default_yearly_limit' => (float) env('PAYMENT_LINK_DEFAULT_YEARLY_LIMIT', 2000000),
     ],
 
     /*

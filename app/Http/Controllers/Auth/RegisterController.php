@@ -71,6 +71,7 @@ class RegisterController extends Controller
             'is_admin' => false,
             'kyc_status' => User::KYC_INCOMPLETE,
             'status' => 'active',
+            ...User::defaultReceiveLimitAttributes(),
         ]);
 
         $otp->consumeVerification($validated['phone'], OtpPurpose::Registration, $user->id);

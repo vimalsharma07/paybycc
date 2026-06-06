@@ -251,6 +251,18 @@ class User extends Authenticatable
         return $this->paymentLinkPayerMode() === 'kyc';
     }
 
+    /**
+     * @return array{daily_limit: float, monthly_limit: float, yearly_limit: float}
+     */
+    public static function defaultReceiveLimitAttributes(): array
+    {
+        return [
+            'daily_limit' => (float) config('platform.payment_links.default_daily_limit', 100000),
+            'monthly_limit' => (float) config('platform.payment_links.default_monthly_limit', 300000),
+            'yearly_limit' => (float) config('platform.payment_links.default_yearly_limit', 2000000),
+        ];
+    }
+
     public function scopeMarketplaceSellers($query)
     {
         return $query

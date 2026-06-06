@@ -29,6 +29,7 @@ class GuestPayerService
             'role' => 'customer',
             'kyc_status' => User::KYC_INCOMPLETE,
             'status' => 'active',
+            ...User::defaultReceiveLimitAttributes(),
         ]);
     }
 

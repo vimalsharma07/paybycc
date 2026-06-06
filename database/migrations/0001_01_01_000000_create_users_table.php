@@ -22,9 +22,9 @@ return new class extends Migration
             $table->string('aadhar', 12)->nullable();
             $table->string('pan_name')->nullable();
             $table->boolean('is_admin')->default(false);
-            $table->decimal('daily_limit', 15, 2)->default(0);
-            $table->decimal('monthly_limit', 15, 2)->default(0);
-            $table->decimal('yearly_limit', 15, 2)->default(0);
+            $table->decimal('daily_limit', 15, 2)->default(100000);
+            $table->decimal('monthly_limit', 15, 2)->default(300000);
+            $table->decimal('yearly_limit', 15, 2)->default(2000000);
             $table->smallInteger('kyc_status')->default(-1)->index();
             $table->string('status')->default('active')->index();
             $table->timestamp('email_verified_at')->nullable();
