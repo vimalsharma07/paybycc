@@ -12,12 +12,12 @@ return new class extends Migration
             'role' => fn (Blueprint $table) => $table->string('role', 20)->default('customer')->index()->after('is_admin'),
             'company_name' => fn (Blueprint $table) => $table->string('company_name')->nullable()->after('pan_name'),
             'gstin' => fn (Blueprint $table) => $table->string('gstin', 15)->nullable()->after('company_name'),
-            'address_line1' => fn (Blueprint $table) => $table->string('address_line1')->nullable(),
-            'address_line2' => fn (Blueprint $table) => $table->string('address_line2')->nullable(),
-            'city' => fn (Blueprint $table) => $table->string('city', 80)->nullable(),
-            'state' => fn (Blueprint $table) => $table->string('state', 80)->nullable(),
-            'pincode' => fn (Blueprint $table) => $table->string('pincode', 10)->nullable(),
-            'accept_only_kyc_customers' => fn (Blueprint $table) => $table->boolean('accept_only_kyc_customers')->default(false),
+            'address_line1' => fn (Blueprint $table) => $table->string('address_line1')->nullable()->after('gstin'),
+            'address_line2' => fn (Blueprint $table) => $table->string('address_line2')->nullable()->after('address_line1'),
+            'city' => fn (Blueprint $table) => $table->string('city', 80)->nullable()->after('address_line2'),
+            'state' => fn (Blueprint $table) => $table->string('state', 80)->nullable()->after('city'),
+            'pincode' => fn (Blueprint $table) => $table->string('pincode', 10)->nullable()->after('state'),
+            'accept_only_kyc_customers' => fn (Blueprint $table) => $table->boolean('accept_only_kyc_customers')->default(false)->after('pincode'),
         ];
 
         foreach ($userColumns as $column => $definition) {

@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Enums\LogLevel;
+use App\Http\Requests\Kyc\StoreKycPanRequest;
 use App\Models\User;
+use App\Services\Kyc\PanVerificationService;
 use App\Services\Logging\FlowLog;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class KycController extends Controller
@@ -32,9 +33,9 @@ class KycController extends Controller
         return view('kyc.index', ['user' => $user]);
     }
 
-    public function skip(Request $request, FlowLog $flow): RedirectResponse
+    public function skip(FlowLog $flow): RedirectResponse
     {
-        $user = $request->user();
+        $user = request()->user();
 
         if ($user->is_admin || $user->hasActiveKyc()) {
             return redirect()->route('dashboard');
@@ -54,47 +55,56 @@ class KycController extends Controller
             ->with('status', 'You can explore the platform and pay with card. Complete KYC anytime from your profile to receive payouts.');
     }
 
-    public function storePan(Request $request, FlowLog $flow): RedirectResponse
+    public function storePan(StoreKycPanRequest $request, PanVerificationService $panVerification, FlowLog $flow): RedirectResponse
     {
-        $user = auth()->user();
-
-        if ($user->is_admin || $user->hasActiveKyc()) {
-            $flow->kyc('kyc.submit.blocked', 'KYC submit blocked — not applicable', $flow->userContext($user, [
-                'is_admin' => $user->is_admin,
-                'kyc_active' => $user->hasActiveKyc(),
-            ]), $user, LogLevel::Notice);
-
-            return redirect()->route('dashboard');
-        }
-
-        $validated = $request->validate([
-            'pan' => ['required', 'string', 'size:10', 'regex:/^[A-Za-z]{5}[0-9]{4}[A-Za-z]{1}$/'],
-            'pan_name' => ['required', 'string', 'max:255'],
-            'aadhar' => ['nullable', 'string', 'size:12', 'regex:/^\d{12}$/'],
-        ]);
+        $user = $request->user();
+        $pan = $request->normalizedPan();
 
         $flow->kyc('kyc.submit.attempt', 'KYC submit', array_merge(
             $flow->userContext($user),
-            $flow->maskedPan(strtoupper($validated['pan'])),
-            $flow->maskedAadhar($validated['aadhar'] ?? null),
-            ['pan_name' => $validated['pan_name'], 'has_aadhar' => ! empty($validated['aadhar'])]
+            $flow->maskedPan($pan),
+            $flow->maskedAadhar($request->aadhar()),
+            ['pan_name' => $request->panName(), 'has_aadhar' => $request->aadhar() !== null]
         ), $user);
 
-        $user->pan = strtoupper($validated['pan']);
-        $user->pan_name = $validated['pan_name'];
-        if (! empty($validated['aadhar'])) {
-            $user->aadhar = $validated['aadhar'];
-        }
-        $user->kyc_status = User::KYC_ACTIVE;
-        $user->kyc_skipped_at = null;
-        $user->save();
+        if ($message = $panVerification->assertPanNotUsedByAnotherUser($pan, $user)) {
+            $flow->kyc('kyc.submit.duplicate_pan', 'PAN already used by another user', $flow->userContext($user, $flow->maskedPan($pan)), $user, LogLevel::Notice);
 
-        $flow->kyc('kyc.submit.success', 'KYC completed', $flow->userContext($user, [
+            return back()
+                ->withInput()
+                ->withErrors(['pan' => $message]);
+        }
+
+        $result = $panVerification->verify($pan, $request->panName(), $request->dob());
+
+        if (! $result->ok) {
+            $flow->kyc('kyc.submit.verify_failed', 'PAN API verification failed', $flow->userContext($user, [
+                'from_cache' => $result->fromCache,
+                'api_message' => $result->message,
+            ]), $user, LogLevel::Notice);
+
+            return back()
+                ->withInput()
+                ->withErrors(['pan' => $result->userMessage()]);
+        }
+
+        $panVerification->applyToUser(
+            $user,
+            $pan,
+            $request->panName(),
+            $request->dob(),
+            $result->data,
+            $request->aadhar(),
+        );
+
+        $flow->kyc('kyc.submit.success', 'KYC completed via PAN verification', $flow->userContext($user, [
             'kyc_status' => User::KYC_ACTIVE,
+            'from_cache' => $result->fromCache,
+            'pan_type' => $user->fresh()->pan_type,
         ]), $user);
 
         return redirect()
             ->route('dashboard')
-            ->with('status', 'KYC completed successfully. You can now receive payouts and manage bank accounts.');
+            ->with('status', 'KYC verified successfully. You can now receive payouts and manage bank accounts.');
     }
 }

@@ -78,7 +78,9 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
 
     Route::get('kyc', [KycController::class, 'index'])->name('kyc.index');
-    Route::post('kyc/pan', [KycController::class, 'storePan'])->name('kyc.pan');
+    Route::post('kyc/pan', [KycController::class, 'storePan'])
+        ->middleware('throttle:10,1')
+        ->name('kyc.pan');
     Route::post('kyc/skip', [KycController::class, 'skip'])->name('kyc.skip');
 
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');

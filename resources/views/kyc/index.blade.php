@@ -51,6 +51,15 @@
         </div>
 
         <div>
+            <label for="dob" class="auth-label">Date of birth <span class="font-normal text-slate-500">(DD/MM/YYYY)</span></label>
+            <input id="dob" type="text" name="dob" value="{{ old('dob') }}" required inputmode="numeric" placeholder="e.g. 15/08/1990" maxlength="10"
+                class="auth-input @error('dob') auth-input-error @enderror">
+            @error('dob')
+                <p class="auth-error-text">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div>
             <label for="aadhar" class="auth-label">Aadhaar <span class="font-normal text-slate-500">(optional)</span></label>
             <input id="aadhar" type="text" name="aadhar" value="{{ old('aadhar') }}" maxlength="12" inputmode="numeric" placeholder="12 digits"
                 class="auth-input @error('aadhar') auth-input-error @enderror">
@@ -59,8 +68,10 @@
             @enderror
         </div>
 
+        <p class="text-xs leading-relaxed text-slate-500">We verify your PAN with the income tax registry. Name and date of birth must match your PAN card exactly.</p>
+
         <button type="submit" class="auth-btn-primary">
-            Submit &amp; finish KYC
+            Verify PAN &amp; finish KYC
         </button>
     </form>
 
