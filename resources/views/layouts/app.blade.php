@@ -68,6 +68,7 @@
     </div>
 
     @include('partials.mobile-dock-app')
+    @include('partials.payment-link-qr-init')
     @stack('scripts')
 </body>
 </html>
