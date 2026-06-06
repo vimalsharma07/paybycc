@@ -65,8 +65,8 @@
                     <div class="absolute -right-6 -top-6 h-40 w-40 rounded-full bg-gradient-to-br from-emerald-500/40 to-transparent blur-2xl"></div>
                     <div class="absolute -left-4 top-1/3 h-32 w-32 rounded-full bg-gradient-to-br from-indigo-500/30 to-transparent blur-2xl"></div>
                     <img
-                        src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&amp;fit=crop&amp;w=900&amp;q=80"
-                        alt="Freelancer accepting UPI and card payments"
+                        src="{{ asset('images/hero-payments.png') }}"
+                        alt="Indian freelancer receiving a successful UPI and card payment"
                         class="relative z-10 rounded-3xl border border-white/10 shadow-2xl shadow-black/40"
                         width="900"
                         height="600"
@@ -237,8 +237,8 @@
         <div class="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
             <div class="order-2 lg:order-1">
                 <img
-                    src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&amp;fit=crop&amp;w=900&amp;q=80"
-                    alt="Secure multi-method checkout for freelancers"
+                    src="{{ asset('images/secure-checkout.png') }}"
+                    alt="Secure licensed UPI and card checkout for Indian freelancers"
                     class="rounded-3xl border border-white/10 shadow-xl"
                     loading="lazy"
                     width="900"

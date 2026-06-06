@@ -70,7 +70,7 @@
                 </div>
             </div>
 
-            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&amp;fit=crop&amp;w=800&amp;q=80" alt="" class="mt-10 hidden rounded-3xl border border-white/10 object-cover lg:block" loading="lazy" />
+            <img src="{{ asset('images/contact-support.png') }}" alt="PayByCC support team helping with business payments" class="mt-10 hidden w-full rounded-3xl border border-white/10 object-cover lg:block" loading="lazy" />
         </div>
 
         <div class="rounded-3xl border border-white/10 bg-slate-900/60 p-8 shadow-xl backdrop-blur-sm">

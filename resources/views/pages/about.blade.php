@@ -14,7 +14,7 @@
         </div>
 
         <div class="relative mt-12 overflow-hidden rounded-3xl border border-white/10">
-            <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" alt="Business team accepting online payments" class="h-56 w-full object-cover sm:h-72" loading="lazy" />
+            <img src="{{ asset('images/about-banner.png') }}" alt="Indian business team accepting online payments" class="h-56 w-full object-cover sm:h-72" loading="lazy" />
             <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
             <p class="absolute bottom-6 left-6 right-6 text-sm text-slate-200">Licensed checkout · KYC &amp; PAN · GST-ready · Built for India</p>
         </div>
