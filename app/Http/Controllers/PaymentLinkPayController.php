@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PayPaymentLinkRequest;
 use App\Services\Orders\OrderService;
 use App\Services\PaymentLinks\PaymentLinkService;
 use App\Services\Payments\PaymentCheckoutService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 use InvalidArgumentException;
 
@@ -39,7 +39,7 @@ class PaymentLinkPayController extends Controller
         $feeBreakdown = null;
         $seller = $paymentLink->seller;
 
-        if ($payable && $seller) {
+        if ($payable && $seller && ! $paymentLink->isOpenAmount()) {
             try {
                 $feeBreakdown = $this->orders->previewFees(
                     $seller,
@@ -67,10 +67,12 @@ class PaymentLinkPayController extends Controller
             'feeBreakdown' => $feeBreakdown,
             'canPayNow' => $canPayNow,
             'pendingPayment' => $pendingPayment,
+            'minAmount' => (float) config('platform.marketplace.min_order_amount', 1),
+            'maxAmount' => (float) config('platform.marketplace.max_order_amount', 500000),
         ]);
     }
 
-    public function pay(Request $request, string $linkToken): RedirectResponse
+    public function pay(PayPaymentLinkRequest $request, string $linkToken): RedirectResponse
     {
         $paymentLink = $this->paymentLinks->findByToken($linkToken);
 
@@ -103,7 +105,18 @@ class PaymentLinkPayController extends Controller
                 ->withErrors(['payment_link' => 'Seller account is unavailable.']);
         }
 
-        $amountDecimal = number_format((float) $paymentLink->amount, 2, '.', '');
+        try {
+            $amountDecimal = $this->paymentLinks->resolveAmountForPayment(
+                $paymentLink,
+                $request->input('amount'),
+            );
+        } catch (InvalidArgumentException $e) {
+            return redirect()
+                ->route('payment-links.pay.show', $linkToken)
+                ->withInput()
+                ->withErrors(['amount' => $e->getMessage()]);
+        }
+
         $remark = $paymentLink->description
             ?? ('Payment link · '.$seller->name);
 

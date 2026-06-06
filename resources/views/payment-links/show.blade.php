@@ -10,6 +10,7 @@
         $statusTone = match ($paymentLink->status) {
             \App\Models\PaymentLink::STATUS_OPEN => 'bg-emerald-100 text-emerald-800 ring-emerald-300/50',
             \App\Models\PaymentLink::STATUS_PAID => 'bg-indigo-100 text-indigo-800 ring-indigo-300/50',
+            \App\Models\PaymentLink::STATUS_EXHAUSTED => 'bg-amber-100 text-amber-900 ring-amber-300/50',
             default => 'bg-slate-100 text-slate-700 ring-slate-300/50',
         };
     @endphp
@@ -19,8 +20,9 @@
             <div class="bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 px-6 py-8 text-white sm:px-8">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-widest text-white/70">Amount due</p>
-                        <p class="mt-1 font-mono text-4xl font-extrabold">₹{{ number_format((float) $paymentLink->amount, 2) }}</p>
+                        <p class="text-xs font-bold uppercase tracking-widest text-white/70">Amount</p>
+                        <p class="mt-1 font-mono text-4xl font-extrabold">{{ $paymentLink->amountLabel() }}</p>
+                        <p class="mt-2 text-sm text-white/80">{{ $paymentLink->usageLimitLabel() }}@if ($paymentLink->uses_count > 0) · {{ $paymentLink->uses_count }} paid @endif</p>
                     </div>
                     <span class="rounded-full px-3 py-1 text-xs font-bold ring-1 {{ $statusTone }}">{{ $paymentLink->statusLabel() }}</span>
                 </div>

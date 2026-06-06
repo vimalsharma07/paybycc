@@ -1,7 +1,8 @@
 @extends('layouts.marketing')
 
-@section('title', ($seller?->name ?? 'Payment').' — Pay ₹'.number_format((float) $paymentLink->amount, 0).' — '.config('app.name'))
-@section('meta_description', 'Pay '.$seller?->name.' ₹'.number_format((float) $paymentLink->amount, 2).' via UPI, card, or net banking on '.config('app.name').'.')
+@section('title', ($seller?->name ?? 'Payment').' — '.($paymentLink->isOpenAmount() ? 'Pay' : 'Pay ₹'.number_format((float) $paymentLink->amount, 0)).' — '.config('app.name'))
+@section('meta_description', 'Pay '.$seller?->name.' via UPI, card, or net banking on '.config('app.name').'.')
+@section('meta_robots', 'noindex, nofollow')
 
 @section('content')
     <section class="px-4 py-12 sm:px-6 sm:py-20">
@@ -15,7 +16,12 @@
                             <p class="mt-1 text-sm text-white/85">{{ $seller->company_name }}</p>
                         @endif
                     @endif
-                    <p class="mt-6 font-mono text-5xl font-extrabold tracking-tight">₹{{ number_format((float) $paymentLink->amount, 2) }}</p>
+                    @if ($paymentLink->isOpenAmount())
+                        <p class="mt-6 text-lg font-semibold text-white/90">Enter amount to pay</p>
+                        <p class="mt-1 text-sm text-white/70">₹{{ number_format($minAmount, 0) }} – ₹{{ number_format($maxAmount, 0) }}</p>
+                    @else
+                        <p class="mt-6 font-mono text-5xl font-extrabold tracking-tight">₹{{ number_format((float) $paymentLink->amount, 2) }}</p>
+                    @endif
                 </div>
 
                 <div class="space-y-5 p-6 sm:p-8">
@@ -25,6 +31,13 @@
                             <p class="mt-1 text-sm text-slate-200">{{ $paymentLink->description }}</p>
                         </div>
                     @endif
+
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <span class="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-slate-400">{{ $paymentLink->usageLimitLabel() }}</span>
+                        @if ($paymentLink->expires_at && $payable)
+                            <span class="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-slate-400">Expires {{ $paymentLink->expires_at->format('M j, Y') }}</span>
+                        @endif
+                    </div>
 
                     <div>
                         <x-payment-methods variant="dark" size="sm" :show-label="false" />
@@ -62,11 +75,29 @@
                                 Resume checkout →
                             </a>
                         @else
-                            <form method="POST" action="{{ route('payment-links.pay.store', $paymentLink->link_token) }}">
+                            <form method="POST" action="{{ route('payment-links.pay.store', $paymentLink->link_token) }}" class="space-y-4">
                                 @csrf
+                                @if ($paymentLink->isOpenAmount())
+                                    <div>
+                                        <label for="pay-amount" class="block text-sm font-semibold text-slate-300">Amount (INR)</label>
+                                        <div class="relative mt-2">
+                                            <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-500">₹</span>
+                                            <input id="pay-amount" name="amount" type="text" inputmode="decimal" value="{{ old('amount') }}" required
+                                                placeholder="0.00"
+                                                class="block w-full rounded-xl border border-white/10 bg-slate-950/80 py-3 pl-9 pr-4 text-lg font-semibold text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                                        </div>
+                                        @error('amount')
+                                            <p class="mt-1 text-sm text-rose-400">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                @endif
                                 <button type="submit"
                                     class="pay-now-btn inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 via-cyan-500 to-indigo-600 px-6 py-4 text-base font-bold text-white shadow-xl hover:brightness-110">
-                                    Pay ₹{{ number_format((float) $paymentLink->amount, 2) }} now
+                                    @if ($paymentLink->isOpenAmount())
+                                        Continue to pay
+                                    @else
+                                        Pay ₹{{ number_format((float) $paymentLink->amount, 2) }} now
+                                    @endif
                                 </button>
                             </form>
                         @endif
@@ -77,10 +108,6 @@
                     @error('payment_link')
                         <p class="text-sm text-rose-400">{{ $message }}</p>
                     @enderror
-
-                    @if ($paymentLink->expires_at && $payable)
-                        <p class="text-center text-xs text-slate-600">Link expires {{ $paymentLink->expires_at->format('M j, Y') }}</p>
-                    @endif
                 </div>
             </div>
 

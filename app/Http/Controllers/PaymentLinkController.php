@@ -60,19 +60,19 @@ class PaymentLinkController extends Controller
         $seller = $request->user();
 
         $description = isset($validated['description']) ? trim((string) $validated['description']) : null;
-        $expiresAt = null;
-        $expiryDays = isset($validated['expires_in_days']) ? (int) $validated['expires_in_days'] : (int) config('platform.payment_links.default_expiry_days', 30);
+        $expiresAt = $this->resolveExpiry($validated);
 
-        if ($expiryDays > 0) {
-            $expiresAt = now()->addDays($expiryDays);
-        }
+        $amount = $request->isOpenAmount()
+            ? null
+            : number_format((float) $validated['amount'], 2, '.', '');
 
         try {
             $paymentLink = $this->paymentLinks->create(
                 $seller,
-                number_format((float) $validated['amount'], 2, '.', ''),
+                $amount,
                 $description !== '' ? $description : null,
                 $expiresAt,
+                $request->maxUses(),
             );
         } catch (InvalidArgumentException $e) {
             return back()->withInput()->withErrors(['amount' => $e->getMessage()]);
@@ -105,6 +105,26 @@ class PaymentLinkController extends Controller
         }
 
         return back()->with('status', 'Payment link cancelled.');
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    protected function resolveExpiry(array $validated): ?\DateTimeInterface
+    {
+        if (! empty($validated['expires_on'])) {
+            return \Carbon\Carbon::parse($validated['expires_on'])->endOfDay();
+        }
+
+        $expiryDays = isset($validated['expires_in_days']) ? (int) $validated['expires_in_days'] : 0;
+
+        if ($expiryDays > 0) {
+            return now()->addDays($expiryDays);
+        }
+
+        $defaultDays = (int) config('platform.payment_links.default_expiry_days', 30);
+
+        return $defaultDays > 0 ? now()->addDays($defaultDays) : null;
     }
 
     protected function authorizeSeller(PaymentLink $paymentLink): void

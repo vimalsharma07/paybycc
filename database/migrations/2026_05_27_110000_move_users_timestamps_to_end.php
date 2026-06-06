@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::getConnection()->getDriverName() !== 'mysql') {
+            return;
+        }
+
         if (! Schema::hasColumn('users', 'created_at') || ! Schema::hasColumn('users', 'updated_at')) {
             return;
         }
@@ -24,6 +28,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (Schema::getConnection()->getDriverName() !== 'mysql') {
+            return;
+        }
+
         if (! Schema::hasColumn('users', 'created_at') || ! Schema::hasColumn('users', 'updated_at')) {
             return;
         }
