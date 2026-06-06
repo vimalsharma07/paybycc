@@ -60,17 +60,15 @@ class PanVerificationService
     /**
      * @param  array<string, mixed>  $apiData
      */
-    public function applyToUser(User $user, string $pan, string $panName, string $dobInput, array $apiData, ?string $aadhar = null): void
+    public function applyToUser(User $user, string $pan, string $panName, string $dobInput, array $apiData, bool $hasGst = false, ?string $gstin = null): void
     {
-        DB::transaction(function () use ($user, $pan, $panName, $dobInput, $apiData, $aadhar) {
+        DB::transaction(function () use ($user, $pan, $panName, $dobInput, $apiData, $hasGst, $gstin) {
             $user->pan = strtoupper($pan);
             $user->pan_name = $panName;
             $user->dob = $this->parseDob($dobInput);
             $user->pan_type = $this->normalizePanType($apiData['category'] ?? null);
-
-            if ($aadhar !== null && $aadhar !== '') {
-                $user->aadhar = $aadhar;
-            }
+            $user->isgst_available = $hasGst;
+            $user->gstin = $hasGst && $gstin !== null && $gstin !== '' ? strtoupper($gstin) : null;
 
             $this->applyAddressFromApi($user, $apiData);
 

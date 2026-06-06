@@ -64,8 +64,7 @@ class KycController extends Controller
         $flow->kyc('kyc.submit.attempt', 'KYC submit', array_merge(
             $flow->userContext($user),
             $flow->maskedPan($pan),
-            $flow->maskedAadhar($request->aadhar()),
-            ['pan_name' => $request->panName(), 'has_aadhar' => $request->aadhar() !== null]
+            ['pan_name' => $request->panName(), 'has_gst' => $request->hasGst()]
         ), $user);
 
         if ($message = $panVerification->assertPanNotUsedByAnotherUser($pan, $user)) {
@@ -95,7 +94,8 @@ class KycController extends Controller
             $request->panName(),
             $request->dob(),
             $result->data,
-            $request->aadhar(),
+            $request->hasGst(),
+            $request->gstin(),
         );
 
         $user->refresh();

@@ -68,10 +68,20 @@
         </div>
 
         <div>
-            <label for="aadhar" class="auth-label">Aadhaar <span class="font-normal text-slate-500">(optional)</span></label>
-            <input id="aadhar" type="text" name="aadhar" value="{{ old('aadhar') }}" maxlength="12" inputmode="numeric" placeholder="12 digits"
-                class="auth-input @error('aadhar') auth-input-error @enderror">
-            @error('aadhar')
+            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                <input id="has_gst" type="checkbox" name="has_gst" value="1" class="mt-1" @checked(old('has_gst'))>
+                <span>
+                    <span class="block text-sm font-semibold text-white">I have GST number</span>
+                    <span class="mt-0.5 block text-xs text-slate-400">Check this if you are GST registered.</span>
+                </span>
+            </label>
+        </div>
+
+        <div id="gstin-wrap" class="{{ old('has_gst') ? '' : 'hidden' }}">
+            <label for="gstin" class="auth-label">GSTIN</label>
+            <input id="gstin" type="text" name="gstin" value="{{ old('gstin') }}" maxlength="15" autocomplete="off" placeholder="e.g. 22AAAAA0000A1Z5"
+                class="auth-input font-mono uppercase placeholder:normal-case @error('gstin') auth-input-error @enderror">
+            @error('gstin')
                 <p class="auth-error-text">{{ $message }}</p>
             @enderror
         </div>
@@ -149,6 +159,22 @@
             picker.click();
         }
     });
+
+    const hasGst = document.getElementById('has_gst');
+    const gstinWrap = document.getElementById('gstin-wrap');
+    const gstin = document.getElementById('gstin');
+    if (hasGst && gstinWrap && gstin) {
+        function syncGstField() {
+            const show = hasGst.checked;
+            gstinWrap.classList.toggle('hidden', !show);
+            gstin.required = show;
+            if (!show) {
+                gstin.value = '';
+            }
+        }
+        hasGst.addEventListener('change', syncGstField);
+        syncGstField();
+    }
 })();
 </script>
 @endpush

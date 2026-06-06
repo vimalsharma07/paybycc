@@ -4,6 +4,7 @@ namespace App\Http\Requests\Kyc;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class StoreKycPanRequest extends FormRequest
@@ -26,7 +27,14 @@ class StoreKycPanRequest extends FormRequest
             'pan' => ['required', 'string', 'size:10', 'regex:/^[A-Za-z]{5}[0-9]{4}[A-Za-z]{1}$/'],
             'pan_name' => ['required', 'string', 'max:255'],
             'dob' => ['required', 'string', 'regex:/^\d{2}\/\d{2}\/\d{4}$/'],
-            'aadhar' => ['nullable', 'string', 'size:12', 'regex:/^\d{12}$/'],
+            'has_gst' => ['sometimes', 'boolean'],
+            'gstin' => [
+                Rule::requiredIf(fn () => $this->boolean('has_gst')),
+                'nullable',
+                'string',
+                'size:15',
+                'regex:/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/i',
+            ],
         ];
     }
 
@@ -77,10 +85,22 @@ class StoreKycPanRequest extends FormRequest
         return (string) $this->validated('dob');
     }
 
-    public function aadhar(): ?string
+    public function hasGst(): bool
     {
-        $value = $this->validated('aadhar');
+        return $this->boolean('has_gst');
+    }
 
-        return is_string($value) && $value !== '' ? $value : null;
+    public function gstin(): ?string
+    {
+        if (! $this->hasGst()) {
+            return null;
+        }
+
+        $value = $this->validated('gstin');
+        if (! is_string($value) || $value === '') {
+            return null;
+        }
+
+        return strtoupper(preg_replace('/\s+/', '', $value) ?? $value);
     }
 }
