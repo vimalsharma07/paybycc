@@ -39,6 +39,10 @@ final class AppNavigation
 
         $items[] = self::item('profile.show', 'Profile', 'user', ['profile.*']);
 
+        if ($user->hasActiveKyc()) {
+            $items[] = self::item('settings.payment', 'Payment settings', 'shield', ['settings.payment']);
+        }
+
         return $items;
     }
 

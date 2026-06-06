@@ -22,6 +22,7 @@ use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentLinkController;
 use App\Http\Controllers\PaymentLinkPayController;
+use App\Http\Controllers\PaymentSettingsController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WalletController;
@@ -37,6 +38,10 @@ Route::get('/terms', [PageController::class, 'terms'])->name('terms');
 Route::get('pay/{linkToken}', [PaymentLinkPayController::class, 'show'])
     ->middleware('throttle:60,1')
     ->name('payment-links.pay.show');
+
+Route::post('pay/{linkToken}/guest', [PaymentLinkPayController::class, 'guestPay'])
+    ->middleware('throttle:20,1')
+    ->name('payment-links.pay.guest');
 
 Route::get('/cache-clear', [DeployController::class, 'cacheClear'])
     ->middleware('throttle:10,1')
@@ -85,6 +90,20 @@ Route::middleware('auth')->group(function () {
 
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
 
+    Route::get('settings/payment', [PaymentSettingsController::class, 'edit'])->name('settings.payment');
+    Route::patch('settings/payment', [PaymentSettingsController::class, 'update'])->name('settings.payment.update');
+
+    Route::get('payments/return', [PaymentController::class, 'returnFromGateway'])->name('payments.return');
+    Route::get('payments/cashfree/return', [PaymentController::class, 'cashfreeReturn'])->name('payments.cashfree.return');
+    Route::get('payments/{payment}/checkout', [PaymentController::class, 'checkout'])->name('payments.checkout');
+    Route::get('payments/{payment}/success', [PaymentController::class, 'success'])->name('payments.success');
+    Route::get('payments/{payment}/failed', [PaymentController::class, 'failed'])->name('payments.failed');
+    Route::get('payments/{payment}/pending', [PaymentController::class, 'pending'])->name('payments.pending');
+
+    Route::post('pay/{linkToken}', [PaymentLinkPayController::class, 'pay'])
+        ->middleware('throttle:20,1')
+        ->name('payment-links.pay.store');
+
     Route::middleware('platform.access')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -98,17 +117,6 @@ Route::middleware('auth')->group(function () {
         Route::get('payments', [PaymentController::class, 'create'])->name('payments.create');
         Route::get('payments/fee-estimate', [PaymentController::class, 'feeEstimate'])->name('payments.fee-estimate');
         Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
-        Route::get('payments/return', [PaymentController::class, 'returnFromGateway'])->name('payments.return');
-        Route::get('payments/cashfree/return', [PaymentController::class, 'cashfreeReturn'])->name('payments.cashfree.return');
-        Route::get('payments/{payment}/checkout', [PaymentController::class, 'checkout'])->name('payments.checkout');
-        Route::get('payments/{payment}/success', [PaymentController::class, 'success'])->name('payments.success');
-        Route::get('payments/{payment}/failed', [PaymentController::class, 'failed'])->name('payments.failed');
-        Route::get('payments/{payment}/pending', [PaymentController::class, 'pending'])->name('payments.pending');
-
-        Route::post('pay/{linkToken}', [PaymentLinkPayController::class, 'pay'])
-            ->middleware('throttle:20,1')
-            ->name('payment-links.pay.store');
-
         Route::get('payment-links', [PaymentLinkController::class, 'index'])->name('payment-links.index');
         Route::get('payment-links/create', [PaymentLinkController::class, 'create'])->name('payment-links.create');
         Route::post('payment-links', [PaymentLinkController::class, 'store'])->name('payment-links.store');

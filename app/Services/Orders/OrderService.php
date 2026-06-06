@@ -5,6 +5,7 @@ namespace App\Services\Orders;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\Payments\SellerReceiveLimitService;
 use App\Services\Wallet\WalletService;
 use InvalidArgumentException;
 
@@ -13,15 +14,34 @@ class OrderService
     public function __construct(
         protected OrderFeeCalculator $fees,
         protected WalletService $wallets,
+        protected SellerReceiveLimitService $receiveLimits,
     ) {}
 
-    public function assertCanPay(User $customer, User $freelancer): void
+    public function assertCanPay(User $customer, User $freelancer, bool $viaPaymentLink = false): void
     {
         if ($customer->id === $freelancer->id) {
             throw new InvalidArgumentException('You cannot pay yourself.');
         }
 
-        if (! $freelancer->isSeller() || $freelancer->status !== 'active' || $freelancer->is_admin) {
+        if ($freelancer->status !== 'active' || $freelancer->is_admin) {
+            throw new InvalidArgumentException('This recipient is not available for payments.');
+        }
+
+        if ($viaPaymentLink) {
+            if (! $freelancer->canCreatePaymentLinks()) {
+                throw new InvalidArgumentException('This payment link is not available.');
+            }
+
+            if (! $freelancer->acceptsPaymentLinkPayer($customer)) {
+                throw new InvalidArgumentException($freelancer->payerMustHaveKycForPaymentLinks()
+                    ? 'This seller only accepts payers who have completed KYC.'
+                    : 'You must be logged in to pay this link.');
+            }
+
+            return;
+        }
+
+        if (! $freelancer->isSeller()) {
             throw new InvalidArgumentException('This freelancer is not available for payments.');
         }
 
@@ -35,11 +55,15 @@ class OrderService
         return $this->fees->calculate($freelancer, (float) $amountDecimal);
     }
 
-    public function createOrder(User $customer, User $freelancer, string $amountDecimal, ?string $notes): Order
+    public function createOrder(User $customer, User $freelancer, string $amountDecimal, ?string $notes, bool $viaPaymentLink = false): Order
     {
-        $this->assertCanPay($customer, $freelancer);
+        $this->assertCanPay($customer, $freelancer, $viaPaymentLink);
 
         $amount = round((float) $amountDecimal, 2);
+
+        if ($viaPaymentLink) {
+            $this->receiveLimits->assertCanReceiveAmount($freelancer, $amount);
+        }
         $min = (float) config('platform.marketplace.min_order_amount', 1);
         $max = (float) config('platform.marketplace.max_order_amount', 500000);
 

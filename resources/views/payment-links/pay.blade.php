@@ -47,6 +47,48 @@
                         <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-4 text-sm text-amber-100">
                             <p class="font-semibold">{{ $payError ?? 'This payment link is not available.' }}</p>
                         </div>
+                    @elseif ($guestCheckout)
+                        @if ($canPayNow && $pendingPayment && (int) $pendingPayment->user_id === (int) auth()->id())
+                            <a href="{{ route('payments.checkout', $pendingPayment) }}"
+                                class="pay-now-btn inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 via-cyan-500 to-indigo-600 px-6 py-4 text-base font-bold text-white shadow-xl">
+                                Resume checkout →
+                            </a>
+                        @elseif ($canPayNow)
+                            <form method="POST" action="{{ route('payment-links.pay.store', $paymentLink->link_token) }}" class="mb-4 space-y-4">
+                                @csrf
+                                @include('payment-links.partials.pay-amount-field', ['paymentLink' => $paymentLink])
+                                <button type="submit" class="pay-now-btn inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 via-cyan-500 to-indigo-600 px-6 py-4 text-base font-bold text-white shadow-xl">
+                                    Pay as logged-in user
+                                </button>
+                            </form>
+                            <p class="text-center text-xs text-slate-500">— or pay without an account —</p>
+                        @endif
+
+                        <form method="POST" action="{{ route('payment-links.pay.guest', $paymentLink->link_token) }}" class="mt-4 space-y-4">
+                            @csrf
+                            <div>
+                                <label for="guest-name" class="block text-sm font-semibold text-slate-300">Your name</label>
+                                <input id="guest-name" name="name" type="text" value="{{ old('name') }}" required
+                                    class="mt-2 block w-full rounded-xl border border-white/10 bg-slate-950/80 px-4 py-3 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                                @error('name')<p class="mt-1 text-sm text-rose-400">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label for="guest-email" class="block text-sm font-semibold text-slate-300">Email</label>
+                                <input id="guest-email" name="email" type="email" value="{{ old('email') }}" required
+                                    class="mt-2 block w-full rounded-xl border border-white/10 bg-slate-950/80 px-4 py-3 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                                @error('email')<p class="mt-1 text-sm text-rose-400">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label for="guest-phone" class="block text-sm font-semibold text-slate-300">Mobile</label>
+                                <input id="guest-phone" name="phone" type="tel" inputmode="numeric" value="{{ old('phone') }}" required maxlength="10"
+                                    class="mt-2 block w-full rounded-xl border border-white/10 bg-slate-950/80 px-4 py-3 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                                @error('phone')<p class="mt-1 text-sm text-rose-400">{{ $message }}</p>@enderror
+                            </div>
+                            @include('payment-links.partials.pay-amount-field', ['paymentLink' => $paymentLink])
+                            <button type="submit" class="pay-now-btn inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-600 px-6 py-4 text-base font-bold text-white shadow-xl">
+                                Continue to pay
+                            </button>
+                        </form>
                     @elseif (auth()->guest())
                         <div class="space-y-3 text-center">
                             <p class="text-sm text-slate-400">Log in or create a free account to pay securely.</p>
@@ -58,15 +100,15 @@
                                 Create account
                             </a>
                         </div>
-                    @elseif (! auth()->user()->canUsePlatform())
+                    @elseif ($needsKyc)
                         <div class="rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-4 text-center text-sm text-indigo-100">
-                            <p>Complete KYC to pay on the platform.</p>
+                            <p>This seller only accepts payers who have completed KYC.</p>
                             <a href="{{ route('kyc.index') }}" class="mt-3 inline-flex font-bold text-white underline">Complete KYC →</a>
                         </div>
                     @elseif (! $canPayNow)
                         <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-4 text-sm text-rose-100">
                             <p class="font-semibold">You cannot pay this link.</p>
-                            <p class="mt-1 text-rose-200/90">This may be your own payment link, or the seller restricts who can pay.</p>
+                            <p class="mt-1 text-rose-200/90">This may be your own payment link.</p>
                         </div>
                     @else
                         @if ($pendingPayment && (int) $pendingPayment->user_id === (int) auth()->id())
@@ -77,20 +119,7 @@
                         @else
                             <form method="POST" action="{{ route('payment-links.pay.store', $paymentLink->link_token) }}" class="space-y-4">
                                 @csrf
-                                @if ($paymentLink->isOpenAmount())
-                                    <div>
-                                        <label for="pay-amount" class="block text-sm font-semibold text-slate-300">Amount (INR)</label>
-                                        <div class="relative mt-2">
-                                            <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-500">₹</span>
-                                            <input id="pay-amount" name="amount" type="text" inputmode="decimal" value="{{ old('amount') }}" required
-                                                placeholder="0.00"
-                                                class="block w-full rounded-xl border border-white/10 bg-slate-950/80 py-3 pl-9 pr-4 text-lg font-semibold text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                                        </div>
-                                        @error('amount')
-                                            <p class="mt-1 text-sm text-rose-400">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                @endif
+                                @include('payment-links.partials.pay-amount-field', ['paymentLink' => $paymentLink])
                                 <button type="submit"
                                     class="pay-now-btn inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 via-cyan-500 to-indigo-600 px-6 py-4 text-base font-bold text-white shadow-xl hover:brightness-110">
                                     @if ($paymentLink->isOpenAmount())

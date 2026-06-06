@@ -23,12 +23,17 @@
         ? [['href' => route('payment-links.index'), 'label' => 'Payment links', 'icon' => 'link']]
         : [];
 
+    $settingsTiles = $u->hasActiveKyc()
+        ? [['href' => route('settings.payment'), 'label' => 'Pay settings', 'icon' => 'shield']]
+        : [];
+
     $tilesAppKyc = array_merge(
         [
             ['href' => route('account.payments'), 'label' => 'Payments', 'icon' => 'card'],
             ['href' => route('account.transactions'), 'label' => 'Transactions', 'icon' => 'chart'],
         ],
         $paymentLinksTile,
+        $settingsTiles,
         $menuCommon,
         [$logoutTile],
     );

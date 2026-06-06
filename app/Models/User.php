@@ -103,6 +103,7 @@ class User extends Authenticatable
         'state',
         'pincode',
         'accept_only_kyc_customers',
+        'allow_guest_payment_links',
         'daily_limit',
         'monthly_limit',
         'yearly_limit',
@@ -138,6 +139,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'accept_only_kyc_customers' => 'boolean',
+            'allow_guest_payment_links' => 'boolean',
             'daily_limit' => 'decimal:2',
             'monthly_limit' => 'decimal:2',
             'yearly_limit' => 'decimal:2',
@@ -192,6 +194,61 @@ class User extends Authenticatable
         }
 
         return $customer->hasActiveKyc();
+    }
+
+    public function allowsGuestPaymentLinks(): bool
+    {
+        return (bool) ($this->allow_guest_payment_links ?? false);
+    }
+
+    public function paymentLinkPayerMode(): string
+    {
+        if ($this->allowsGuestPaymentLinks()) {
+            return 'guest';
+        }
+
+        return $this->accept_only_kyc_customers ? 'kyc' : 'login';
+    }
+
+    public function paymentLinkPayerModeLabel(): string
+    {
+        return match ($this->paymentLinkPayerMode()) {
+            'guest' => 'Anyone — no login required',
+            'kyc' => 'Logged-in users with KYC only',
+            default => 'Logged-in users (KYC not required)',
+        };
+    }
+
+    public function applyPaymentLinkPayerMode(string $mode): void
+    {
+        if ($mode === 'guest') {
+            $this->allow_guest_payment_links = true;
+            $this->accept_only_kyc_customers = false;
+
+            return;
+        }
+
+        $this->allow_guest_payment_links = false;
+        $this->accept_only_kyc_customers = $mode === 'kyc';
+    }
+
+    public function acceptsPaymentLinkPayer(?User $payer): bool
+    {
+        return match ($this->paymentLinkPayerMode()) {
+            'guest' => true,
+            'kyc' => $payer !== null && $payer->hasActiveKyc(),
+            default => $payer !== null,
+        };
+    }
+
+    public function payerMustLoginForPaymentLinks(): bool
+    {
+        return $this->paymentLinkPayerMode() !== 'guest';
+    }
+
+    public function payerMustHaveKycForPaymentLinks(): bool
+    {
+        return $this->paymentLinkPayerMode() === 'kyc';
     }
 
     public function scopeMarketplaceSellers($query)

@@ -36,10 +36,12 @@ class PaymentCheckoutService
             throw new InvalidArgumentException('Payments are unavailable: no active primary gateway.');
         }
 
-        $this->orders->assertCanPay($customer, $freelancer);
+        $viaPaymentLink = $paymentLinkId !== null;
+
+        $this->orders->assertCanPay($customer, $freelancer, $viaPaymentLink);
 
         try {
-            $order = $this->orders->createOrder($customer, $freelancer, $amountDecimal, $remark);
+            $order = $this->orders->createOrder($customer, $freelancer, $amountDecimal, $remark, $viaPaymentLink);
         } catch (InvalidArgumentException $e) {
             throw $e;
         }

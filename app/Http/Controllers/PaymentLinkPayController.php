@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\GuestPayPaymentLinkRequest;
 use App\Http\Requests\PayPaymentLinkRequest;
-use App\Services\Orders\OrderService;
+use App\Models\User;
 use App\Services\PaymentLinks\PaymentLinkService;
+use App\Services\Payments\GuestPayerService;
 use App\Services\Payments\PaymentCheckoutService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use InvalidArgumentException;
 
@@ -15,7 +18,7 @@ class PaymentLinkPayController extends Controller
     public function __construct(
         protected PaymentLinkService $paymentLinks,
         protected PaymentCheckoutService $checkout,
-        protected OrderService $orders,
+        protected GuestPayerService $guestPayers,
     ) {}
 
     public function show(string $linkToken): View
@@ -36,26 +39,22 @@ class PaymentLinkPayController extends Controller
             $payError = $e->getMessage();
         }
 
-        $feeBreakdown = null;
         $seller = $paymentLink->seller;
-
-        if ($payable && $seller && ! $paymentLink->isOpenAmount()) {
-            try {
-                $feeBreakdown = $this->orders->previewFees(
-                    $seller,
-                    number_format((float) $paymentLink->amount, 2, '.', '')
-                );
-            } catch (InvalidArgumentException) {
-                // Fee preview optional on public page
-            }
-        }
-
         $user = auth()->user();
+        $guestCheckout = $payable && $seller && $seller->allowsGuestPaymentLinks();
+        $payerMode = $seller?->paymentLinkPayerMode() ?? 'login';
+
         $canPayNow = $payable
-            && $user
-            && $user->canUsePlatform()
             && $seller
-            && (int) $user->id !== (int) $seller->id;
+            && $user
+            && (int) $user->id !== (int) $seller->id
+            && $seller->acceptsPaymentLinkPayer($user);
+
+        $needsKyc = $payable
+            && $seller
+            && $user
+            && $seller->payerMustHaveKycForPaymentLinks()
+            && ! $user->hasActiveKyc();
 
         $pendingPayment = $payable ? $this->paymentLinks->resumePendingPayment($paymentLink) : null;
 
@@ -64,8 +63,10 @@ class PaymentLinkPayController extends Controller
             'seller' => $seller,
             'payable' => $payable,
             'payError' => $payError,
-            'feeBreakdown' => $feeBreakdown,
             'canPayNow' => $canPayNow,
+            'guestCheckout' => $guestCheckout,
+            'payerMode' => $payerMode,
+            'needsKyc' => $needsKyc,
             'pendingPayment' => $pendingPayment,
             'minAmount' => (float) config('platform.marketplace.min_order_amount', 1),
             'maxAmount' => (float) config('platform.marketplace.max_order_amount', 500000),
@@ -80,9 +81,72 @@ class PaymentLinkPayController extends Controller
             abort(404, 'Payment link not found.');
         }
 
-        $customer = $request->user();
-        if (! $customer->canUsePlatform()) {
-            return redirect()->route('kyc.index');
+        return $this->processPayment(
+            $request->user(),
+            $paymentLink,
+            $linkToken,
+            $request->input('amount'),
+        );
+    }
+
+    public function guestPay(GuestPayPaymentLinkRequest $request, string $linkToken): RedirectResponse
+    {
+        $paymentLink = $this->paymentLinks->findByToken($linkToken);
+
+        if (! $paymentLink) {
+            abort(404, 'Payment link not found.');
+        }
+
+        $seller = $paymentLink->seller;
+        if (! $seller || ! $seller->allowsGuestPaymentLinks()) {
+            return redirect()
+                ->route('payment-links.pay.show', $linkToken)
+                ->withErrors(['payment_link' => 'This link requires you to log in before paying.']);
+        }
+
+        $customer = $this->guestPayers->resolve(
+            $request->input('name'),
+            $request->input('email'),
+            $request->input('phone'),
+        );
+
+        Auth::login($customer);
+        $request->session()->regenerate();
+
+        return $this->processPayment(
+            $customer,
+            $paymentLink,
+            $linkToken,
+            $request->input('amount'),
+        );
+    }
+
+    protected function processPayment(User $customer, $paymentLink, string $linkToken, ?string $submittedAmount): RedirectResponse
+    {
+        $seller = $paymentLink->seller;
+
+        if (! $seller) {
+            return redirect()
+                ->route('payment-links.pay.show', $linkToken)
+                ->withErrors(['payment_link' => 'Seller account is unavailable.']);
+        }
+
+        if ((int) $customer->id === (int) $seller->id) {
+            return redirect()
+                ->route('payment-links.pay.show', $linkToken)
+                ->withErrors(['payment_link' => 'You cannot pay your own payment link.']);
+        }
+
+        if ($seller->payerMustHaveKycForPaymentLinks() && ! $customer->hasActiveKyc()) {
+            return redirect()
+                ->route('kyc.index')
+                ->with('status', 'This seller requires KYC before you can pay.');
+        }
+
+        if (! $seller->acceptsPaymentLinkPayer($customer)) {
+            return redirect()
+                ->route('payment-links.pay.show', $linkToken)
+                ->withErrors(['payment_link' => 'You are not allowed to pay this link.']);
         }
 
         try {
@@ -98,17 +162,10 @@ class PaymentLinkPayController extends Controller
             return redirect()->route('payments.checkout', $pending);
         }
 
-        $seller = $paymentLink->seller;
-        if (! $seller) {
-            return redirect()
-                ->route('payment-links.pay.show', $linkToken)
-                ->withErrors(['payment_link' => 'Seller account is unavailable.']);
-        }
-
         try {
             $amountDecimal = $this->paymentLinks->resolveAmountForPayment(
                 $paymentLink,
-                $request->input('amount'),
+                $submittedAmount,
             );
         } catch (InvalidArgumentException $e) {
             return redirect()
