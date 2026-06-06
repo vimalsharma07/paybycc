@@ -19,11 +19,16 @@
 
     $logoutTile = ['logout' => true, 'label' => 'Log out', 'icon' => 'logout'];
 
+    $paymentLinksTile = $u->canCreatePaymentLinks()
+        ? [['href' => route('payment-links.index'), 'label' => 'Payment links', 'icon' => 'link']]
+        : [];
+
     $tilesAppKyc = array_merge(
         [
             ['href' => route('account.payments'), 'label' => 'Payments', 'icon' => 'card'],
             ['href' => route('account.transactions'), 'label' => 'Transactions', 'icon' => 'chart'],
         ],
+        $paymentLinksTile,
         $menuCommon,
         [$logoutTile],
     );
@@ -57,7 +62,7 @@
                 @if ($u->canCreatePaymentLinks())
                     <a href="{{ route('payment-links.index') }}" class="mobile-dock-item flex flex-col items-center justify-end gap-0.5 pb-1.5 pt-1 {{ request()->routeIs('payment-links.*') ? 'text-indigo-600' : 'text-slate-600 hover:text-indigo-600' }}">
                         <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
-                        <span class="text-[10px] font-semibold leading-none">Links</span>
+                        <span class="text-[10px] font-semibold leading-none">Pay link</span>
                     </a>
                 @else
                     <a href="{{ route('account.transactions') }}" class="mobile-dock-item flex flex-col items-center justify-end gap-0.5 pb-1.5 pt-1 {{ request()->routeIs('account.transactions') ? 'text-indigo-600' : 'text-slate-600 hover:text-indigo-600' }}">

@@ -22,7 +22,7 @@ class PaymentLinkController extends Controller
         if (! $seller->canCreatePaymentLinks()) {
             return redirect()
                 ->route('dashboard')
-                ->with('status', 'Payment links are available for active freelancer accounts.');
+                ->with('status', 'Complete KYC to create payment links.');
         }
 
         $links = PaymentLink::query()
@@ -44,7 +44,7 @@ class PaymentLinkController extends Controller
         if (! $seller->canCreatePaymentLinks()) {
             return redirect()
                 ->route('dashboard')
-                ->with('status', 'Payment links are available for active freelancer accounts.');
+                ->with('status', 'Complete KYC to create payment links.');
         }
 
         return view('payment-links.create', [

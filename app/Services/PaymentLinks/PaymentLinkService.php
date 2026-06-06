@@ -13,7 +13,7 @@ class PaymentLinkService
     public function assertSellerCanCreateLinks(User $seller): void
     {
         if (! $seller->canCreatePaymentLinks()) {
-            throw new InvalidArgumentException('Only active freelancer accounts can create payment links.');
+            throw new InvalidArgumentException('Complete KYC to create payment links.');
         }
     }
 

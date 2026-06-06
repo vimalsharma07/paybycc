@@ -49,10 +49,10 @@ class User extends Authenticatable
         return $this->role === 'seller';
     }
 
-    /** Active freelancers can create shareable payment links. */
+    /** Verified accounts can create shareable payment links (after KYC). */
     public function canCreatePaymentLinks(): bool
     {
-        return ! $this->is_admin && $this->isSeller() && $this->status === 'active';
+        return ! $this->is_admin && $this->status === 'active' && $this->hasActiveKyc();
     }
 
     /** Seller has GSTIN on profile (15-char Indian GSTIN). */

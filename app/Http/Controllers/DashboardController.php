@@ -62,7 +62,7 @@ class DashboardController extends Controller
             : collect();
 
         $defaultPaymentLink = null;
-        if ($user->canCreatePaymentLinks() && $user->hasActiveKyc()) {
+        if ($user->canCreatePaymentLinks()) {
             $defaultPaymentLink = $this->paymentLinks->ensureDefaultForSeller($user);
         }
 
