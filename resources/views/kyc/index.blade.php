@@ -52,8 +52,16 @@
 
         <div>
             <label for="dob" class="auth-label">Date of birth <span class="font-normal text-slate-500">(DD/MM/YYYY)</span></label>
-            <input id="dob" type="text" name="dob" value="{{ old('dob') }}" required inputmode="numeric" placeholder="e.g. 15/08/1990" maxlength="10"
-                class="auth-input @error('dob') auth-input-error @enderror">
+            <div class="flex gap-2">
+                <input id="dob" type="text" name="dob" value="{{ old('dob') }}" required inputmode="numeric" placeholder="e.g. 30/05/1999" maxlength="10" autocomplete="bday"
+                    class="auth-input min-w-0 flex-1 @error('dob') auth-input-error @enderror">
+                <input type="date" id="dob-picker" class="sr-only" tabindex="-1" aria-hidden="true" max="{{ now()->toDateString() }}">
+                <button type="button" id="dob-calendar-btn" title="Pick date from calendar"
+                    class="flex shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 px-3 text-slate-300 transition hover:border-indigo-400/40 hover:bg-white/10 hover:text-white">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                    <span class="sr-only">Open calendar</span>
+                </button>
+            </div>
             @error('dob')
                 <p class="auth-error-text">{{ $message }}</p>
             @enderror
@@ -85,6 +93,65 @@
         <p class="mt-3 text-center text-xs text-slate-500">You can complete KYC later from your profile.</p>
     @endunless
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const dob = document.getElementById('dob');
+    const picker = document.getElementById('dob-picker');
+    const calendarBtn = document.getElementById('dob-calendar-btn');
+    if (!dob || !picker || !calendarBtn) return;
+
+    function formatDobDigits(digits) {
+        digits = digits.replace(/\D/g, '').slice(0, 8);
+        if (digits.length <= 2) {
+            return digits.length === 2 ? digits + '/' : digits;
+        }
+        if (digits.length <= 4) {
+            return digits.slice(0, 2) + '/' + digits.slice(2) + (digits.length === 4 ? '/' : '');
+        }
+        return digits.slice(0, 2) + '/' + digits.slice(2, 4) + '/' + digits.slice(4);
+    }
+
+    function toPickerValue(ddmmyyyy) {
+        const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(ddmmyyyy);
+        return m ? m[3] + '-' + m[2] + '-' + m[1] : '';
+    }
+
+    function fromPickerValue(yyyymmdd) {
+        if (!yyyymmdd) return '';
+        const p = yyyymmdd.split('-');
+        return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : '';
+    }
+
+    dob.addEventListener('input', function () {
+        const pos = dob.selectionStart;
+        const before = dob.value;
+        dob.value = formatDobDigits(before);
+        const added = dob.value.length - before.length;
+        if (pos !== null) {
+            dob.setSelectionRange(Math.max(0, pos + added), Math.max(0, pos + added));
+        }
+        const pv = toPickerValue(dob.value);
+        if (pv) picker.value = pv;
+    });
+
+    picker.addEventListener('change', function () {
+        dob.value = fromPickerValue(picker.value);
+    });
+
+    calendarBtn.addEventListener('click', function () {
+        const pv = toPickerValue(dob.value);
+        if (pv) picker.value = pv;
+        if (typeof picker.showPicker === 'function') {
+            picker.showPicker();
+        } else {
+            picker.click();
+        }
+    });
+})();
+</script>
+@endpush
 
 @section('guest-footer')
     @if ($user->canUsePlatform())
