@@ -34,6 +34,11 @@ class PaymentSettingsController extends Controller
     {
         $user = $request->user();
         $user->applyPaymentLinkPayerMode($request->input('payer_mode'));
+        $user->fill([
+            'daily_limit' => $request->input('daily_limit'),
+            'monthly_limit' => $request->input('monthly_limit'),
+            'yearly_limit' => $request->input('yearly_limit'),
+        ]);
         $user->save();
 
         return redirect()

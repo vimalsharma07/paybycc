@@ -64,6 +64,7 @@ class SellerReceiveLimitService
             ->where('freelancer_id', $seller->id)
             ->where('payment_status', 'paid')
             ->where('created_at', '>=', $since)
+            ->whereHas('payments', fn ($query) => $query->whereNotNull('payment_link_id'))
             ->sum('order_amount');
     }
 

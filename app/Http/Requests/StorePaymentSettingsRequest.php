@@ -19,6 +19,9 @@ class StorePaymentSettingsRequest extends FormRequest
     {
         return [
             'payer_mode' => ['required', Rule::in(['kyc', 'login', 'guest'])],
+            'daily_limit' => ['required', 'numeric', 'min:0', 'max:9999999999999.99'],
+            'monthly_limit' => ['required', 'numeric', 'min:0', 'max:9999999999999.99'],
+            'yearly_limit' => ['required', 'numeric', 'min:0', 'max:9999999999999.99'],
         ];
     }
 }
