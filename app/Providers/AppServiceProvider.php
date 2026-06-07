@@ -12,8 +12,6 @@ use App\Observers\TransactionObserver;
 use App\Contracts\SmsSender;
 use App\Services\Logging\AppLogger;
 use App\Services\Logging\FlowLog;
-use App\Models\Gateway;
-use App\Services\Payments\CashfreeGatewaySync;
 use App\Services\Payments\GatewayManager;
 use App\Services\Sms\ApitxtSmsSender;
 use App\Services\Sms\LogSmsSender;
@@ -21,7 +19,6 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
@@ -86,8 +83,5 @@ class AppServiceProvider extends ServiceProvider
             app(WalletService::class)->ensureForUser($user);
         });
 
-        if (config('cashfree.auto_sync_gateway') && Schema::hasTable('gateways') && Gateway::count() === 0) {
-            CashfreeGatewaySync::sync();
-        }
     }
 }

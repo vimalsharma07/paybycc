@@ -6,6 +6,8 @@ CREATE TABLE `logs` (
   `message` TEXT NOT NULL,
   `context` JSON NULL,
   `user_id` BIGINT UNSIGNED NULL,
+  `order_id` BIGINT UNSIGNED NULL,
+  `transaction_id` BIGINT UNSIGNED NULL,
   `subject_type` VARCHAR(255) NULL,
   `subject_id` BIGINT UNSIGNED NULL,
   `ip_address` VARCHAR(45) NULL,
@@ -16,10 +18,16 @@ CREATE TABLE `logs` (
   KEY `logs_channel_index` (`channel`),
   KEY `logs_event_index` (`event`),
   KEY `logs_user_id_foreign` (`user_id`),
+  KEY `logs_order_id_foreign` (`order_id`),
+  KEY `logs_transaction_id_foreign` (`transaction_id`),
+  KEY `logs_order_id_created_at_index` (`order_id`, `created_at`),
+  KEY `logs_transaction_id_created_at_index` (`transaction_id`, `created_at`),
   KEY `logs_subject_type_subject_id_index` (`subject_type`, `subject_id`),
   KEY `logs_request_id_index` (`request_id`),
   KEY `logs_created_at_index` (`created_at`),
   KEY `logs_channel_created_at_index` (`channel`, `created_at`),
   KEY `logs_level_created_at_index` (`level`, `created_at`),
-  CONSTRAINT `logs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+  CONSTRAINT `logs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `logs_order_id_foreign` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `logs_transaction_id_foreign` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

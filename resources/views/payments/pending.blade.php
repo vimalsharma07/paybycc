@@ -23,7 +23,7 @@
             @include('payments.partials.result-details')
 
             <div class="animate-fade-up animate-delay-300 flex flex-col gap-3 sm:flex-row sm:justify-center">
-                <a href="{{ route('payments.return', ['pid' => $payment->id]) }}" class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition hover:brightness-110">
+                <a href="{{ $refreshReturnUrl ?? route('payments.pending', $payment) }}" class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition hover:brightness-110">
                     Refresh status
                 </a>
                 <a href="{{ route('contact') }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 transition hover:bg-slate-50">
@@ -36,7 +36,7 @@
 
     <script>
         setTimeout(function () {
-            window.location.href = @json(route('payments.return', ['pid' => $payment->id]));
+            window.location.href = @json($refreshReturnUrl ?? route('payments.pending', $payment));
         }, 8000);
     </script>
 @endsection

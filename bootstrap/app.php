@@ -21,6 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 | Request::HEADER_X_FORWARDED_PROTO
         );
 
+        $middleware->validateCsrfTokens(except: [
+            'payments/gateway/*/webhook',
+        ]);
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'kyc.verified' => \App\Http\Middleware\EnsureKycVerified::class,

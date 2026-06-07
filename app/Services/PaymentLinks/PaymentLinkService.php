@@ -2,9 +2,11 @@
 
 namespace App\Services\PaymentLinks;
 
+use App\Gateways\Contracts\HostedCheckoutGateway;
 use App\Models\Payment;
 use App\Models\PaymentLink;
 use App\Models\User;
+use App\Services\Payments\GatewayManager;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
@@ -175,12 +177,21 @@ class PaymentLinkService
             return null;
         }
 
-        $payload = $payment->driver_payload ?? [];
-        if (! is_array($payload) || ($payload['mode'] ?? '') !== 'cashfree_hosted') {
+        $payment->loadMissing('gateway');
+        if (! $payment->gateway) {
             return null;
         }
 
-        return $payment;
+        try {
+            $driver = app(GatewayManager::class)->resolveDriver($payment->gateway);
+            if ($driver instanceof HostedCheckoutGateway && $driver->isHostedPayment($payment)) {
+                return $payment;
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return null;
     }
 
     public function ensureDefaultForSeller(User $seller): ?PaymentLink

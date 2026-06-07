@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="mb-6">
-        <a href="{{ route('admin.logs.index', request()->only(['channel', 'level', 'event', 'q', 'date_from', 'date_to'])) }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">← Back to logs</a>
+        <a href="{{ route('admin.logs.index', request()->only(['channel', 'level', 'event', 'q', 'date_from', 'date_to', 'order_id', 'transaction_id'])) }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">← Back to logs</a>
         <h1 class="mt-3 text-2xl font-semibold tracking-tight text-slate-900">Log entry #{{ $log->id }}</h1>
         <p class="mt-1 text-sm text-slate-600">{{ $log->created_at?->format('l, F j, Y \a\t H:i:s') }}</p>
     </div>
@@ -34,6 +34,31 @@
                 <div class="flex flex-wrap justify-between gap-2 border-b border-slate-100 pb-3">
                     <dt class="font-medium text-slate-500">Request ID</dt>
                     <dd class="max-w-xs break-all font-mono text-xs text-slate-700">{{ $log->request_id ?? '—' }}</dd>
+                </div>
+                <div class="flex flex-wrap justify-between gap-2 border-b border-slate-100 pb-3">
+                    <dt class="font-medium text-slate-500">Order</dt>
+                    <dd class="font-mono text-slate-900">
+                        @if ($log->order_id)
+                            <a href="{{ route('admin.orders.show', $log->order_id) }}" class="text-indigo-600 hover:text-indigo-500">#{{ $log->order_id }}</a>
+                            @if ($log->order?->order_code)
+                                <span class="text-slate-500">· {{ $log->order->order_code }}</span>
+                            @endif
+                            · <a href="{{ route('admin.logs.index', ['order_id' => $log->order_id]) }}" class="text-xs text-indigo-600 hover:text-indigo-500">All logs</a>
+                        @else
+                            <span class="text-slate-400">—</span>
+                        @endif
+                    </dd>
+                </div>
+                <div class="flex flex-wrap justify-between gap-2 border-b border-slate-100 pb-3">
+                    <dt class="font-medium text-slate-500">Transaction</dt>
+                    <dd class="font-mono text-slate-900">
+                        @if ($log->transaction_id)
+                            #{{ $log->transaction_id }}
+                            · <a href="{{ route('admin.logs.index', ['transaction_id' => $log->transaction_id]) }}" class="text-xs text-indigo-600 hover:text-indigo-500">All logs</a>
+                        @else
+                            <span class="text-slate-400">—</span>
+                        @endif
+                    </dd>
                 </div>
                 <div class="flex flex-wrap justify-between gap-2 border-b border-slate-100 pb-3">
                     <dt class="font-medium text-slate-500">User</dt>

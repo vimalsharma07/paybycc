@@ -101,7 +101,7 @@
                 @error('credentials_json')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
-                <p class="mt-2 text-xs text-slate-500">Stored encrypted. Cashfree: <span class="font-mono">client_id</span>, <span class="font-mono">client_secret</span>, <span class="font-mono">env</span>. Omit <span class="font-mono">payment_methods</span> to show all methods (UPI, cards, NB, etc.) enabled in Cashfree.</p>
+                <p class="mt-2 text-xs text-slate-500">Stored encrypted. Cashfree: <span class="font-mono">client_id</span>, <span class="font-mono">client_secret</span>, <span class="font-mono">env</span>, <span class="font-mono">api_version</span>. Omit <span class="font-mono">payment_methods</span> to show all methods (UPI, cards, NB, etc.) enabled in Cashfree.</p>
             </div>
 
             <div class="flex flex-wrap items-center gap-4 border-t border-slate-100 pt-6">

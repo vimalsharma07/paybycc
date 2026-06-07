@@ -17,9 +17,11 @@ class LogController extends Controller
         $q = trim((string) $request->query('q', ''));
         $dateFrom = trim((string) $request->query('date_from', ''));
         $dateTo = trim((string) $request->query('date_to', ''));
+        $orderId = (int) $request->query('order_id', 0);
+        $transactionId = (int) $request->query('transaction_id', 0);
 
         $logs = ApplicationLog::query()
-            ->with(['user:id,name,email'])
+            ->with(['user:id,name,email', 'order:id,order_code', 'transaction:id,payment_id'])
             ->when($channel !== '', fn ($query) => $query->where('channel', $channel))
             ->when($level !== '', fn ($query) => $query->where('level', $level))
             ->when($event !== '', fn ($query) => $query->where('event', 'like', '%'.$event.'%'))
@@ -34,6 +36,8 @@ class LogController extends Controller
             })
             ->when($dateFrom !== '', fn ($query) => $query->whereDate('created_at', '>=', $dateFrom))
             ->when($dateTo !== '', fn ($query) => $query->whereDate('created_at', '<=', $dateTo))
+            ->when($orderId > 0, fn ($query) => $query->where('order_id', $orderId))
+            ->when($transactionId > 0, fn ($query) => $query->where('transaction_id', $transactionId))
             ->orderByDesc('id')
             ->paginate(40)
             ->withQueryString();
@@ -66,12 +70,14 @@ class LogController extends Controller
             'q' => $q,
             'dateFrom' => $dateFrom,
             'dateTo' => $dateTo,
+            'orderId' => $orderId > 0 ? $orderId : '',
+            'transactionId' => $transactionId > 0 ? $transactionId : '',
         ]);
     }
 
     public function show(ApplicationLog $log): View
     {
-        $log->load(['user:id,name,email', 'subject']);
+        $log->load(['user:id,name,email', 'subject', 'order:id,order_code', 'transaction:id,payment_id']);
 
         return view('admin.logs.show', ['log' => $log]);
     }

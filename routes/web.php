@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\BankController as AdminBankController;
 use App\Http\Controllers\Admin\GatewayController as AdminGatewayController;
+use App\Http\Controllers\Admin\GatewayReqResController as AdminGatewayReqResController;
 use App\Http\Controllers\Admin\LogController as AdminLogController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeployController;
 use App\Http\Controllers\KycController;
 use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\GatewayCallbackController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentLinkController;
 use App\Http\Controllers\PaymentLinkPayController;
@@ -34,6 +36,9 @@ Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::post('/contact', [PageController::class, 'contactSubmit'])->name('contact.store');
 Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');
 Route::get('/terms', [PageController::class, 'terms'])->name('terms');
+
+Route::post('payments/gateway/{gateway}/webhook', [GatewayCallbackController::class, 'webhook'])
+    ->name('gateways.webhook');
 
 Route::get('pay/{linkToken}', [PaymentLinkPayController::class, 'show'])
     ->middleware('throttle:60,1')
@@ -93,8 +98,7 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/payment', [PaymentSettingsController::class, 'edit'])->name('settings.payment');
     Route::patch('settings/payment', [PaymentSettingsController::class, 'update'])->name('settings.payment.update');
 
-    Route::get('payments/return', [PaymentController::class, 'returnFromGateway'])->name('payments.return');
-    Route::get('payments/cashfree/return', [PaymentController::class, 'cashfreeReturn'])->name('payments.cashfree.return');
+    Route::get('payments/gateway/{gateway}/return', [GatewayCallbackController::class, 'return'])->name('gateways.return');
     Route::get('payments/{payment}/checkout', [PaymentController::class, 'checkout'])->name('payments.checkout');
     Route::get('payments/{payment}/success', [PaymentController::class, 'success'])->name('payments.success');
     Route::get('payments/{payment}/failed', [PaymentController::class, 'failed'])->name('payments.failed');
@@ -155,6 +159,9 @@ Route::middleware('auth')->group(function () {
 
         Route::get('admin/logs', [AdminLogController::class, 'index'])->name('admin.logs.index');
         Route::get('admin/logs/{log}', [AdminLogController::class, 'show'])->name('admin.logs.show');
+
+        Route::get('admin/gateway-req-res', [AdminGatewayReqResController::class, 'index'])->name('admin.gateway-req-res.index');
+        Route::get('admin/gateway-req-res/{gateway_req_res}', [AdminGatewayReqResController::class, 'show'])->name('admin.gateway-req-res.show');
 
         Route::get('admin/gateways', [AdminGatewayController::class, 'index'])->name('admin.gateways.index');
         Route::get('admin/gateways/create', [AdminGatewayController::class, 'create'])->name('admin.gateways.create');

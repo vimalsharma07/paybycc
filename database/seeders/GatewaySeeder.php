@@ -2,20 +2,34 @@
 
 namespace Database\Seeders;
 
-use App\Services\Payments\CashfreeGatewaySync;
+use App\Gateways\Cashfree;
+use App\Models\Gateway;
 use Illuminate\Database\Seeder;
 
 class GatewaySeeder extends Seeder
 {
     public function run(): void
     {
-        if (! CashfreeGatewaySync::credentialsConfigured()) {
-            $this->command?->warn('Skipping gateway seed: set CASHFREE_CLIENT_ID and CASHFREE_CLIENT_SECRET in .env');
+        if (Gateway::query()->where('code', Cashfree::CODE)->exists()) {
+            $this->command?->info('Cashfree gateway row already exists — skipped.');
 
             return;
         }
 
-        CashfreeGatewaySync::sync();
-        $this->command?->info('Cashfree gateway synced as primary.');
+        $hasPrimary = Gateway::query()->where('is_primary', true)->exists();
+
+        Gateway::query()->create([
+            'name' => 'Cashfree',
+            'code' => Cashfree::CODE,
+            'filename' => 'Cashfree',
+            'credentials' => Cashfree::defaultCredentials(),
+            'status' => 'inactive',
+            'is_primary' => ! $hasPrimary,
+            'min_txn' => 1,
+            'max_txn' => 500000,
+            'daily_limit' => 0,
+        ]);
+
+        $this->command?->info('Cashfree gateway row created. Set credentials in Admin → Gateways and mark active + primary.');
     }
 }

@@ -253,19 +253,10 @@
             </script>
         @else
             <div class="mx-auto max-w-xl space-y-4 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 text-sm text-amber-950">
-                <p class="font-semibold">Payments need a Cashfree gateway</p>
-                <p class="leading-relaxed">No active payment gateway is configured. To enable UPI, card, and net banking checkout:</p>
-                <ol class="list-decimal space-y-2 pl-5">
-                    <li>Add your Cashfree sandbox keys to <span class="font-mono text-xs">.env</span> (see below).</li>
-                    <li>Run <span class="font-mono text-xs">php artisan db:seed --class=GatewaySeeder</span> or reload this page (auto-sync when keys are set).</li>
-                    <li>Or configure manually under <strong>Admin → Gateways</strong> if you are an admin.</li>
-                </ol>
-                <pre class="overflow-x-auto rounded-lg bg-amber-100/80 p-3 text-xs text-amber-950">CASHFREE_CLIENT_ID=your_app_id
-CASHFREE_CLIENT_SECRET=your_secret
-CASHFREE_ENV=sandbox</pre>
-                @if ($gatewayConfigured ?? false)
-                    <p class="text-emerald-800">Keys detected in .env — try refreshing this page or run the gateway seeder.</p>
-                @endif
+                <p class="font-semibold">Payments need an active gateway</p>
+                <p class="leading-relaxed">No active primary gateway is configured. An admin must add credentials under <strong>Admin → Gateways</strong> and set the gateway to <strong>active</strong> and <strong>primary</strong>.</p>
+                <p class="leading-relaxed">Cashfree credentials (JSON): <span class="font-mono text-xs">client_id</span>, <span class="font-mono text-xs">client_secret</span>, <span class="font-mono text-xs">env</span> (<span class="font-mono">sandbox</span> or <span class="font-mono">production</span>). Optional: <span class="font-mono text-xs">api_version</span>, <span class="font-mono text-xs">payment_methods</span>.</p>
+                <p class="text-xs text-amber-800">First-time setup: run <span class="font-mono">php artisan db:seed --class=GatewaySeeder</span> to create the Cashfree row, then fill credentials in admin.</p>
             </div>
         @endif
         </div>

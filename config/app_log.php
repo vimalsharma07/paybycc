@@ -12,6 +12,7 @@ return [
         'sms',
         'auth',
         'payment',
+        'gateway',
         'order',
         'transaction',
         'wallet',

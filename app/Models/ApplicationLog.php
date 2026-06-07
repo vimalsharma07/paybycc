@@ -20,6 +20,8 @@ class ApplicationLog extends Model
         'message',
         'context',
         'user_id',
+        'order_id',
+        'transaction_id',
         'subject_type',
         'subject_id',
         'ip_address',
@@ -37,6 +39,16 @@ class ApplicationLog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    public function transaction(): BelongsTo
+    {
+        return $this->belongsTo(Transaction::class);
     }
 
     public function subject(): MorphTo

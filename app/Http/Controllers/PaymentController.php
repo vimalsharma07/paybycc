@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Gateway;
+use App\Gateways\Contracts\HostedCheckoutGateway;
 use App\Models\Payment;
-use App\Models\Transaction;
-use App\Models\User;
 use App\Services\Orders\OrderService;
 use App\Services\Orders\SellerSearch;
-use App\Services\Payments\CashfreeGatewaySync;
 use App\Services\Payments\GatewayManager;
 use App\Services\Payments\PaymentCheckoutService;
 use App\Services\Payments\PaymentReturnService;
@@ -25,16 +22,12 @@ class PaymentController extends Controller
         protected SellerSearch $sellerSearch,
         protected PaymentReturnService $paymentReturns,
         protected PaymentCheckoutService $checkout,
+        protected GatewayManager $gateways,
     ) {}
 
     public function create(Request $request, GatewayManager $gatewayManager): View
     {
         $primary = $gatewayManager->primaryGateway();
-
-        if (! $primary && CashfreeGatewaySync::credentialsConfigured()) {
-            CashfreeGatewaySync::sync();
-            $primary = $gatewayManager->primaryGateway();
-        }
 
         $freelancerId = (int) $request->query('freelancer', 0);
         $selectedFreelancer = $freelancerId > 0 ? $this->sellerSearch->findSeller($freelancerId) : null;
@@ -44,7 +37,7 @@ class PaymentController extends Controller
 
         return view('payments.create', [
             'gateway' => $primary,
-            'gatewayConfigured' => CashfreeGatewaySync::credentialsConfigured(),
+            'gatewayConfigured' => $gatewayManager->primaryReady(),
             'selectedFreelancer' => $selectedFreelancer,
             'searchQ' => $searchQ,
             'searchResults' => $searchResults,
@@ -138,47 +131,21 @@ class PaymentController extends Controller
             return $this->redirectToResult($payment);
         }
 
-        $payload = $payment->driver_payload ?? [];
-        if (! is_array($payload) || ($payload['mode'] ?? '') !== 'cashfree_hosted') {
+        $driver = $this->gateways->driverForPayment($payment);
+        if (! $driver instanceof HostedCheckoutGateway) {
             return redirect()
                 ->route('payments.create')
                 ->with('status', 'Checkout is not available for this payment.');
         }
 
-        $sessionId = $payload['payment_session_id'] ?? null;
-        $environment = $payload['environment'] ?? 'sandbox';
-        if (! is_string($sessionId) || $sessionId === '' || ! is_string($environment)) {
+        $viewData = $driver->hostedCheckoutView($payment);
+        if ($viewData === null) {
             return redirect()
                 ->route('payments.create')
                 ->with('status', 'Payment session missing. Please start a new payment.');
         }
 
-        $payment->load('order.freelancer');
-
-        return view('payments.checkout', [
-            'payment' => $payment,
-            'paymentSessionId' => $sessionId,
-            'cashfreeMode' => $environment === 'production' ? 'production' : 'sandbox',
-        ]);
-    }
-
-    /** Gateway return URL — works for Cashfree and future hosted checkouts. */
-    public function returnFromGateway(Request $request): RedirectResponse
-    {
-        $payment = $this->resolveReturnPayment($request);
-
-        if (! $payment) {
-            return redirect()->route('payments.create')->withErrors(['amount' => 'Invalid payment return link.']);
-        }
-
-        $payment = $this->paymentReturns->syncFromGateway($payment);
-
-        return $this->redirectToResult($payment);
-    }
-
-    public function cashfreeReturn(Request $request): RedirectResponse
-    {
-        return $this->returnFromGateway($request);
+        return view('payments.checkout', $viewData);
     }
 
     public function success(Payment $payment): View|RedirectResponse
@@ -230,22 +197,6 @@ class PaymentController extends Controller
         abort_unless((int) $payment->user_id === (int) auth()->id(), 403);
     }
 
-    protected function resolveReturnPayment(Request $request): ?Payment
-    {
-        $pid = (int) $request->query('pid', 0);
-        if ($pid <= 0) {
-            return null;
-        }
-
-        return Payment::query()
-            ->whereKey($pid)
-            ->where('user_id', $request->user()->id)
-            ->first();
-    }
-
-    /**
-     * @return RedirectResponse
-     */
     protected function redirectAfterCheckout(Payment $payment, bool $hostedCheckout): RedirectResponse
     {
         if ($hostedCheckout) {

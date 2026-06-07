@@ -32,6 +32,9 @@
                 <a href="{{ route('admin.gateways.index') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.gateways.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     Gateways
                 </a>
+                <a href="{{ route('admin.gateway-req-res.index') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.gateway-req-res.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                    Gateway Req/Res
+                </a>
                 <a href="{{ route('admin.orders.index') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.orders.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     Orders
                 </a>
@@ -65,6 +68,7 @@
                     <a href="{{ route('admin.users.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.users.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Users</a>
                     <a href="{{ route('admin.banks.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.banks.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Banks</a>
                     <a href="{{ route('admin.gateways.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.gateways.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Gateways</a>
+                    <a href="{{ route('admin.gateway-req-res.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.gateway-req-res.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Req/Res</a>
                     <a href="{{ route('admin.orders.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.orders.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Orders</a>
                     <a href="{{ route('admin.transactions.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.transactions.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Transactions</a>
                     <a href="{{ route('admin.logs.index') }}" class="rounded-md px-2 py-1 font-medium {{ request()->routeIs('admin.logs.*') ? 'bg-slate-900 text-white' : 'text-slate-700' }}">Logs</a>

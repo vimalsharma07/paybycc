@@ -3,12 +3,12 @@
 namespace App\Services\Payments;
 
 use App\Constants\OrderStatuses;
-use App\Constants\TransactionStatuses;
 use App\Enums\LogLevel;
+use App\Gateways\Contracts\HandlesPaymentReturn;
+use App\Gateways\Contracts\HostedCheckoutGateway;
 use App\Models\Gateway;
 use App\Models\Order;
 use App\Models\Payment;
-use App\Models\Transaction;
 use App\Models\User;
 use App\Services\Logging\FlowLog;
 use App\Services\Orders\OrderService;
@@ -23,6 +23,7 @@ class PaymentCheckoutService
         protected OrderService $orders,
         protected GatewayManager $gatewayManager,
         protected PaymentLinkService $paymentLinks,
+        protected PaymentCompletionService $completion,
         protected FlowLog $flow,
     ) {}
 
@@ -110,7 +111,7 @@ class PaymentCheckoutService
 
         $orderNote = $remark ?? ('Payment to '.$freelancer->name.' · '.$order->order_code);
 
-        $payment = DB::transaction(function () use ($customer, $gateway, $amountDecimal, $driver, $orderNote, $order, $freelancer, $paymentLinkId) {
+        $payment = DB::transaction(function () use ($customer, $gateway, $amountDecimal, $driver, $orderNote, $order, $paymentLinkId) {
             $payment = Payment::create([
                 'user_id' => $customer->id,
                 'gateway_id' => $gateway->id,
@@ -122,9 +123,11 @@ class PaymentCheckoutService
                 'status' => 'pending',
             ]);
 
-            $returnUrl = route('payments.return', ['pid' => $payment->id], true);
+            $returnUrl = $driver instanceof HandlesPaymentReturn
+                ? $driver->returnUrl($payment)
+                : null;
 
-            $result = $driver->initiatePayment($amountDecimal, [
+            $result = $driver->initiatePayment($amountDecimal, array_filter([
                 'payment_id' => $payment->id,
                 'user_id' => $customer->id,
                 'currency' => 'INR',
@@ -132,9 +135,10 @@ class PaymentCheckoutService
                 'customer_name' => $customer->name,
                 'customer_phone' => (string) $customer->phone,
                 'return_url' => $returnUrl,
-            ]);
+            ], fn ($v) => $v !== null));
 
-            $hosted = (($result['mode'] ?? '') === 'cashfree_hosted') && ($result['success'] ?? false);
+            $hosted = $driver instanceof HostedCheckoutGateway
+                && $driver->isHostedInitResult($result);
             $reference = $result['reference']
                 ?? $result['gateway_reference']
                 ?? $result['payment_reference']
@@ -159,7 +163,7 @@ class PaymentCheckoutService
 
                 $payment = $payment->fresh();
                 if ($payment) {
-                    $this->createPayerTransaction($customer->id, $payment, $amountDecimal);
+                    $this->completion->createPayerTransaction($payment, $amountDecimal);
                     $this->orders->recordPaymentSuccess($payment);
                     $this->paymentLinks->markPaidFromPayment($payment);
                 }
@@ -188,9 +192,9 @@ class PaymentCheckoutService
             throw new InvalidArgumentException('Could not start payment.');
         }
 
-        $payload = $payment->driver_payload ?? [];
-        $hostedCheckout = is_array($payload)
-            && (($payload['mode'] ?? '') === 'cashfree_hosted')
+        $driver = $this->gatewayManager->driverForPayment($payment);
+        $hostedCheckout = $driver instanceof HostedCheckoutGateway
+            && $driver->isHostedPayment($payment)
             && $payment->status === 'pending';
 
         return [
@@ -238,52 +242,32 @@ class PaymentCheckoutService
             return;
         }
 
-        $this->flow->order(
+        $context = array_merge(
+            $this->flow->paymentContext($payment),
+            $this->flow->orderContext($order),
+            ['hosted_checkout' => $hosted],
+        );
+
+        $this->flow->order($event, $message, $context, $order, $level);
+
+        $payment->loadMissing('gateway');
+        $this->flow->gateway(
             $event,
             $message,
             array_merge(
-                $this->flow->paymentContext($payment),
-                $this->flow->orderContext($order),
+                $this->flow->gatewayContext($payment),
                 ['hosted_checkout' => $hosted],
             ),
             $order,
             $level,
         );
-    }
 
-    protected function createPayerTransaction(int $userId, Payment $payment, string $amountDecimal): void
-    {
-        if ($payment->transactions()->exists()) {
-            $this->flow->transaction(
-                'transaction.skip',
-                'Payer transaction already exists for payment',
-                $this->flow->paymentContext($payment),
-                null,
-                LogLevel::Debug,
-            );
-
-            return;
-        }
-
-        $bufferDays = max(0, (int) config('paybycc.settlement_buffer_days', 2));
-        $userNote = trim((string) ($payment->remark ?? ''));
-        $gatewayLabel = $payment->gateway?->name ?? 'Gateway';
-        $note = $userNote !== ''
-            ? $userNote.' · '.$gatewayLabel
-            : 'Payment via '.$gatewayLabel;
-
-        Transaction::create([
-            'user_id' => $userId,
-            'bank_id' => null,
-            'payment_id' => $payment->id,
-            'parent_transaction_id' => null,
-            'type' => Transaction::TYPE_CARD_PAYMENT,
-            'amount' => $amountDecimal,
-            'currency' => 'INR',
-            'status' => TransactionStatuses::COMPLETED,
-            'settlement_trigger_at' => now()->addDays($bufferDays),
-            'settled_at' => null,
-            'note' => $note,
-        ]);
+        $this->flow->payment(
+            $event,
+            $message,
+            $this->flow->gatewayContext($payment),
+            $payment,
+            $level,
+        );
     }
 }

@@ -22,6 +22,7 @@ class CashfreeClient
         string $clientId,
         string $clientSecret,
         bool $sandbox,
+        string $apiVersion,
         float $orderAmount,
         string $currency,
         string $customerId,
@@ -53,7 +54,7 @@ class CashfreeClient
             'order_note' => $orderNote,
         ];
 
-        return $this->postJson($clientId, $clientSecret, $sandbox, '/orders', $payload);
+        return $this->postJson($clientId, $clientSecret, $sandbox, $apiVersion, '/orders', $payload);
     }
 
     /**
@@ -63,9 +64,10 @@ class CashfreeClient
         string $clientId,
         string $clientSecret,
         bool $sandbox,
+        string $apiVersion,
         string $cashfreeOrderId,
     ): array {
-        return $this->getJson($clientId, $clientSecret, $sandbox, '/orders/'.$cashfreeOrderId);
+        return $this->getJson($clientId, $clientSecret, $sandbox, $apiVersion, '/orders/'.$cashfreeOrderId);
     }
 
     /**
@@ -76,11 +78,12 @@ class CashfreeClient
         string $clientId,
         string $clientSecret,
         bool $sandbox,
+        string $apiVersion,
         string $path,
         array $body,
     ): array {
         $response = Http::timeout(30)
-            ->withHeaders($this->headers($clientId, $clientSecret))
+            ->withHeaders($this->headers($clientId, $clientSecret, $apiVersion))
             ->acceptJson()
             ->asJson()
             ->post($this->baseUrl($sandbox).$path, $body);
@@ -95,10 +98,11 @@ class CashfreeClient
         string $clientId,
         string $clientSecret,
         bool $sandbox,
+        string $apiVersion,
         string $path,
     ): array {
         $response = Http::timeout(30)
-            ->withHeaders($this->headers($clientId, $clientSecret))
+            ->withHeaders($this->headers($clientId, $clientSecret, $apiVersion))
             ->acceptJson()
             ->get($this->baseUrl($sandbox).$path);
 
@@ -108,12 +112,12 @@ class CashfreeClient
     /**
      * @return array<string, string>
      */
-    protected function headers(string $clientId, string $clientSecret): array
+    protected function headers(string $clientId, string $clientSecret, string $apiVersion): array
     {
         return [
             'x-client-id' => $clientId,
             'x-client-secret' => $clientSecret,
-            'x-api-version' => (string) config('cashfree.api_version', '2023-08-01'),
+            'x-api-version' => $apiVersion,
         ];
     }
 

@@ -69,6 +69,26 @@ class FlowLog
         $this->logger->log($level, 'transaction', $event, $message, $context, $subject);
     }
 
+    public function payment(
+        string $event,
+        string $message,
+        array $context = [],
+        ?Model $subject = null,
+        LogLevel $level = LogLevel::Info,
+    ): void {
+        $this->logger->log($level, 'payment', $event, $message, $context, $subject);
+    }
+
+    public function gateway(
+        string $event,
+        string $message,
+        array $context = [],
+        ?Model $subject = null,
+        LogLevel $level = LogLevel::Info,
+    ): void {
+        $this->logger->log($level, 'gateway', $event, $message, $context, $subject);
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -102,6 +122,48 @@ class FlowLog
             'gateway_id' => $payment->gateway_id,
             'amount' => (float) $payment->amount,
             'status' => $payment->status,
+            'gateway_reference' => $payment->gateway_reference,
+        ], $extra);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function gatewayContext(Payment $payment, array $extra = []): array
+    {
+        $payment->loadMissing('gateway');
+
+        $payload = is_array($payment->driver_payload) ? $payment->driver_payload : [];
+
+        return array_merge(
+            $this->paymentContext($payment),
+            [
+                'gateway_code' => $payment->gateway?->code,
+                'gateway_name' => $payment->gateway?->name,
+                'driver_mode' => $payload['mode'] ?? null,
+                'environment' => $payload['environment'] ?? null,
+            ],
+            $extra,
+        );
+    }
+
+    /**
+     * Safe subset of a gateway API response (no secrets / full payloads).
+     *
+     * @param  array<string, mixed>  $api
+     * @return array<string, mixed>
+     */
+    public function gatewayApiContext(array $api, array $extra = []): array
+    {
+        $data = isset($api['data']) && is_array($api['data']) ? $api['data'] : [];
+
+        return array_merge([
+            'api_ok' => (bool) ($api['ok'] ?? false),
+            'http_status' => $api['status'] ?? null,
+            'api_error' => $api['error'] ?? null,
+            'order_status' => $data['order_status'] ?? null,
+            'order_amount' => isset($data['order_amount']) ? (float) $data['order_amount'] : null,
+            'gateway_order_id' => $data['order_id'] ?? null,
         ], $extra);
     }
 

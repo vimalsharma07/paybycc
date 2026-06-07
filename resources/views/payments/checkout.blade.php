@@ -6,7 +6,7 @@
     <div class="mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
         <h1 class="text-xl font-semibold text-slate-900">Redirecting to secure payment</h1>
         <p class="mt-2 text-sm text-slate-600">
-            You are paying <span class="font-mono font-semibold text-slate-900">₹{{ number_format((float) $payment->amount, 2) }}</span> via Cashfree — choose card, UPI, netbanking, wallets, and other methods enabled on your account.
+            You are paying <span class="font-mono font-semibold text-slate-900">₹{{ number_format((float) $payment->amount, 2) }}</span> via {{ $gatewayLabel ?? 'secure checkout' }} — choose card, UPI, netbanking, wallets, and other methods enabled on your account.
         </p>
         @if (filled($payment->remark))
             <div class="mt-4 flex items-start gap-3 rounded-xl border border-indigo-100 bg-indigo-50/80 px-4 py-3">
@@ -19,7 +19,7 @@
         @endif
         <p class="mt-4 text-xs text-slate-500">If nothing happens, use the button below. Do not refresh while paying.</p>
         <button type="button" id="cf-pay-btn" class="mt-6 inline-flex w-full justify-center rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
-            Open Cashfree checkout
+            Open {{ $gatewayLabel ?? 'payment' }} checkout
         </button>
         <p class="mt-6 text-center text-xs text-slate-500">
             <a href="{{ route('payments.create') }}" class="font-medium text-indigo-600 hover:text-indigo-500">Cancel and return to Pay</a>
