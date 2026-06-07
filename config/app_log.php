@@ -12,6 +12,8 @@ return [
         'sms',
         'auth',
         'payment',
+        'order',
+        'transaction',
         'wallet',
         'kyc',
         'bank',

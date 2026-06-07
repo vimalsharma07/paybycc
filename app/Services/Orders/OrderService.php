@@ -3,9 +3,11 @@
 namespace App\Services\Orders;
 
 use App\Constants\OrderStatuses;
+use App\Enums\LogLevel;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\Logging\FlowLog;
 use App\Services\Payments\SellerReceiveLimitService;
 use App\Services\Wallet\WalletService;
 use InvalidArgumentException;
@@ -16,6 +18,7 @@ class OrderService
         protected OrderFeeCalculator $fees,
         protected WalletService $wallets,
         protected SellerReceiveLimitService $receiveLimits,
+        protected FlowLog $flow,
     ) {}
 
     public function assertCanPay(User $customer, User $freelancer, bool $viaPaymentLink = false): void
@@ -74,7 +77,7 @@ class OrderService
 
         $breakdown = $this->fees->calculate($freelancer, $amount);
 
-        return Order::create(array_merge([
+        $order = Order::create(array_merge([
             'order_code' => $this->uniqueOrderCode(),
             'customer_id' => $customer->id,
             'freelancer_id' => $freelancer->id,
@@ -87,6 +90,18 @@ class OrderService
             'safe_status' => OrderStatuses::SAFE_PENDING_REVIEW,
             'notes' => $notes,
         ], $breakdown->toOrderAttributes()));
+
+        $this->flow->order(
+            'order.create',
+            'Order created for checkout',
+            array_merge(
+                $this->flow->orderContext($order),
+                $this->flow->userContext($customer, ['freelancer_id' => $freelancer->id, 'via_payment_link' => $viaPaymentLink]),
+            ),
+            $order,
+        );
+
+        return $order;
     }
 
     public function recordPaymentSuccess(Payment $payment): void
@@ -98,6 +113,14 @@ class OrderService
         }
 
         if ((int) $order->payment_status === OrderStatuses::PAYMENT_PAID) {
+            $this->flow->order(
+                'order.paid.skip',
+                'Order already marked paid',
+                array_merge($this->flow->orderContext($order), ['payment_id' => $payment->id]),
+                $order,
+                LogLevel::Debug,
+            );
+
             return;
         }
 
@@ -111,10 +134,25 @@ class OrderService
             'safe_status' => $canSettle ? OrderStatuses::SAFE_SAFE : OrderStatuses::SAFE_HOLD,
         ]);
 
+        $walletCredited = 0.0;
         if ($canSettle && (float) $order->net_settlement_amount > 0) {
             $wallet = $this->wallets->ensureForUser($freelancer);
             $wallet->increment('balance', (float) $order->net_settlement_amount);
+            $walletCredited = (float) $order->net_settlement_amount;
         }
+
+        $order->refresh();
+
+        $this->flow->order(
+            'order.paid',
+            'Order marked paid after successful payment',
+            array_merge(
+                $this->flow->orderContext($order),
+                $this->flow->paymentContext($payment),
+                ['can_settle' => $canSettle, 'wallet_credited' => $walletCredited],
+            ),
+            $order,
+        );
     }
 
     protected function uniqueOrderCode(): string

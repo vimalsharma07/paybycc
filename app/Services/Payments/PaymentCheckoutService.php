@@ -4,11 +4,13 @@ namespace App\Services\Payments;
 
 use App\Constants\OrderStatuses;
 use App\Constants\TransactionStatuses;
+use App\Enums\LogLevel;
 use App\Models\Gateway;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\Logging\FlowLog;
 use App\Services\Orders\OrderService;
 use App\Services\PaymentLinks\PaymentLinkService;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +22,7 @@ class PaymentCheckoutService
         protected OrderService $orders,
         protected GatewayManager $gatewayManager,
         protected PaymentLinkService $paymentLinks,
+        protected FlowLog $flow,
     ) {}
 
     /**
@@ -32,21 +35,60 @@ class PaymentCheckoutService
         ?string $remark,
         ?int $paymentLinkId = null,
     ): array {
+        $viaPaymentLink = $paymentLinkId !== null;
+
+        $this->flow->order(
+            'checkout.start',
+            'Payment checkout initiated',
+            $this->flow->userContext($customer, [
+                'freelancer_id' => $freelancer->id,
+                'amount' => (float) $amountDecimal,
+                'via_payment_link' => $viaPaymentLink,
+                'payment_link_id' => $paymentLinkId,
+            ]),
+            null,
+            LogLevel::Debug,
+        );
+
+        try {
+            return $this->runCheckout($customer, $freelancer, $amountDecimal, $remark, $paymentLinkId, $viaPaymentLink);
+        } catch (InvalidArgumentException $e) {
+            $this->flow->order(
+                'checkout.blocked',
+                $e->getMessage(),
+                $this->flow->userContext($customer, [
+                    'freelancer_id' => $freelancer->id,
+                    'amount' => (float) $amountDecimal,
+                    'via_payment_link' => $viaPaymentLink,
+                ]),
+                null,
+                LogLevel::Warning,
+            );
+
+            throw $e;
+        }
+    }
+
+    /**
+     * @return array{payment: Payment, hosted_checkout: bool}
+     */
+    protected function runCheckout(
+        User $customer,
+        User $freelancer,
+        string $amountDecimal,
+        ?string $remark,
+        ?int $paymentLinkId,
+        bool $viaPaymentLink,
+    ): array {
         $gateway = $this->gatewayManager->primaryGateway();
 
         if (! $gateway || ! $gateway->isActive()) {
             throw new InvalidArgumentException('Payments are unavailable: no active primary gateway.');
         }
 
-        $viaPaymentLink = $paymentLinkId !== null;
-
         $this->orders->assertCanPay($customer, $freelancer, $viaPaymentLink);
 
-        try {
-            $order = $this->orders->createOrder($customer, $freelancer, $amountDecimal, $remark, $viaPaymentLink);
-        } catch (InvalidArgumentException $e) {
-            throw $e;
-        }
+        $order = $this->orders->createOrder($customer, $freelancer, $amountDecimal, $remark, $viaPaymentLink);
 
         $this->assertGatewayLimits($gateway, (float) $amountDecimal);
 
@@ -99,6 +141,7 @@ class PaymentCheckoutService
                     'driver_payload' => $result,
                     'status' => 'pending',
                 ]);
+                $this->logCheckoutOutcome('checkout.hosted', 'Hosted checkout session created', $payment, $order, $hosted);
             } elseif ($success) {
                 $payment->update([
                     'gateway_reference' => is_string($reference) ? $reference : null,
@@ -112,6 +155,7 @@ class PaymentCheckoutService
                     $this->orders->recordPaymentSuccess($payment);
                     $this->paymentLinks->markPaidFromPayment($payment);
                 }
+                $this->logCheckoutOutcome('checkout.completed', 'Payment completed immediately', $payment, $order, $hosted);
             } else {
                 $payment->update([
                     'gateway_reference' => is_string($reference) ? $reference : null,
@@ -119,6 +163,7 @@ class PaymentCheckoutService
                     'status' => 'failed',
                 ]);
                 $order->update(['payment_status' => OrderStatuses::PAYMENT_FAILED]);
+                $this->logCheckoutOutcome('checkout.failed', 'Gateway rejected payment initiation', $payment, $order, $hosted, LogLevel::Warning);
             }
 
             if ($paymentLinkId) {
@@ -173,9 +218,42 @@ class PaymentCheckoutService
         }
     }
 
+    protected function logCheckoutOutcome(
+        string $event,
+        string $message,
+        ?Payment $payment,
+        Order $order,
+        bool $hosted,
+        LogLevel $level = LogLevel::Info,
+    ): void {
+        if (! $payment) {
+            return;
+        }
+
+        $this->flow->order(
+            $event,
+            $message,
+            array_merge(
+                $this->flow->paymentContext($payment),
+                $this->flow->orderContext($order),
+                ['hosted_checkout' => $hosted],
+            ),
+            $order,
+            $level,
+        );
+    }
+
     protected function createPayerTransaction(int $userId, Payment $payment, string $amountDecimal): void
     {
         if ($payment->transactions()->exists()) {
+            $this->flow->transaction(
+                'transaction.skip',
+                'Payer transaction already exists for payment',
+                $this->flow->paymentContext($payment),
+                null,
+                LogLevel::Debug,
+            );
+
             return;
         }
 

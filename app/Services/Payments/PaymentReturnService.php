@@ -4,10 +4,12 @@ namespace App\Services\Payments;
 
 use App\Constants\OrderStatuses;
 use App\Constants\TransactionStatuses;
+use App\Enums\LogLevel;
 use App\Gateways\Cashfree;
 use App\Models\Gateway;
 use App\Models\Payment;
 use App\Models\Transaction;
+use App\Services\Logging\FlowLog;
 use App\Services\Orders\OrderService;
 use App\Services\PaymentLinks\PaymentLinkService;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +20,7 @@ class PaymentReturnService
         protected CashfreeClient $cashfreeClient,
         protected OrderService $orders,
         protected PaymentLinkService $paymentLinks,
+        protected FlowLog $flow,
     ) {}
 
     /**
@@ -30,11 +33,30 @@ class PaymentReturnService
         $payload = is_array($payment->driver_payload) ? $payment->driver_payload : [];
         $mode = (string) ($payload['mode'] ?? '');
 
+        $this->flow->order(
+            'return.sync',
+            'Reconciling payment from gateway return',
+            $this->flow->paymentContext($payment, ['mode' => $mode]),
+            $payment->order,
+            LogLevel::Debug,
+        );
+
         if ($mode === 'cashfree_hosted') {
             $this->syncCashfreeHosted($payment);
         }
 
-        return $payment->fresh(['gateway', 'order.freelancer', 'order.customer']);
+        $fresh = $payment->fresh(['gateway', 'order.freelancer', 'order.customer']);
+
+        if ($fresh) {
+            $this->flow->order(
+                'return.synced',
+                'Payment status after gateway sync',
+                $this->flow->paymentContext($fresh),
+                $fresh->order,
+            );
+        }
+
+        return $fresh ?? $payment;
     }
 
     public function outcome(Payment $payment): string
@@ -118,6 +140,16 @@ class PaymentReturnService
 
         if ($orderAmount !== null && abs($orderAmount - (float) $payment->amount) > 0.02) {
             report(new \RuntimeException('Cashfree order amount mismatch for payment '.$payment->id));
+            $this->flow->order(
+                'return.amount_mismatch',
+                'Gateway amount mismatch — sync aborted',
+                array_merge(
+                    $this->flow->paymentContext($payment),
+                    ['gateway_amount' => $orderAmount, 'gateway_status' => $orderStatus],
+                ),
+                $payment->order,
+                LogLevel::Warning,
+            );
 
             return;
         }
@@ -131,6 +163,13 @@ class PaymentReturnService
         if (in_array($orderStatus, ['EXPIRED', 'TERMINATED'], true)) {
             $payment->update(['status' => 'failed']);
             $payment->order?->update(['payment_status' => OrderStatuses::PAYMENT_FAILED]);
+            $this->flow->order(
+                'return.failed',
+                'Gateway reported payment '.$orderStatus,
+                array_merge($this->flow->paymentContext($payment), ['gateway_status' => $orderStatus]),
+                $payment->order,
+                LogLevel::Warning,
+            );
         }
     }
 
@@ -144,6 +183,14 @@ class PaymentReturnService
         DB::transaction(function () use ($payment, $gatewaySnapshot, $amountDecimal) {
             $locked = Payment::query()->whereKey($payment->id)->lockForUpdate()->first();
             if (! $locked || $locked->status === 'completed' || $locked->status !== 'pending') {
+                $this->flow->order(
+                    'return.finalize.skip',
+                    'Finalize paid skipped — payment not pending',
+                    $this->flow->paymentContext($payment),
+                    $payment->order,
+                    LogLevel::Debug,
+                );
+
                 return;
             }
 
@@ -161,6 +208,12 @@ class PaymentReturnService
                 $this->createPayerTransaction($fresh, $amountDecimal);
                 $this->orders->recordPaymentSuccess($fresh);
                 $this->paymentLinks->markPaidFromPayment($fresh);
+                $this->flow->order(
+                    'return.finalized',
+                    'Payment finalized from gateway return',
+                    $this->flow->paymentContext($fresh),
+                    $fresh->order,
+                );
             }
         });
     }
@@ -168,6 +221,14 @@ class PaymentReturnService
     protected function createPayerTransaction(Payment $payment, string $amountDecimal): void
     {
         if ($payment->transactions()->exists()) {
+            $this->flow->transaction(
+                'transaction.skip',
+                'Payer transaction already exists for payment',
+                $this->flow->paymentContext($payment),
+                null,
+                LogLevel::Debug,
+            );
+
             return;
         }
 

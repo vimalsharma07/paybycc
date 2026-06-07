@@ -39,10 +39,10 @@ class LoginController extends Controller
 
         $remember = $request->boolean('remember');
 
-        $flow->auth('login.attempt', 'Login attempt', [
-            'email' => $credentials['email'],
-            'remember' => $remember,
-        ]);
+        // $flow->auth('login.attempt', 'Login attempt', [
+        //     'email' => $credentials['email'],
+        //     'remember' => $remember,
+        // ]);
 
         if (! Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $remember)) {
             $flow->auth('login.failed', 'Login failed — invalid credentials', [
@@ -59,10 +59,10 @@ class LoginController extends Controller
 
         $redirect = $this->redirectPath($user);
 
-        $flow->auth('login.success', 'Login successful', $flow->userContext($user, [
-            'remember' => $remember,
-            'redirect' => $redirect,
-        ]), $user);
+        // $flow->auth('login.success', 'Login successful', $flow->userContext($user, [
+        //     'remember' => $remember,
+        //     'redirect' => $redirect,
+        // ]), $user);
 
         return redirect()->intended($redirect);
     }
@@ -71,9 +71,9 @@ class LoginController extends Controller
     {
         $user = Auth::user();
 
-        if ($user !== null) {
-            $flow->auth('logout.success', 'User logged out', $flow->userContext($user), $user);
-        }
+        // if ($user !== null) {
+        //     $flow->auth('logout.success', 'User logged out', $flow->userContext($user), $user);
+        // }
 
         Auth::logout();
 

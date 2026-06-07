@@ -3,6 +3,9 @@
 namespace App\Services\Logging;
 
 use App\Enums\LogLevel;
+use App\Models\Order;
+use App\Models\Payment;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
@@ -44,6 +47,76 @@ class FlowLog
         LogLevel $level = LogLevel::Info,
     ): void {
         $this->logger->log($level, 'bank', $event, $message, $context, $subject);
+    }
+
+    public function order(
+        string $event,
+        string $message,
+        array $context = [],
+        ?Model $subject = null,
+        LogLevel $level = LogLevel::Info,
+    ): void {
+        $this->logger->log($level, 'order', $event, $message, $context, $subject);
+    }
+
+    public function transaction(
+        string $event,
+        string $message,
+        array $context = [],
+        ?Model $subject = null,
+        LogLevel $level = LogLevel::Info,
+    ): void {
+        $this->logger->log($level, 'transaction', $event, $message, $context, $subject);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function orderContext(Order $order, array $extra = []): array
+    {
+        return array_merge([
+            'order_id' => $order->id,
+            'order_code' => $order->order_code,
+            'customer_id' => $order->customer_id,
+            'freelancer_id' => $order->freelancer_id,
+            'order_amount' => (float) $order->order_amount,
+            'net_settlement_amount' => (float) $order->net_settlement_amount,
+            'order_status' => (int) $order->order_status,
+            'payment_status' => (int) $order->payment_status,
+            'settlement_status' => (int) $order->settlement_status,
+            'safe_status' => (int) $order->safe_status,
+        ], $extra);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function paymentContext(Payment $payment, array $extra = []): array
+    {
+        return array_merge([
+            'payment_id' => $payment->id,
+            'order_id' => $payment->order_id,
+            'payment_link_id' => $payment->payment_link_id,
+            'user_id' => $payment->user_id,
+            'gateway_id' => $payment->gateway_id,
+            'amount' => (float) $payment->amount,
+            'status' => $payment->status,
+        ], $extra);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function transactionContext(Transaction $transaction, array $extra = []): array
+    {
+        return array_merge([
+            'transaction_id' => $transaction->id,
+            'user_id' => $transaction->user_id,
+            'payment_id' => $transaction->payment_id,
+            'type' => $transaction->type,
+            'amount' => (float) $transaction->amount,
+            'status' => (int) $transaction->status,
+        ], $extra);
     }
 
     /**

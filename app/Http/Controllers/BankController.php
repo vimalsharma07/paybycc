@@ -33,10 +33,10 @@ class BankController extends Controller
             ->orderByDesc('updated_at')
             ->get();
 
-        $flow->bank('bank.index.view', 'Bank accounts page opened', array_merge(
-            $flow->userContext($user),
-            ['bank_count' => $banks->count()]
-        ), $user);
+        // $flow->bank('bank.index.view', 'Bank accounts page opened', array_merge(
+        //     $flow->userContext($user),
+        //     ['bank_count' => $banks->count()]
+        // ), $user);
 
         return view('banks.index', compact('banks'));
     }
