@@ -96,10 +96,10 @@ return new class extends Migration
                 $table->decimal('tcs_amount', 15, 2)->default(0);
                 $table->decimal('net_settlement_amount', 15, 2)->default(0);
                 $table->char('currency', 3)->default('INR');
-                $table->string('order_status', 20)->default('created')->index();
-                $table->string('payment_status', 24)->default('pending')->index();
-                $table->string('settlement_status', 20)->default('pending')->index();
-                $table->string('safe_status', 20)->default('pending_review')->index();
+                $table->unsignedTinyInteger('order_status')->default(0)->index()->comment('0=created,1=pending,2=accepted,3=in_progress,4=completed,5=cancelled,6=disputed');
+                $table->unsignedTinyInteger('payment_status')->default(0)->index()->comment('0=pending,1=authorized,2=paid,3=failed,4=refunded,5=partially_refunded');
+                $table->unsignedTinyInteger('settlement_status')->default(0)->index()->comment('0=pending,1=eligible,2=settled,3=failed');
+                $table->unsignedTinyInteger('safe_status')->default(0)->index()->comment('0=pending_review,1=safe,2=hold,3=rejected');
                 $table->timestamp('completed_at')->nullable();
                 $table->text('notes')->nullable();
                 $table->timestamps();
@@ -116,7 +116,7 @@ return new class extends Migration
                 $table->foreignId('freelancer_id')->constrained('users')->cascadeOnDelete();
                 $table->foreignId('bank_id')->nullable()->constrained()->nullOnDelete();
                 $table->decimal('amount', 15, 2);
-                $table->string('status', 20)->default('pending')->index();
+                $table->unsignedTinyInteger('status')->default(0)->index()->comment('0=pending,1=eligible,2=settled,3=failed');
                 $table->string('reference')->nullable();
                 $table->timestamp('settled_at')->nullable();
                 $table->timestamps();

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\OrderStatuses;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -24,7 +25,13 @@ class Settlement extends Model
         return [
             'amount' => 'decimal:2',
             'settled_at' => 'datetime',
+            'status' => 'integer',
         ];
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return OrderStatuses::settlementLabel($this->status);
     }
 
     public function order(): BelongsTo

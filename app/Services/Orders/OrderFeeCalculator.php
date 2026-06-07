@@ -2,6 +2,7 @@
 
 namespace App\Services\Orders;
 
+use App\Constants\OrderStatuses;
 use App\Models\Order;
 use App\Models\User;
 use App\Support\Commerce\FinancialYear;
@@ -86,7 +87,7 @@ class OrderFeeCalculator
 
         return (float) Order::query()
             ->where('freelancer_id', $freelancerId)
-            ->where('payment_status', 'paid')
+            ->where('payment_status', OrderStatuses::PAYMENT_PAID)
             ->where('created_at', '>=', $fyStart)
             ->sum('net_settlement_amount');
     }

@@ -2,6 +2,7 @@
 
 namespace App\Services\Payments;
 
+use App\Constants\OrderStatuses;
 use App\Models\Order;
 use App\Models\User;
 use Carbon\Carbon;
@@ -62,7 +63,7 @@ class SellerReceiveLimitService
     {
         return (float) Order::query()
             ->where('freelancer_id', $seller->id)
-            ->where('payment_status', 'paid')
+            ->where('payment_status', OrderStatuses::PAYMENT_PAID)
             ->where('created_at', '>=', $since)
             ->whereHas('payments', fn ($query) => $query->whereNotNull('payment_link_id'))
             ->sum('order_amount');

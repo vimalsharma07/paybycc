@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\TransactionStatuses;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -10,6 +11,14 @@ class Transaction extends Model
     public const TYPE_CARD_PAYMENT = 'card_payment';
 
     public const TYPE_SETTLEMENT = 'settlement';
+
+    public const STATUS_PENDING = TransactionStatuses::PENDING;
+
+    public const STATUS_COMPLETED = TransactionStatuses::COMPLETED;
+
+    public const STATUS_FAILED = TransactionStatuses::FAILED;
+
+    public const STATUS_PROCESSING = TransactionStatuses::PROCESSING;
 
     protected $fillable = [
         'user_id',
@@ -31,7 +40,13 @@ class Transaction extends Model
             'amount' => 'decimal:2',
             'settlement_trigger_at' => 'datetime',
             'settled_at' => 'datetime',
+            'status' => 'integer',
         ];
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return TransactionStatuses::label($this->status);
     }
 
     public function user(): BelongsTo

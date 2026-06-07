@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\OrderStatuses;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -41,8 +42,32 @@ class Order extends Model
             'tds_amount' => 'decimal:2',
             'tcs_amount' => 'decimal:2',
             'net_settlement_amount' => 'decimal:2',
+            'order_status' => 'integer',
+            'payment_status' => 'integer',
+            'settlement_status' => 'integer',
+            'safe_status' => 'integer',
             'completed_at' => 'datetime',
         ];
+    }
+
+    public function getOrderStatusLabelAttribute(): string
+    {
+        return OrderStatuses::orderLabel($this->order_status);
+    }
+
+    public function getPaymentStatusLabelAttribute(): string
+    {
+        return OrderStatuses::paymentLabel($this->payment_status);
+    }
+
+    public function getSettlementStatusLabelAttribute(): string
+    {
+        return OrderStatuses::settlementLabel($this->settlement_status);
+    }
+
+    public function getSafeStatusLabelAttribute(): string
+    {
+        return OrderStatuses::safeLabel($this->safe_status);
     }
 
     public function customer(): BelongsTo

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Constants\OrderStatuses;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -12,8 +13,10 @@ class OrderController extends Controller
     public function index(Request $request): View
     {
         $q = trim((string) $request->query('q', ''));
-        $paymentStatus = trim((string) $request->query('payment_status', ''));
-        $orderStatus = trim((string) $request->query('order_status', ''));
+        $paymentStatus = $request->query('payment_status');
+        $paymentStatus = is_numeric($paymentStatus) ? (int) $paymentStatus : null;
+        $orderStatus = $request->query('order_status');
+        $orderStatus = is_numeric($orderStatus) ? (int) $orderStatus : null;
 
         $orders = Order::query()
             ->with([
@@ -29,8 +32,8 @@ class OrderController extends Controller
                         ->orWhereHas('freelancer', fn ($q) => $q->where('name', 'like', $like)->orWhere('email', 'like', $like)->orWhere('user_code', 'like', $like)->orWhere('company_name', 'like', $like));
                 });
             })
-            ->when($paymentStatus !== '', fn ($query) => $query->where('payment_status', $paymentStatus))
-            ->when($orderStatus !== '', fn ($query) => $query->where('order_status', $orderStatus))
+            ->when($paymentStatus !== null, fn ($query) => $query->where('payment_status', $paymentStatus))
+            ->when($orderStatus !== null, fn ($query) => $query->where('order_status', $orderStatus))
             ->orderByDesc('id')
             ->paginate(25)
             ->withQueryString();

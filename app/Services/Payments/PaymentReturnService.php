@@ -2,6 +2,8 @@
 
 namespace App\Services\Payments;
 
+use App\Constants\OrderStatuses;
+use App\Constants\TransactionStatuses;
 use App\Gateways\Cashfree;
 use App\Models\Gateway;
 use App\Models\Payment;
@@ -128,7 +130,7 @@ class PaymentReturnService
 
         if (in_array($orderStatus, ['EXPIRED', 'TERMINATED'], true)) {
             $payment->update(['status' => 'failed']);
-            $payment->order?->update(['payment_status' => 'failed']);
+            $payment->order?->update(['payment_status' => OrderStatuses::PAYMENT_FAILED]);
         }
     }
 
@@ -184,7 +186,7 @@ class PaymentReturnService
             'type' => Transaction::TYPE_CARD_PAYMENT,
             'amount' => $amountDecimal,
             'currency' => 'INR',
-            'status' => 'completed',
+            'status' => TransactionStatuses::COMPLETED,
             'settlement_trigger_at' => now()->addDays($bufferDays),
             'settled_at' => null,
             'note' => $note,

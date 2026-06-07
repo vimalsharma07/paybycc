@@ -2,6 +2,8 @@
 
 namespace App\Services\Payments;
 
+use App\Constants\OrderStatuses;
+use App\Constants\TransactionStatuses;
 use App\Models\Gateway;
 use App\Models\Order;
 use App\Models\Payment;
@@ -116,7 +118,7 @@ class PaymentCheckoutService
                     'driver_payload' => $result,
                     'status' => 'failed',
                 ]);
-                $order->update(['payment_status' => 'failed']);
+                $order->update(['payment_status' => OrderStatuses::PAYMENT_FAILED]);
             }
 
             if ($paymentLinkId) {
@@ -192,7 +194,7 @@ class PaymentCheckoutService
             'type' => Transaction::TYPE_CARD_PAYMENT,
             'amount' => $amountDecimal,
             'currency' => 'INR',
-            'status' => 'completed',
+            'status' => TransactionStatuses::COMPLETED,
             'settlement_trigger_at' => now()->addDays($bufferDays),
             'settled_at' => null,
             'note' => $note,

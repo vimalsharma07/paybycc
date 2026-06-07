@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Constants\OrderStatuses;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\Orders\OrderFeeCalculator;
@@ -91,10 +92,10 @@ class OrderFeeCalculatorTest extends TestCase
             'tcs_amount' => '0.00',
             'net_settlement_amount' => $netAmount,
             'currency' => 'INR',
-            'order_status' => 'accepted',
-            'payment_status' => 'paid',
-            'settlement_status' => 'eligible',
-            'safe_status' => 'safe',
+            'order_status' => OrderStatuses::ORDER_ACCEPTED,
+            'payment_status' => OrderStatuses::PAYMENT_PAID,
+            'settlement_status' => OrderStatuses::SETTLEMENT_ELIGIBLE,
+            'safe_status' => OrderStatuses::SAFE_SAFE,
         ]);
     }
 }

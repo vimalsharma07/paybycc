@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\OrderStatuses;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Settlement;
@@ -44,7 +45,7 @@ class AccountController extends Controller
 
         $receivedTotal = (float) Order::query()
             ->where('freelancer_id', $user->id)
-            ->where('payment_status', 'paid')
+            ->where('payment_status', OrderStatuses::PAYMENT_PAID)
             ->sum('net_settlement_amount');
 
         return view('account.settlements', compact('ordersReceived', 'settlements', 'receivedTotal'));

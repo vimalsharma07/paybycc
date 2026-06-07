@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Constants\OrderStatuses;
 use App\Http\Controllers\Controller;
 use App\Models\Bank;
 use App\Models\Gateway;
@@ -18,7 +19,7 @@ class AdminDashboardController extends Controller
             'bankCount' => Bank::count(),
             'gatewayCount' => Gateway::count(),
             'orderCount' => Order::count(),
-            'paidOrderCount' => Order::query()->where('payment_status', 'paid')->count(),
+            'paidOrderCount' => Order::query()->where('payment_status', OrderStatuses::PAYMENT_PAID)->count(),
         ]);
     }
 }

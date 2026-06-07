@@ -10,10 +10,10 @@
     </div>
 
     <div class="mb-6 flex flex-wrap gap-2">
-        <x-admin-status-pill :status="$order->order_status" />
-        <x-admin-status-pill :status="$order->payment_status" />
-        <x-admin-status-pill :status="$order->settlement_status" />
-        <x-admin-status-pill :status="$order->safe_status" />
+        <x-admin-status-pill :status="$order->order_status" type="order" />
+        <x-admin-status-pill :status="$order->payment_status" type="payment" />
+        <x-admin-status-pill :status="$order->settlement_status" type="settlement" />
+        <x-admin-status-pill :status="$order->safe_status" type="safe" />
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
@@ -172,7 +172,7 @@
                                     <td class="px-6 py-4 font-mono text-xs">#{{ $payment->id }}</td>
                                     <td class="px-6 py-4">{{ $tx->type_label }}</td>
                                     <td class="px-6 py-4 text-right font-mono tabular-nums">{{ number_format((float) $tx->amount, 2) }}</td>
-                                    <td class="px-6 py-4"><x-admin-status-pill :status="$tx->status" /></td>
+                                    <td class="px-6 py-4"><x-admin-status-pill :status="$tx->status" type="transaction" /></td>
                                     <td class="max-w-[14rem] truncate px-6 py-4 text-slate-700" title="{{ $tx->note }}">{{ $tx->note ?? '—' }}</td>
                                 </tr>
                             @endforeach
@@ -207,7 +207,7 @@
                         <tr class="hover:bg-slate-50/80">
                             <td class="px-6 py-4 font-mono text-xs">#{{ $settlement->id }}</td>
                             <td class="px-6 py-4 text-right font-mono tabular-nums">{{ number_format((float) $settlement->amount, 2) }}</td>
-                            <td class="px-6 py-4"><x-admin-status-pill :status="$settlement->status" /></td>
+                            <td class="px-6 py-4"><x-admin-status-pill :status="$settlement->status" type="settlement" /></td>
                             <td class="px-6 py-4">{{ $settlement->bank?->bank_name ?? '—' }}</td>
                             <td class="px-6 py-4 font-mono text-xs">{{ $settlement->reference ?? '—' }}</td>
                             <td class="px-6 py-4 text-xs text-slate-600">{{ $settlement->settled_at?->format('d M Y H:i') ?? '—' }}</td>

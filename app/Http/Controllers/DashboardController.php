@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\OrderStatuses;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Services\PaymentLinks\PaymentLinkService;
@@ -35,7 +36,7 @@ class DashboardController extends Controller
                 ? Order::query()->where('freelancer_id', $user->id)->count()
                 : 0,
             'received_paid' => $user->isSeller()
-                ? (float) Order::query()->where('freelancer_id', $user->id)->where('payment_status', 'paid')->sum('net_settlement_amount')
+                ? (float) Order::query()->where('freelancer_id', $user->id)->where('payment_status', OrderStatuses::PAYMENT_PAID)->sum('net_settlement_amount')
                 : 0.0,
         ];
 

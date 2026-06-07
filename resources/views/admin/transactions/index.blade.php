@@ -37,7 +37,7 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($transactions as $tx)
                         @php
-                            $st = strtolower((string) $tx->status);
+                            $st = \App\Constants\TransactionStatuses::slug($tx->status);
                             $success = in_array($st, ['completed', 'success', 'succeeded', 'paid'], true);
                             $failed = in_array($st, ['failed', 'error', 'declined', 'rejected', 'denied', 'expired', 'terminated', 'cancelled', 'canceled'], true);
                             $pending = in_array($st, ['pending', 'processing', 'awaiting'], true);
@@ -75,7 +75,7 @@
                                 'text-slate-900' => ! $success && ! $failed && ! $pending,
                             ])>{{ $tx->currency }} {{ number_format((float) $tx->amount, 2) }}</td>
                             <td class="whitespace-nowrap px-4 py-4 sm:px-6">
-                                <x-admin-status-pill :status="$tx->status" />
+                                <x-admin-status-pill :status="$tx->status" type="transaction" />
                             </td>
                             <td class="whitespace-nowrap px-4 py-4 sm:px-6">
                                 @if ($tx->payment)

@@ -42,7 +42,7 @@
                             </div>
                             <div class="text-right text-xs">
                                 <x-payment-status-pill :status="$order->payment_status" />
-                                <p class="mt-2 font-semibold capitalize text-slate-600">Settlement: {{ $order->settlement_status }}</p>
+                                <p class="mt-2 font-semibold text-slate-600">Settlement: {{ $order->settlement_status_label }}</p>
                             </div>
                         </div>
                     </div>
@@ -68,7 +68,7 @@
                             <p class="font-mono text-sm font-semibold text-slate-900">₹{{ number_format((float) $settlement->amount, 2) }}</p>
                             <p class="mt-1 text-xs text-slate-600">{{ $settlement->order?->order_code }} · {{ $settlement->bank?->bank_name ?? 'Bank transfer' }}</p>
                         </div>
-                        <x-payment-status-pill :status="$settlement->status" />
+                        <x-admin-status-pill :status="$settlement->status" type="settlement" />
                     </div>
                 @endforeach
             </div>

@@ -14,14 +14,28 @@
                     class="block min-w-0 flex-1 rounded-xl border border-indigo-200/80 bg-white/90 px-3 py-2.5 text-sm shadow-inner focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/30">
                 <select name="payment_status" class="rounded-xl border border-indigo-200/80 bg-white px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/30">
                     <option value="">All payments</option>
-                    @foreach (['pending', 'paid', 'failed', 'authorized', 'refunded'] as $st)
-                        <option value="{{ $st }}" @selected($paymentStatus === $st)>Payment: {{ $st }}</option>
+                    @foreach ([
+                        \App\Constants\OrderStatuses::PAYMENT_PENDING,
+                        \App\Constants\OrderStatuses::PAYMENT_AUTHORIZED,
+                        \App\Constants\OrderStatuses::PAYMENT_PAID,
+                        \App\Constants\OrderStatuses::PAYMENT_FAILED,
+                        \App\Constants\OrderStatuses::PAYMENT_REFUNDED,
+                    ] as $st)
+                        <option value="{{ $st }}" @selected($paymentStatus === $st)>Payment: {{ \App\Constants\OrderStatuses::paymentLabel($st) }}</option>
                     @endforeach
                 </select>
                 <select name="order_status" class="rounded-xl border border-indigo-200/80 bg-white px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400/30">
                     <option value="">All order status</option>
-                    @foreach (['created', 'pending', 'accepted', 'in_progress', 'completed', 'cancelled', 'disputed'] as $st)
-                        <option value="{{ $st }}" @selected($orderStatus === $st)>Order: {{ $st }}</option>
+                    @foreach ([
+                        \App\Constants\OrderStatuses::ORDER_CREATED,
+                        \App\Constants\OrderStatuses::ORDER_PENDING,
+                        \App\Constants\OrderStatuses::ORDER_ACCEPTED,
+                        \App\Constants\OrderStatuses::ORDER_IN_PROGRESS,
+                        \App\Constants\OrderStatuses::ORDER_COMPLETED,
+                        \App\Constants\OrderStatuses::ORDER_CANCELLED,
+                        \App\Constants\OrderStatuses::ORDER_DISPUTED,
+                    ] as $st)
+                        <option value="{{ $st }}" @selected($orderStatus === $st)>Order: {{ \App\Constants\OrderStatuses::orderLabel($st) }}</option>
                     @endforeach
                 </select>
                 <button type="submit" class="shrink-0 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">Filter</button>
@@ -71,9 +85,9 @@
                             </td>
                             <td class="whitespace-nowrap px-4 py-4 text-right font-mono tabular-nums sm:px-6">{{ $order->currency }} {{ number_format((float) $order->order_amount, 2) }}</td>
                             <td class="whitespace-nowrap px-4 py-4 text-right font-mono tabular-nums text-slate-700 sm:px-6">{{ number_format((float) $order->net_settlement_amount, 2) }}</td>
-                            <td class="whitespace-nowrap px-4 py-4 sm:px-6"><x-admin-status-pill :status="$order->order_status" /></td>
-                            <td class="whitespace-nowrap px-4 py-4 sm:px-6"><x-admin-status-pill :status="$order->payment_status" /></td>
-                            <td class="whitespace-nowrap px-4 py-4 sm:px-6"><x-admin-status-pill :status="$order->settlement_status" /></td>
+                            <td class="whitespace-nowrap px-4 py-4 sm:px-6"><x-admin-status-pill :status="$order->order_status" type="order" /></td>
+                            <td class="whitespace-nowrap px-4 py-4 sm:px-6"><x-admin-status-pill :status="$order->payment_status" type="payment" /></td>
+                            <td class="whitespace-nowrap px-4 py-4 sm:px-6"><x-admin-status-pill :status="$order->settlement_status" type="settlement" /></td>
                             <td class="whitespace-nowrap px-4 py-4 text-xs text-slate-600 sm:px-6">{{ $order->created_at?->format('d M Y H:i') }}</td>
                             <td class="whitespace-nowrap px-4 py-4 sm:px-6">
                                 <a href="{{ route('admin.orders.show', $order) }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-500">View</a>

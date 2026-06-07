@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('type')->index();
             $table->decimal('amount', 15, 2);
             $table->char('currency', 3)->default('INR');
-            $table->string('status')->default('completed')->index();
+            $table->unsignedTinyInteger('status')->default(1)->index()->comment('0=pending,1=completed,2=failed,3=processing');
             $table->timestamp('settlement_trigger_at')->nullable()->index();
             $table->timestamp('settled_at')->nullable();
             $table->string('note')->nullable();

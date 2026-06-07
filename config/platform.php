@@ -13,20 +13,31 @@ return [
         'admin' => 'admin',
     ],
 
+    // orders.* status columns store int codes — see App\Constants\OrderStatuses
     'order_statuses' => [
-        'created', 'pending', 'accepted', 'in_progress', 'completed', 'cancelled', 'disputed',
+        0 => 'created', 1 => 'pending', 2 => 'accepted', 3 => 'in_progress',
+        4 => 'completed', 5 => 'cancelled', 6 => 'disputed',
     ],
 
     'payment_statuses' => [
-        'pending', 'authorized', 'paid', 'failed', 'refunded', 'partially_refunded',
+        0 => 'pending', 1 => 'authorized', 2 => 'paid', 3 => 'failed',
+        4 => 'refunded', 5 => 'partially_refunded',
     ],
 
     'settlement_statuses' => [
-        'pending', 'eligible', 'settled', 'failed',
+        0 => 'pending', 1 => 'eligible', 2 => 'settled', 3 => 'failed',
     ],
 
     'safe_statuses' => [
-        'pending_review', 'safe', 'hold', 'rejected',
+        0 => 'pending_review', 1 => 'safe', 2 => 'hold', 3 => 'rejected',
+    ],
+
+    'transaction_statuses' => [
+        0 => 'pending', 1 => 'completed', 2 => 'failed', 3 => 'processing',
+    ],
+
+    'settlement_record_statuses' => [
+        0 => 'pending', 1 => 'eligible', 2 => 'settled', 3 => 'failed',
     ],
 
     'marketplace' => [

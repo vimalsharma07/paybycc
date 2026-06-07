@@ -2,6 +2,7 @@
 
 namespace App\Services\Orders;
 
+use App\Constants\OrderStatuses;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
@@ -80,10 +81,10 @@ class OrderService
             'service_id' => null,
             'subservice_id' => null,
             'currency' => 'INR',
-            'order_status' => 'created',
-            'payment_status' => 'pending',
-            'settlement_status' => 'pending',
-            'safe_status' => 'pending_review',
+            'order_status' => OrderStatuses::ORDER_CREATED,
+            'payment_status' => OrderStatuses::PAYMENT_PENDING,
+            'settlement_status' => OrderStatuses::SETTLEMENT_PENDING,
+            'safe_status' => OrderStatuses::SAFE_PENDING_REVIEW,
             'notes' => $notes,
         ], $breakdown->toOrderAttributes()));
     }
@@ -96,7 +97,7 @@ class OrderService
             return;
         }
 
-        if ($order->payment_status === 'paid') {
+        if ((int) $order->payment_status === OrderStatuses::PAYMENT_PAID) {
             return;
         }
 
@@ -104,10 +105,10 @@ class OrderService
         $canSettle = $freelancer && $freelancer->canReceivePayouts();
 
         $order->update([
-            'payment_status' => 'paid',
-            'order_status' => 'accepted',
-            'settlement_status' => $canSettle ? 'eligible' : 'pending',
-            'safe_status' => $canSettle ? 'safe' : 'hold',
+            'payment_status' => OrderStatuses::PAYMENT_PAID,
+            'order_status' => OrderStatuses::ORDER_ACCEPTED,
+            'settlement_status' => $canSettle ? OrderStatuses::SETTLEMENT_ELIGIBLE : OrderStatuses::SETTLEMENT_PENDING,
+            'safe_status' => $canSettle ? OrderStatuses::SAFE_SAFE : OrderStatuses::SAFE_HOLD,
         ]);
 
         if ($canSettle && (float) $order->net_settlement_amount > 0) {
