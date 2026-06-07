@@ -56,6 +56,7 @@
                         @elseif ($canPayNow)
                             <form method="POST" action="{{ route('payment-links.pay.store', $paymentLink->link_token) }}" class="mb-4 space-y-4">
                                 @csrf
+                                @include('partials.checkout-client-meta')
                                 @include('payment-links.partials.pay-amount-field', ['paymentLink' => $paymentLink])
                                 <button type="submit" class="pay-now-btn inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 via-cyan-500 to-indigo-600 px-6 py-4 text-base font-bold text-white shadow-xl">
                                     Pay as logged-in user
@@ -66,6 +67,7 @@
 
                         <form method="POST" action="{{ route('payment-links.pay.guest', $paymentLink->link_token) }}" class="mt-4 space-y-4">
                             @csrf
+                            @include('partials.checkout-client-meta')
                             <div>
                                 <label for="guest-name" class="block text-sm font-semibold text-slate-300">Your name</label>
                                 <input id="guest-name" name="name" type="text" value="{{ old('name') }}" required
@@ -119,6 +121,7 @@
                         @else
                             <form method="POST" action="{{ route('payment-links.pay.store', $paymentLink->link_token) }}" class="space-y-4">
                                 @csrf
+                                @include('partials.checkout-client-meta')
                                 @include('payment-links.partials.pay-amount-field', ['paymentLink' => $paymentLink])
                                 <button type="submit"
                                     class="pay-now-btn inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 via-cyan-500 to-indigo-600 px-6 py-4 text-base font-bold text-white shadow-xl hover:brightness-110">

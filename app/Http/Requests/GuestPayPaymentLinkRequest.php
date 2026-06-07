@@ -28,6 +28,7 @@ class GuestPayPaymentLinkRequest extends FormRequest
         }
 
         return [
+            'checkout_meta' => ['nullable', 'string', 'max:2000'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['required', 'string', 'regex:/^[6-9]\d{9}$/'],

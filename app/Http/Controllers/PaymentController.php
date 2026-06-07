@@ -100,6 +100,7 @@ class PaymentController extends Controller
             'freelancer_id' => ['required', 'integer', 'exists:users,id'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'remark' => ['nullable', 'string', 'max:160'],
+            'checkout_meta' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $freelancer = $this->sellerSearch->findSeller((int) $validated['freelancer_id']);

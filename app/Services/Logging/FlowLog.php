@@ -85,6 +85,7 @@ class FlowLog
             'payment_status' => (int) $order->payment_status,
             'settlement_status' => (int) $order->settlement_status,
             'safe_status' => (int) $order->safe_status,
+            'ip' => is_array($order->ip_json) ? ($order->ip_json['ip'] ?? null) : null,
         ], $extra);
     }
 

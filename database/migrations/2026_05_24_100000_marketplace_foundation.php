@@ -102,6 +102,7 @@ return new class extends Migration
                 $table->unsignedTinyInteger('safe_status')->default(0)->index()->comment('0=pending_review,1=safe,2=hold,3=rejected');
                 $table->timestamp('completed_at')->nullable();
                 $table->text('notes')->nullable();
+                $table->json('ip_json')->nullable();
                 $table->timestamps();
 
                 $table->index(['customer_id', 'order_status']);

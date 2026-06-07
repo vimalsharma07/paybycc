@@ -31,6 +31,7 @@ class Order extends Model
         'safe_status',
         'completed_at',
         'notes',
+        'ip_json',
     ];
 
     protected function casts(): array
@@ -47,6 +48,7 @@ class Order extends Model
             'settlement_status' => 'integer',
             'safe_status' => 'integer',
             'completed_at' => 'datetime',
+            'ip_json' => 'array',
         ];
     }
 

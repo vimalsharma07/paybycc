@@ -59,7 +59,7 @@ class OrderService
         return $this->fees->calculate($freelancer, (float) $amountDecimal);
     }
 
-    public function createOrder(User $customer, User $freelancer, string $amountDecimal, ?string $notes, bool $viaPaymentLink = false): Order
+    public function createOrder(User $customer, User $freelancer, string $amountDecimal, ?string $notes, bool $viaPaymentLink = false, ?array $ipJson = null): Order
     {
         $this->assertCanPay($customer, $freelancer, $viaPaymentLink);
 
@@ -89,6 +89,7 @@ class OrderService
             'settlement_status' => OrderStatuses::SETTLEMENT_PENDING,
             'safe_status' => OrderStatuses::SAFE_PENDING_REVIEW,
             'notes' => $notes,
+            'ip_json' => $ipJson,
         ], $breakdown->toOrderAttributes()));
 
         $this->flow->order(

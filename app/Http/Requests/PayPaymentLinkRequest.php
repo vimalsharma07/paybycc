@@ -28,6 +28,7 @@ class PayPaymentLinkRequest extends FormRequest
         }
 
         return [
+            'checkout_meta' => ['nullable', 'string', 'max:2000'],
             'amount' => [
                 $requiresAmount ? 'required' : 'nullable',
                 'numeric',

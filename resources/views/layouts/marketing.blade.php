@@ -143,5 +143,6 @@
     </footer>
 
     @include('partials.mobile-dock-marketing')
+    @stack('scripts')
 </body>
 </html>

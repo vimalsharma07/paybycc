@@ -12,6 +12,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Services\Logging\FlowLog;
 use App\Services\Orders\OrderService;
+use App\Support\CheckoutIpJson;
 use App\Services\PaymentLinks\PaymentLinkService;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -88,7 +89,14 @@ class PaymentCheckoutService
 
         $this->orders->assertCanPay($customer, $freelancer, $viaPaymentLink);
 
-        $order = $this->orders->createOrder($customer, $freelancer, $amountDecimal, $remark, $viaPaymentLink);
+        $order = $this->orders->createOrder(
+            $customer,
+            $freelancer,
+            $amountDecimal,
+            $remark,
+            $viaPaymentLink,
+            CheckoutIpJson::fromRequest(),
+        );
 
         $this->assertGatewayLimits($gateway, (float) $amountDecimal);
 

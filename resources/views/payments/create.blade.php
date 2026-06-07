@@ -37,6 +37,7 @@
 
             <form method="POST" action="{{ route('payments.store') }}" class="mx-auto mt-8 max-w-xl space-y-8" id="pay-form">
                 @csrf
+                @include('partials.checkout-client-meta')
 
                 <div class="space-y-3">
 
