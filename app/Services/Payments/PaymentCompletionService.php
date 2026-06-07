@@ -134,19 +134,22 @@ class PaymentCompletionService
 
     public function createPayerTransaction(Payment $payment, string $amountDecimal): void
     {
-        if ($payment->transactions()->exists()) {
-            $this->flow->transaction(
-                'transaction.skip',
-                'Payer transaction already exists for payment',
-                $this->flow->paymentContext($payment),
-                null,
-                LogLevel::Debug,
-            );
+        $bufferDays = max(0, (int) config('paybycc.settlement_buffer_days', 2));
+        $cfOrderId = $this->cfOrderIdFromPayment($payment);
+
+        $existing = $payment->transactions()->orderBy('id')->first();
+        if ($existing) {
+            if ($existing->status !== TransactionStatuses::COMPLETED) {
+                $existing->update([
+                    'status' => TransactionStatuses::COMPLETED,
+                    'gateway_id' => $existing->gateway_id ?? $cfOrderId,
+                    'settlement_trigger_at' => now()->addDays($bufferDays),
+                ]);
+            }
 
             return;
         }
 
-        $bufferDays = max(0, (int) config('paybycc.settlement_buffer_days', 2));
         $userNote = trim((string) ($payment->remark ?? ''));
         $gatewayLabel = $payment->gateway?->name ?? 'Gateway';
         $note = $userNote !== ''
@@ -162,10 +165,12 @@ class PaymentCompletionService
             'amount' => $amountDecimal,
             'currency' => 'INR',
             'status' => TransactionStatuses::COMPLETED,
+            'gateway_id' => $cfOrderId,
             'settlement_trigger_at' => now()->addDays($bufferDays),
             'settled_at' => null,
             'note' => $note,
         ]);
+        $transaction->update(['transaction_id' => (string) $transaction->id]);
 
         $this->flow->gateway(
             'transaction.created',
@@ -176,5 +181,14 @@ class PaymentCompletionService
             ),
             $transaction,
         );
+    }
+
+    protected function cfOrderIdFromPayment(Payment $payment): ?string
+    {
+        $payload = is_array($payment->driver_payload) ? $payment->driver_payload : [];
+        $id = $payload['cf_order_id']
+            ?? ($payload['gateway_order_snapshot']['cf_order_id'] ?? null);
+
+        return $id !== null && $id !== '' ? (string) $id : null;
     }
 }

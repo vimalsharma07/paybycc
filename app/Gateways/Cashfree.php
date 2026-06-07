@@ -9,6 +9,7 @@ use App\Gateways\Contracts\HandlesPaymentWebhook;
 use App\Gateways\Contracts\HostedCheckoutGateway;
 use App\Enums\LogLevel;
 use App\Models\Payment;
+use App\Models\Transaction;
 use App\Services\Payments\CashfreeClient;
 use App\Services\Payments\GatewayReqResService;
 use App\Services\Payments\PaymentCompletionService;
@@ -97,8 +98,10 @@ class Cashfree extends AbstractGateway implements DefinesGatewayCredentials, Gat
      */
     public function initiatePayment(string $amount, array $meta = []): array
     {
+        $txnId = (int) ($meta['transaction_id'] ?? 0);
         $paymentId = (int) ($meta['payment_id'] ?? 0);
         $userId = (int) ($meta['user_id'] ?? 0);
+        $orderNote = 'PayByCC #'.$txnId;
 
         $this->logGateway('cashfree.initiate.start', 'Creating Cashfree hosted order', [
             'gateway_code' => self::CODE,
@@ -161,7 +164,7 @@ class Cashfree extends AbstractGateway implements DefinesGatewayCredentials, Gat
         $reqPayload = [
             'gateway' => self::CODE,
             'action' => 'create_order',
-            'payment_id' => $paymentId,
+            'transaction_id' => $txnId,
             'order_amount' => $amountFloat,
             'order_currency' => $currency,
             'customer_id' => 'paybycc_u'.$userId,
@@ -169,7 +172,7 @@ class Cashfree extends AbstractGateway implements DefinesGatewayCredentials, Gat
             'customer_email' => $email,
             'customer_name' => $name,
             'return_url' => $returnUrl,
-            'order_note' => 'PayByCC #'.$paymentId,
+            'order_note' => $orderNote,
             'payment_methods' => $paymentMethods !== '' ? $paymentMethods : null,
             'environment' => $sandbox ? 'sandbox' : 'production',
         ];
@@ -186,7 +189,7 @@ class Cashfree extends AbstractGateway implements DefinesGatewayCredentials, Gat
             customerEmail: $email,
             customerName: $name,
             returnUrl: $returnUrl,
-            orderNote: 'PayByCC #'.$paymentId,
+            orderNote: $orderNote,
             paymentMethods: $paymentMethods !== '' ? $paymentMethods : null,
         );
 
@@ -196,7 +199,7 @@ class Cashfree extends AbstractGateway implements DefinesGatewayCredentials, Gat
                 ['gateway_code' => self::CODE, 'payment_id' => $paymentId],
             ), null, LogLevel::Warning);
 
-            $this->reqRes->store(null, $reqPayload, $this->reqRes->normalizeApiResponse($api), null, 'failed');
+            $this->reqRes->store($txnId ?: null, $reqPayload, $this->reqRes->normalizeApiResponse($api), null, 'failed');
 
             return [
                 'success' => false,
@@ -232,12 +235,19 @@ class Cashfree extends AbstractGateway implements DefinesGatewayCredentials, Gat
             'environment' => $sandbox ? 'sandbox' : 'production',
         ]);
 
-        $this->reqRes->store(null, $reqPayload, $this->reqRes->normalizeApiResponse($api), null, 'success');
+        if ($txnId > 0 && isset($data['cf_order_id'])) {
+            Transaction::query()->whereKey($txnId)->update([
+                'gateway_id' => (string) $data['cf_order_id'],
+            ]);
+        }
+
+        $this->reqRes->store($txnId ?: null, $reqPayload, $this->reqRes->normalizeApiResponse($api), null, 'success');
 
         return [
             'success' => true,
             'mode' => self::HOSTED_MODE,
             'cashfree_order_id' => $orderId,
+            'cf_order_id' => $data['cf_order_id'] ?? null,
             'reference' => $orderId,
             'payment_session_id' => $sessionId,
             'environment' => $sandbox ? 'sandbox' : 'production',
@@ -311,6 +321,11 @@ class Cashfree extends AbstractGateway implements DefinesGatewayCredentials, Gat
         }
 
         $data = $api['data'];
+        $txn = $payment->transactions()->orderBy('id')->first();
+        if ($txn && ($txn->gateway_id === null || $txn->gateway_id === '') && isset($data['cf_order_id'])) {
+            $txn->update(['gateway_id' => (string) $data['cf_order_id']]);
+        }
+
         $orderStatus = strtoupper((string) ($data['order_status'] ?? ''));
         $orderAmount = isset($data['order_amount']) ? (float) $data['order_amount'] : null;
 

@@ -3,12 +3,14 @@
 namespace App\Services\Payments;
 
 use App\Constants\OrderStatuses;
+use App\Constants\TransactionStatuses;
 use App\Enums\LogLevel;
 use App\Gateways\Contracts\HandlesPaymentReturn;
 use App\Gateways\Contracts\HostedCheckoutGateway;
 use App\Models\Gateway;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Services\Logging\FlowLog;
 use App\Services\Orders\OrderService;
@@ -123,11 +125,23 @@ class PaymentCheckoutService
                 'status' => 'pending',
             ]);
 
+            $txn = Transaction::create([
+                'user_id' => $customer->id,
+                'payment_id' => $payment->id,
+                'type' => Transaction::TYPE_CARD_PAYMENT,
+                'amount' => $amountDecimal,
+                'currency' => 'INR',
+                'status' => TransactionStatuses::PENDING,
+                'note' => $orderNote,
+            ]);
+            $txn->update(['transaction_id' => (string) $txn->id]);
+
             $returnUrl = $driver instanceof HandlesPaymentReturn
                 ? $driver->returnUrl($payment)
                 : null;
 
             $result = $driver->initiatePayment($amountDecimal, array_filter([
+                'transaction_id' => $txn->id,
                 'payment_id' => $payment->id,
                 'user_id' => $customer->id,
                 'currency' => 'INR',

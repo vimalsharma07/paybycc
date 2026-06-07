@@ -24,6 +24,8 @@ class Transaction extends Model
         'user_id',
         'bank_id',
         'payment_id',
+        'transaction_id',
+        'gateway_id',
         'parent_transaction_id',
         'type',
         'amount',
