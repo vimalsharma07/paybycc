@@ -18,7 +18,7 @@ class GatewayReqResController extends Controller
         $q = trim((string) $request->query('q', ''));
 
         $entries = GatewayReqRes::query()
-            ->with(['transaction:id,payment_id,amount,type'])
+            ->with(['transaction:id,payment_id,amount,type,transaction_id'])
             ->when($status !== '', fn ($query) => $query->where('status', $status))
             ->when($transactionId > 0, fn ($query) => $query->where('transaction_id', $transactionId))
             ->when($dateFrom !== '', fn ($query) => $query->whereDate('created_at', '>=', $dateFrom))

@@ -49,7 +49,7 @@
                             'border-l-[5px] border-l-amber-500 bg-amber-50/20' => $pending,
                             'border-l-[5px] border-l-slate-300 bg-white' => ! $success && ! $failed && ! $pending,
                         ])>
-                            <td class="whitespace-nowrap px-4 py-4 font-mono text-xs text-slate-600 sm:px-6">#{{ $tx->id }}</td>
+                            <td class="whitespace-nowrap px-4 py-4 font-mono text-xs text-slate-600 sm:px-6">#{{ $tx->id }}@if ($tx->transaction_id) · {{ $tx->transaction_id }}@endif</td>
                             <td class="px-4 py-4 sm:px-6">
                                 @if ($tx->user)
                                     <p class="font-medium text-slate-900">{{ $tx->user->name }}</p>

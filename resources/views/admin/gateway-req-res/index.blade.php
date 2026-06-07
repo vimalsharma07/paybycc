@@ -71,7 +71,7 @@
                             </td>
                             <td class="whitespace-nowrap px-4 py-4 font-mono text-xs sm:px-6">
                                 @if ($entry->transaction_id)
-                                    <a href="{{ route('admin.gateway-req-res.index', ['transaction_id' => $entry->transaction_id]) }}" class="text-indigo-600 hover:text-indigo-500">#{{ $entry->transaction_id }}</a>
+                                    <a href="{{ route('admin.gateway-req-res.index', ['transaction_id' => $entry->transaction_id]) }}" class="text-indigo-600 hover:text-indigo-500">#{{ $entry->transaction_id }}</a>@if ($entry->transaction?->transaction_id) · {{ $entry->transaction->transaction_id }}@endif
                                 @else
                                     <span class="text-slate-300">—</span>
                                 @endif
