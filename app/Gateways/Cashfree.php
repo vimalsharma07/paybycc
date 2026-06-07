@@ -98,10 +98,11 @@ class Cashfree extends AbstractGateway implements DefinesGatewayCredentials, Gat
      */
     public function initiatePayment(string $amount, array $meta = []): array
     {
-        $txnId = (int) ($meta['transaction_id'] ?? 0);
+        $txnRowId = (int) ($meta['transaction_row_id'] ?? 0);
+        $txnRef = (string) ($meta['transaction_id'] ?? '');
         $paymentId = (int) ($meta['payment_id'] ?? 0);
         $userId = (int) ($meta['user_id'] ?? 0);
-        $orderNote = 'PayByCC #'.$txnId;
+        $orderNote = 'PayByCC #'.($txnRef !== '' ? $txnRef : $txnRowId);
 
         $this->logGateway('cashfree.initiate.start', 'Creating Cashfree hosted order', [
             'gateway_code' => self::CODE,
@@ -164,7 +165,7 @@ class Cashfree extends AbstractGateway implements DefinesGatewayCredentials, Gat
         $reqPayload = [
             'gateway' => self::CODE,
             'action' => 'create_order',
-            'transaction_id' => $txnId,
+            'transaction_id' => $txnRef !== '' ? $txnRef : $txnRowId,
             'order_amount' => $amountFloat,
             'order_currency' => $currency,
             'customer_id' => 'paybycc_u'.$userId,
@@ -199,7 +200,7 @@ class Cashfree extends AbstractGateway implements DefinesGatewayCredentials, Gat
                 ['gateway_code' => self::CODE, 'payment_id' => $paymentId],
             ), null, LogLevel::Warning);
 
-            $this->reqRes->store($txnId ?: null, $reqPayload, $this->reqRes->normalizeApiResponse($api), null, 'failed');
+            $this->reqRes->store($txnRowId ?: null, $reqPayload, $this->reqRes->normalizeApiResponse($api), null, 'failed');
 
             return [
                 'success' => false,
@@ -235,13 +236,13 @@ class Cashfree extends AbstractGateway implements DefinesGatewayCredentials, Gat
             'environment' => $sandbox ? 'sandbox' : 'production',
         ]);
 
-        if ($txnId > 0 && isset($data['cf_order_id'])) {
-            Transaction::query()->whereKey($txnId)->update([
+        if ($txnRowId > 0 && isset($data['cf_order_id'])) {
+            Transaction::query()->whereKey($txnRowId)->update([
                 'gateway_id' => (string) $data['cf_order_id'],
             ]);
         }
 
-        $this->reqRes->store($txnId ?: null, $reqPayload, $this->reqRes->normalizeApiResponse($api), null, 'success');
+        $this->reqRes->store($txnRowId ?: null, $reqPayload, $this->reqRes->normalizeApiResponse($api), null, 'success');
 
         return [
             'success' => true,

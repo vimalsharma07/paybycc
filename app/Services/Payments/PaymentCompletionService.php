@@ -170,7 +170,12 @@ class PaymentCompletionService
             'settled_at' => null,
             'note' => $note,
         ]);
-        $transaction->update(['transaction_id' => (string) $transaction->id]);
+        $transaction->update([
+            'transaction_id' => Transaction::generateTransactionRef(
+                $transaction->id,
+                (int) $payment->user_id,
+            ),
+        ]);
 
         $this->flow->gateway(
             'transaction.created',

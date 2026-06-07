@@ -79,4 +79,9 @@ class Transaction extends Model
             default => $this->type,
         };
     }
+
+    public static function generateTransactionRef(int $id, int $userId): string
+    {
+        return substr('pay'.$id.$userId.time(), 0, 8);
+    }
 }

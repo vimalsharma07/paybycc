@@ -134,14 +134,16 @@ class PaymentCheckoutService
                 'status' => TransactionStatuses::PENDING,
                 'note' => $orderNote,
             ]);
-            $txn->update(['transaction_id' => (string) $txn->id]);
+            $txnRef = Transaction::generateTransactionRef($txn->id, $customer->id);
+            $txn->update(['transaction_id' => $txnRef]);
 
             $returnUrl = $driver instanceof HandlesPaymentReturn
                 ? $driver->returnUrl($payment)
                 : null;
 
             $result = $driver->initiatePayment($amountDecimal, array_filter([
-                'transaction_id' => $txn->id,
+                'transaction_row_id' => $txn->id,
+                'transaction_id' => $txnRef,
                 'payment_id' => $payment->id,
                 'user_id' => $customer->id,
                 'currency' => 'INR',
